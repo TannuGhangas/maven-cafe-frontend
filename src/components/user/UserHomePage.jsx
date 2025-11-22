@@ -147,7 +147,7 @@ const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, styles: _propSty
             {/* Image Header Section */}
             <div style={styles.headerBanner}>
                 <div style={styles.backgroundImage(HEADER_IMAGE_URL)}>
-                    <h1 style={styles.bannerTitle}>Good Morning</h1>
+                    <h1 style={styles.bannerTitle}>Hello</h1>
                     <p style={styles.bannerSubtitle}>Start your day with a warm cup</p>
                 </div>
             </div>
