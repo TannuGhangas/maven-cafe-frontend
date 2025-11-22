@@ -5,7 +5,7 @@ import { FaUserCircle, FaCoffee, FaListAlt } from 'react-icons/fa';
 
 // CORRECTED IMPORT PATH based on the provided tree structure:
 // From src/components/common/ -> ../../assets/maven_logo.png
-import MavenLogo from '../../assets/maven_logo.png'; 
+import MavenLogo from '../../assets/maven_logoo.png'; 
 
 const NavBar = ({ user, setPage, setModal, styles }) => {
     const isKitchenOrAdmin = user.role === 'kitchen' || user.role === 'admin';
