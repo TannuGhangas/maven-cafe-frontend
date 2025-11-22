@@ -1,6 +1,6 @@
 // src/components/user/OrderConfirmationPage.jsx
 
-import React from 'react';
+import React, { useState } from 'react'; // <--- 1. Import useState
 import { FaTrash, FaEdit, FaCheckCircle, FaPlus } from 'react-icons/fa';
 
 // --- Configuration Image URL ---
@@ -62,8 +62,92 @@ const ConfirmationBanner = ({ slot, styles, imageUrl }) => {
     );
 };
 
+// --- NEW COMPONENT: Custom Order Confirmed Modal ---
+const OrderConfirmedModal = ({ styles, onClose }) => {
+    const primaryGreen = '#4CAF50'; // Use a strong green for the confirmation box
+
+    const modalOverlayStyle = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.6)', // Dark, semi-transparent background
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        zIndex: 1000,
+    };
+
+    const modalContentStyle = {
+        backgroundColor: primaryGreen,
+        borderRadius: '20px',
+        width: '90%',
+        maxWidth: '350px',
+        padding: '30px 20px',
+        textAlign: 'center',
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.3)',
+        color: 'white',
+    };
+
+    const checkIconStyle = {
+        ...styles.circularCheck, 
+        backgroundColor: 'white', 
+        color: primaryGreen, 
+        width: '60px', 
+        height: '60px', 
+        fontSize: '2.5em',
+        margin: '0 auto 20px auto',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+    };
+
+    const titleStyle = {
+        fontSize: '1.8rem',
+        fontWeight: '900',
+        marginBottom: '10px',
+        textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)',
+    };
+
+    const messageStyle = {
+        fontSize: '1.0rem',
+        fontWeight: '400',
+        color: 'rgba(255, 255, 255, 0.9)',
+        marginBottom: '20px',
+    };
+
+    return (
+        <div style={modalOverlayStyle} onClick={onClose}>
+            <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+                <div style={checkIconStyle}>
+                    <FaCheckCircle />
+                </div>
+                <h2 style={titleStyle}>Order Confirmed!</h2>
+                <p style={messageStyle}>Your order has been successfully placed</p>
+                
+                {/* Optional: Add a button to close the modal and go home */}
+                <button 
+                    style={{
+                        ...styles.primaryButton,
+                        backgroundColor: 'white',
+                        color: primaryGreen,
+                        border: `2px solid white`,
+                        marginTop: '15px',
+                    }}
+                    onClick={onClose}
+                >
+                    Continue
+                </button>
+            </div>
+        </div>
+    );
+};
+// --- END NEW COMPONENT ---
+
+
 // Main Component
 const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, callApi, styles }) => {
+    // 2. Add local state to control the modal visibility
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
     
     const handleDelete = (index) => {
         const newItems = currentOrder.items.filter((_, i) => i !== index);
@@ -75,28 +159,37 @@ const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, c
     const handleProceed = async () => {
         // Basic check to prevent placing empty order
         if (currentOrder.items.length === 0) {
-            alert("Your order is empty. Add items before placing the order.");
+            // Keep the alert for the specific error, or replace with an error toast/modal
+            alert("Your order is empty. Add items before placing the order."); 
             return;
         }
 
         const orderData = {
-            userId: user.id,        
+            userId: user.id,        
             userName: user.name,
-            slot: currentOrder.slot, // Contains clean slot name (e.g., 'morning')
+            slot: currentOrder.slot, // Contains clean slot name (e'g., 'morning')
             items: currentOrder.items,
             userRole: user.role, 
         };
 
         const data = await callApi('/orders', 'POST', orderData);
         if (data && data.success) {
-            alert('Order Sent! The Kitchen has been notified.');
-            // Reset the order state
-            setCurrentOrder(prev => ({ ...prev, items: [] })); // Keep the slot, just clear items
-            setPage('home');
+            // 3. CHANGE: Show the custom modal instead of native alert
+            setShowSuccessModal(true); 
+            // The state reset and page change are now handled by the modal's onClose callback
         } else {
-            alert('Failed to place order. Please try again.');
+            // Keep the native alert for failure (for simplicity) or replace with a custom error modal/toast
+            alert('Failed to place order. Please try again.'); 
         }
     };
+    
+    // Function to handle modal closing and state reset
+    const handleModalClose = () => {
+        setShowSuccessModal(false);
+        // Reset the order state
+        setCurrentOrder(prev => ({ ...prev, items: [] })); // Keep the slot, just clear items
+        setPage('home'); // Go back to home page
+    }
     
     // Determine the slot name for the banner (capitalized clean name)
     const slotName = currentOrder.slot.charAt(0).toUpperCase() + currentOrder.slot.slice(1);
@@ -118,6 +211,13 @@ const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, c
     return (
         <div style={{ ...styles.appContainer, padding: '0' }}>
             
+            {/* 4. Render the Modal when showSuccessModal is true */}
+            {showSuccessModal && (
+                <OrderConfirmedModal 
+                    styles={styles} 
+                    onClose={handleModalClose} 
+                />
+            )}
             {/* Header Banner */}
             <ConfirmationBanner 
                 slot={slotName} 
@@ -190,3 +290,7 @@ const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, c
 };
 
 export default OrderConfirmationPage;
+
+// The file should not contain a second default export, 
+// so the line 'export default NavBar;' is removed/ignored. 
+// If it was supposed to be a different component, it needs its own file.
