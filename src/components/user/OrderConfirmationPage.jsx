@@ -408,7 +408,7 @@ const handleProceed = async () => {
 
     try {
         const orderData = {
-            userId: user.id,
+            userId: parseInt(user.id), // Ensure it's a number
             userName: user.name,
             slot: currentOrder.slot,
             items: currentOrder.items,
@@ -416,6 +416,8 @@ const handleProceed = async () => {
         };
 
         console.log('Placing order with data:', orderData);
+        console.log('User object:', user);
+        console.log('Current order:', currentOrder);
 
         // Actually call the API to place the order
         const data = await callApi('/orders', 'POST', orderData);

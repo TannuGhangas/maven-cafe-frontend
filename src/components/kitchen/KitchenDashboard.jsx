@@ -112,34 +112,18 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
             setOrders(newOrders);
             
             const newActiveOrderCount = newOrders.filter(o => String(o?.status || "").toLowerCase() === "placed").length;
-            
+
             if (newActiveOrderCount > lastOrderCount.current) {
                 setNotificationAcknowledged(false); // Reset acknowledgment for new orders
 
-                // Play notification sound 3 times with 5 second intervals
-                let playCount = 0;
-                const playNotificationSound = () => {
-                    if (!notificationAcknowledged && playCount < 3) {
-                        playCount++;
-                        setShowNotification(true);
-                        if (audio) {
-                            audio.currentTime = 0;
-                            audio.play().catch(e => console.error("Audio playback failed (user interaction required):", e));
-                        }
+                // Show notification
+                setShowNotification(true);
 
-                        // Schedule next play if not acknowledged and haven't played 3 times yet
-                        if (playCount < 3) {
-                            setTimeout(() => {
-                                if (!notificationAcknowledged) {
-                                    playNotificationSound();
-                                }
-                            }, 5000); // 5 second interval
-                        }
-                    }
-                };
-
-                // Start playing immediately
-                playNotificationSound();
+                // Play the beep sound
+                if (audio) {
+                    audio.currentTime = 0;
+                    audio.play().catch(e => console.log("Audio playback blocked by browser:", e));
+                }
             }
             
             lastOrderCount.current = newActiveOrderCount;
@@ -560,7 +544,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             {/* Relevant Item Details (Always Visible) - Simplified structure */}
                             <div style={{ background: '#f7f7f7', padding: 10, borderRadius: 6, marginBottom: 15 }}>
                                 <div style={{ fontWeight: 700, fontSize: 16, color: styles.SECONDARY_COLOR, marginBottom: 5 }}>
-                                    Preparation: {relevantItems[0]?.type} {relevantItems[0]?.item}
+                                    Preparation: {relevantItems[0]?.type === relevantItems[0]?.item ? relevantItems[0]?.item : `${relevantItems[0]?.type} ${relevantItems[0]?.item}`}
                                 </div>
                                 
                                 {relevantItems.map((it, i) => (
