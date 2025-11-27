@@ -1,222 +1,586 @@
-// src/components/user/ItemConfigPage.jsx
-
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft } from 'react-icons/fa';
-import { 
-    LOCATIONS, COFFEE_TYPES, TEA_TYPES, 
-    MILK_TYPES, WATER_TYPES, SUGAR_LEVELS, 
-    TABLE_NUMBERS 
+import { FaChevronLeft, FaMinus, FaPlus } from 'react-icons/fa'; // Import FaMinus and FaPlus
+// Import the centralized theme styles and external constants
+import { STYLES_THEME } from './UserHomePage';
+import {
+    COFFEE_TYPES, TEA_TYPES,
+    MILK_TYPES, WATER_TYPES, SUGAR_LEVELS,
+    TABLE_NUMBERS, ADD_ONS,
+    // 🔑 UPDATED IMPORTS: Removed LOCATIONS and added necessary location logic
+    getAllowedLocations, USER_LOCATIONS_DATA
 } from '../../config/constants';
 
 // --- Configuration Image URL ---
-// 🔑 You can paste the image URL for the configuration banner here:
-const HEADER_IMAGE_URL = 'https://png.pngtree.com/thumb_back/fh260/background/20250808/pngtree-steaming-cup-of-tea-with-lavender-on-blue-fabric-background-cozy-image_17717402.webp'; 
+const HEADER_IMAGE_URL = 'https://png.pngtree.com/thumb_back/fh260/background/20250808/pngtree-steaming-cup-of-tea-with-lavender-on-blue-fabric-background-cozy-image_17717402.webp';
 // ---------------------------------
 
-// Helper component for the image banner (Re-used structure from previous pages)
-const ImageBanner = ({ itemType, styles, imageUrl }) => {
-    const title = `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Configuration`;
-    
-    // Apply professional styling to the banner container
-    const bannerStyle = {
-        height: '150px',
-        width: '100%',
-        marginBottom: '25px',
-        borderRadius: '0 0 16px 16px', 
-        overflow: 'hidden',
-        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
-        position: 'relative',
-    };
+// --- NEW/OVERRIDDEN STYLES FOR THEME ENHANCEMENT ---
+// NOTE: Assuming STYLES_THEME imports base styles. We override/add necessary custom styles here.
+const THEME_COLORS = {
+    PRIMARY: '#103c7f', // Dark Blue
+    ACCENT: '#a1db40', // Green
+    TEXT_DARK: '#2c3e50', // Darker text for readability
+    TEXT_MUTED: '#7f8c8d', // Muted text
+    BACKGROUND_LIGHT: '#f9f9f9', // Light background for contrast
+    BORDER_LIGHT: '#e0e0e0', // Light border
+};
 
-    const imageStyle = {
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        height: '100%',
-        display: 'flex',
-        alignItems: 'flex-end',
-        padding: '15px 20px',
-    };
+const ENHANCED_STYLES = {
+    ...STYLES_THEME, // Keep original base styles (e.g., BORDER_RADIUS_LG)
+    // ADDED PILL-LIKE BORDER RADIUS FOR BUTTONS
+    BORDER_RADIUS_PILL: '25px',
 
-    const textStyle = {
-        fontSize: '1.6rem',
-        fontWeight: '800',
-        color: '#ffffff',
-        textShadow: '0 1px 4px rgba(0, 0, 0, 0.8)',
-    };
+    // Override or add key visual styles
+    COLOR_PRIMARY: THEME_COLORS.PRIMARY,
+    COLOR_ACCENT: THEME_COLORS.ACCENT,
+    COLOR_TEXT_DARK: THEME_COLORS.TEXT_DARK,
+    COLOR_TEXT_MUTED: THEME_COLORS.TEXT_MUTED,
+    
+    // Consistent Box Shadow
+    SHADOW_ELEVATION_1: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    SHADOW_ELEVATION_2: '0 4px 8px rgba(0, 0, 0, 0.15)',
+    SHADOW_ELEVATION_3: '0 8px 16px rgba(0, 0, 0, 0.2)',
 
-    return (
-        <div style={bannerStyle}>
-            <div style={imageStyle}>
-                <h1 style={textStyle}>{title}</h1>
-            </div>
-        </div>
-    );
+    // Enhanced Header/Label
+    headerText: {
+        fontSize: '1.6rem',
+        fontWeight: '700',
+        color: THEME_COLORS.PRIMARY,
+        margin: '0 0 10px 0',
+    },
+    label: {
+        fontSize: '1rem',
+        fontWeight: '600',
+        color: THEME_COLORS.TEXT_DARK,
+        display: 'block',
+        marginBottom: '8px',
+        marginTop: '20px',
+    },
+
+    // Enhanced Input/Select
+    inputField: {
+        padding: '12px 15px',
+        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        width: '100%',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        color: THEME_COLORS.TEXT_DARK,
+        transition: 'border-color 0.2s',
+        marginBottom: '15px',
+    },
+selectField: {
+padding: '12px 15px',
+border: `2px solid ${THEME_COLORS.BORDER_LIGHT}`,
+borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+width: '100%',
+boxSizing: 'border-box',
+fontSize: '1rem',
+color: THEME_COLORS.TEXT_DARK,
+backgroundColor: '#ffffff',
+appearance: 'none',
+marginBottom: '20px',
+fontWeight: '500',
+cursor: 'pointer',
+transition: 'border-color 0.2s ease',
+backgroundImage: 'url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'%23666\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'%3e%3cpolyline points=\'6,9 12,15 18,9\'%3e%3c/polyline%3e%3c/svg%3e")',
+backgroundRepeat: 'no-repeat',
+backgroundPosition: 'right 15px center',
+backgroundSize: '16px',
+paddingRight: '45px', // Make room for the custom arrow
+},
+
+    // Enhanced Primary Button (Save/Update)
+    primaryButton: {
+        padding: '15px 25px',
+        backgroundColor: THEME_COLORS.PRIMARY,
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        fontSize: '1.1rem',
+        fontWeight: '700',
+        cursor: 'pointer',
+        width: '100%',
+        boxShadow: THEME_COLORS.SHADOW_ELEVATION_2,
+        transition: 'background-color 0.2s ease, transform 0.1s ease',
+        marginTop: '20px',
+    },
+
+    // Enhanced Secondary Button (Back)
+    secondaryButton: {
+        padding: '12px 25px',
+        backgroundColor: 'transparent',
+        color: THEME_COLORS.TEXT_MUTED,
+        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        fontSize: '1rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px', // Added gap for spacing between icon and text
+        transition: 'color 0.2s, border-color 0.2s',
+        whiteSpace: 'nowrap', // Prevents wrapping the text/icon if possible
+    },
+};
+// ---------------------------------
+
+// Helper component for the image banner
+const ImageBanner = ({ itemType, imageUrl }) => {
+    const title = `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Configuration`;
+    // Use the enhanced styles
+    const styles = ENHANCED_STYLES;
+    
+    const bannerStyle = {
+        height: '200px',
+        width: '100%',
+        marginBottom: '30px',
+        borderRadius: `0 0 ${styles.BORDER_RADIUS_LG} ${styles.BORDER_RADIUS_LG}`,
+        overflow: 'hidden',
+        boxShadow: styles.SHADOW_ELEVATION_3,
+        position: 'relative',
+    };
+
+    const imageStyle = {
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url(${imageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100%',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '0 24px',
+        textAlign: 'center',
+        display: 'flex', // Ensure display is set
+    };
+
+    const textStyle = {
+        fontSize: '2rem',
+        fontWeight: '900',
+        color: '#ffffff',
+        textShadow: '0 3px 8px rgba(0, 0, 0, 0.9)',
+        margin: 0,
+    };
+
+    return (
+        <div style={bannerStyle}>
+            <div style={imageStyle}>
+                <h1 style={textStyle}>{title}</h1>
+            </div>
+        </div>
+    );
 };
 
 // Main Component
-const ItemConfigPage = ({ 
-    itemType, setPage, currentOrder, 
-    setCurrentOrder, isEditMode, itemIndex, styles 
+const ItemConfigPage = ({
+itemType, setPage, currentOrder,
+setCurrentOrder, isEditMode, itemIndex, user, styles: _propStyles
 }) => {
-    
-    const typeOptions = 
-        itemType === 'coffee' ? COFFEE_TYPES :
-        itemType === 'tea' ? TEA_TYPES :
-        itemType === 'milk' ? MILK_TYPES :
-        itemType === 'water' ? WATER_TYPES : [];
+// Use the enhanced styles
+const styles = ENHANCED_STYLES;
 
-    // Initialize itemConfig state
-    const [itemConfig, setItemConfig] = useState(
-        isEditMode ? currentOrder.items[itemIndex] : 
-        {
-            item: itemType,
-            type: typeOptions.length > 0 ? typeOptions[0] : '', // Set default type if available
-            sugarLevel: 1,
-            quantity: 1,
-            location: LOCATIONS[0],
-            tableNo: null,
-            customLocation: '', 
-            notes: ''
-        }
-    );
+// --- START USER LOCATION LOGIC ---
+// Use the actual logged-in user
+const currentUser = USER_LOCATIONS_DATA.find(u => u.name === user.name) || USER_LOCATIONS_DATA[0];
 
-    useEffect(() => {
-        // This ensures if the component is mounted for a new item, it gets the correct default type
-        if (!isEditMode && typeOptions.length > 0 && itemConfig.type === '') {
-            setItemConfig(prev => ({ ...prev, type: typeOptions[0] }));
-        }
-    }, [isEditMode, itemType]);
+    // Calculate allowed locations for the current user 
+    const allowedLocations = getAllowedLocations(currentUser.location, currentUser.access);
+    const defaultLocationKey = allowedLocations[0]?.key || 'Others';
+    // --- END USER LOCATION LOGIC ---
 
-    const handleSave = () => {
-        if (!itemConfig.type) {
-             alert("Please select a type.");
-             return;
-        }
-        
-        // Validation for 'Others' location
-        if (itemConfig.location === 'Others') {
-             if (itemConfig.tableNo === null) {
-                alert("Please select a table number.");
-                return;
-             }
-        }
+    // Determine type options. If none exist (like for 'jaljeera', 'maggie'), typeOptions will be empty.
+    const typeOptions =
+        itemType === 'coffee' ? COFFEE_TYPES :
+        itemType === 'tea' ? TEA_TYPES :
+        itemType === 'milk' ? MILK_TYPES :
+        itemType === 'water' ? WATER_TYPES : [];
 
-        if (isEditMode) {
-            const newItems = [...currentOrder.items];
-            newItems[itemIndex] = itemConfig;
-            setCurrentOrder(prev => ({ ...prev, items: newItems }));
-        } else {
-            setCurrentOrder(prev => ({ ...prev, items: [...prev.items, itemConfig] }));
-        }
-        setPage('item-selection');
-    };
-    
-    // Apply base screen padding for the content below the banner
-    const contentPaddingStyle = {
-        padding: '0 20px', // Horizontal padding to align with other pages
-    };
+    // **CORE LOGIC**: Set default type to the item name itself if no sub-types exist.
+    const defaultType = typeOptions.length > 0 ? typeOptions[0] : itemType;
 
-    return (
-        <div style={{ ...styles.appContainer, padding: '0' }}>
-            
-            {/* Image Banner Component */}
-            <ImageBanner 
-                itemType={itemType} 
-                styles={styles} 
-                imageUrl={HEADER_IMAGE_URL} 
-            />
+    // State for managing custom sugar input
+    const [customSugar, setCustomSugar] = useState(''); 
+    
+    const [itemConfig, setItemConfig] = useState(
+        isEditMode ? currentOrder.items[itemIndex] :
+        {
+            item: itemType,
+            // Use the determined default type
+            type: defaultType, 
+            sugarLevel: 1, // Default to 1
+            selectedAddOns: [],
+            quantity: 1,
+            // Uses the filtered default location
+            location: defaultLocationKey, 
+            tableNo: null,
+            customLocation: '',
+            notes: ''
+        }
+    );
 
-            <div style={contentPaddingStyle}>
-                {/* Main Content Area */}
-                <h3 style={{ fontSize: '1.4rem', color: styles.SECONDARY_COLOR }}>
-                    {isEditMode ? 'Edit' : 'Configure'} {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
-                </h3>
-                
-                <hr style={{ border: 'none', borderTop: '1px solid #eee', marginBottom: '20px' }} />
-                
-                {/* Type Selection */}
-                <label style={styles.label}>Select Type:</label>
-                <select 
-                    style={styles.selectField}
-                    value={itemConfig.type} 
-                    onChange={e => setItemConfig({...itemConfig, type: e.target.value})}
-                >
-                    {typeOptions.map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
+    // Effect to handle setting the custom sugar input if the sugar level is not standard
+    useEffect(() => {
+        if (itemConfig.sugarLevel !== null && !SUGAR_LEVELS.includes(itemConfig.sugarLevel)) {
+            setCustomSugar(String(itemConfig.sugarLevel));
+        } else if (itemConfig.sugarLevel !== null && customSugar !== '') {
+            setCustomSugar(''); 
+        }
+    }, [itemConfig.sugarLevel]);
 
-                {/* Sugar Level (if applicable) */}
-                {(itemType === 'coffee' || itemType === 'tea') && (
-                    <>
-                        <label style={styles.label}>Sugar Level (Spoons):</label>
-                        <select 
-                            style={styles.selectField}
-                            value={itemConfig.sugarLevel} 
-                            onChange={e => setItemConfig({...itemConfig, sugarLevel: parseInt(e.target.value)})}
-                        >
-                            {SUGAR_LEVELS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                    </>
-                )}
+    useEffect(() => {
+        // Ensure the type is set, defaulting to itemType if no options exist.
+        if (!isEditMode) {
+            if (typeOptions.length > 0 && itemConfig.type === itemType) {
+                 // For items with types, ensure the first type is selected if no previous type was set
+                 setItemConfig(prev => ({ ...prev, type: typeOptions[0] }));
+            } else if (typeOptions.length === 0 && itemConfig.type !== itemType) {
+                 // For items without types (like jaljeera, maggie), ensure type is set to itemType
+                 setItemConfig(prev => ({ ...prev, type: itemType }));
+            }
+        }
 
-                {/* Quantity */}
-                <label style={styles.label}>Quantity (Cups/Glasses):</label>
-                <input 
-                    style={styles.inputField}
-                    type="number" 
-                    min="1" 
-                    value={itemConfig.quantity} 
-                    onChange={e => setItemConfig({...itemConfig, quantity: parseInt(e.target.value)})}
-                />
+        // If in edit mode, ensure the default location is set if the current one is somehow invalid
+        if (isEditMode && !itemConfig.location && defaultLocationKey) {
+             setItemConfig(prev => ({ ...prev, location: defaultLocationKey }));
+        }
+    }, [isEditMode, itemType, typeOptions, defaultLocationKey]);
+    
+    // Handler for toggling Type/Add-Ons/Sugar Level
+    const handleToggle = (key, value) => {
+        if (key === 'selectedAddOns') {
+            setItemConfig(prev => {
+                const isSelected = prev.selectedAddOns.includes(value);
+                return {
+                    ...prev,
+                    selectedAddOns: isSelected
+                        ? prev.selectedAddOns.filter(a => a !== value)
+                        : [...prev.selectedAddOns, value]
+                };
+            });
+        } else {
+            setItemConfig(prev => ({ ...prev, [key]: value }));
+        }
+    };
 
-                {/* Location Selection */}
-                <label style={styles.label}>Delivery Location:</label>
-                <select 
-                    style={styles.selectField}
-                    value={itemConfig.location} 
-                    // Clear tableNo/customLocation when location changes
-                    onChange={e => setItemConfig({...itemConfig, location: e.target.value, tableNo: null, customLocation: ''})}
-                >
-                    {LOCATIONS.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
+    // Handler for selecting standard sugar level
+    const handleSugarSelect = (level) => {
+        setItemConfig(prev => ({ ...prev, sugarLevel: level }));
+        setCustomSugar('');
+    };
 
-                {/* Table Number */}
-                {itemConfig.location === 'Others' && (
-                    <>
-                        <label style={styles.label}>Table Number (1-25):</label>
-                        <select 
-                            style={styles.selectField}
-                            value={itemConfig.tableNo || ''} 
-                            onChange={e => setItemConfig({...itemConfig, tableNo: parseInt(e.target.value)})}
-                        >
-                            <option value="">Select Table</option>
-                            {TABLE_NUMBERS.map(n => <option key={n} value={n}>{n}</option>)}
-                        </select>
-                    </>
-                )}
-                
-                {/* Notes */}
-                <label style={styles.label}>Notes / Preferences:</label>
-                <textarea 
-                    style={{ ...styles.inputField, height: '60px', marginBottom: '30px' }}
-                    value={itemConfig.notes} 
-                    onChange={e => setItemConfig({...itemConfig, notes: e.target.value})}
-                    placeholder="E.g., Extra hot, light milk"
-                />
+    // Handler for custom sugar input change
+    const handleCustomSugarChange = (value) => {
+        setCustomSugar(value);
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+            setItemConfig(prev => ({ ...prev, sugarLevel: parsedValue }));
+        } else {
+            if (value === '') {
+                 setItemConfig(prev => ({ ...prev, sugarLevel: 0 }));
+            }
+        }
+    };
 
-                <button style={styles.primaryButton} onClick={handleSave}>
-                    {isEditMode ? 'Update Item' : 'Add Item'}
-                </button>
-                
-                <button 
-                    style={{ ...styles.secondaryButton, marginBottom: '20px' }} 
-                    onClick={() => setPage('item-selection')}
-                >
-                    <FaChevronLeft /> Back to Items
-                </button>
-            </div>
-        </div>
-    );
+// Handler for quantity change
+const handleQuantityChange = (delta) => {
+    setItemConfig(prev => {
+        const newQuantity = prev.quantity + delta;
+        // Ensure quantity is between 1 and 5
+        return { ...prev, quantity: Math.max(1, Math.min(5, newQuantity)) };
+    });
+};
+
+    const handleSave = () => {
+        // Type validation is only required if type options exist and a selection is expected
+        if (typeOptions.length > 0 && !itemConfig.type) {
+            alert("Please select a type.");
+            return;
+        }
+        
+        if (itemConfig.quantity < 1 || isNaN(itemConfig.quantity)) {
+             alert("Quantity must be at least 1.");
+             return;
+        }
+
+        // Validate custom sugar input
+        if (customSugar && isNaN(parseFloat(customSugar))) {
+             alert("Please enter a valid number for custom sugar level.");
+             return;
+        }
+
+        // Validate table number if 'Others' is selected
+        if (itemConfig.location === 'Others' && (itemConfig.tableNo === null || isNaN(itemConfig.tableNo))) {
+            alert("Please select a table number for 'Others' location.");
+            return;
+        }
+
+        if (isEditMode) {
+            const newItems = [...currentOrder.items];
+            newItems[itemIndex] = itemConfig;
+            setCurrentOrder(prev => ({ ...prev, items: newItems }));
+        } else {
+            setCurrentOrder(prev => ({ ...prev, items: [...prev.items, itemConfig] }));
+        }
+
+        // Go directly to the Order Confirmation Page
+        setPage('order-confirmation');
+    };
+
+    const contentPaddingStyle = {
+        padding: '0 24px',
+    };
+
+// Style for all button options (Type, Sugar, Add-ons)
+const buttonStyle = (isSelected, isAccent = true) => ({
+// SMALLER PADDING FOR COMPACT BUTTONS
+padding: '8px 12px',
+// APPLIED PILL-LIKE ROUND CORNERS
+borderRadius: styles.BORDER_RADIUS_PILL,
+// REMOVED BORDER
+border: 'none',
+// Use ACCENT (Green) for main choice (Type/Sugar) and PRIMARY (Blue) for Add-Ons
+backgroundColor: isSelected ? (isAccent ? styles.COLOR_ACCENT : styles.COLOR_PRIMARY) : styles.BACKGROUND_LIGHT,
+color: isSelected ? (isAccent ? styles.COLOR_TEXT_DARK : '#ffffff') : styles.COLOR_TEXT_DARK,
+fontWeight: isSelected ? '700' : '500',
+cursor: 'pointer',
+transition: 'all 0.2s ease',
+// Added stronger shadow for unselected buttons, stronger/darker for selected
+boxShadow: isSelected ? styles.SHADOW_ELEVATION_2 : styles.SHADOW_ELEVATION_1,
+fontSize: '0.9rem', // Smaller font size
+flexGrow: 0, // Resetting flexGrow to 0
+textAlign: 'center',
+whiteSpace: 'nowrap',
+minWidth: '60px', // Smaller minimum width
+});
+    
+    // Style for sugar custom input
+    const customSugarInputStyle = {
+        ...styles.inputField,
+        flexGrow: 1,
+        width: 'auto',
+        textAlign: 'center',
+        padding: '10px',
+        fontWeight: '600',
+        borderColor: (customSugar && !SUGAR_LEVELS.includes(itemConfig.sugarLevel)) ? styles.COLOR_PRIMARY : styles.BORDER_LIGHT,
+        marginBottom: 0, // Adjusted for layout in the flex container
+        boxShadow: styles.SHADOW_ELEVATION_1,
+    };
+
+    // Style for Quantity control
+    const quantityControlStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start', // Align to left for better flow
+        marginBottom: '30px',
+        width: '100%',
+        maxWidth: '250px', 
+    };
+
+const quantityButtonStyle = {
+// Smaller buttons for quantity control
+...buttonStyle(true, false), // Use primary blue for counter buttons
+flexGrow: 0,
+width: '35px',
+height: '35px',
+padding: '0',
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'center',
+// Override to ensure standard dark blue color
+backgroundColor: styles.COLOR_PRIMARY,
+color: '#ffffff',
+borderRadius: styles.BORDER_RADIUS_PILL, // Ensure pill shape
+boxShadow: styles.SHADOW_ELEVATION_2,
+border: 'none',
+// Set specific width for counter buttons
+minWidth: '35px',
+fontSize: '0.8rem',
+};
+
+const quantityDisplay = {
+...styles.inputField,
+flexGrow: 1,
+textAlign: 'center',
+fontWeight: '700',
+fontSize: '1.1rem',
+// Keep a distinct border for the counter display
+border: `2px solid ${styles.COLOR_ACCENT}`, // Green border
+margin: '0 8px',
+height: '35px',
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'center',
+boxShadow: styles.SHADOW_ELEVATION_1,
+backgroundColor: '#ffffff', // White background
+marginBottom: 0, // Adjusted for layout
+color: styles.COLOR_TEXT_DARK,
+// Make the counter display rounded too
+borderRadius: styles.BORDER_RADIUS_PILL,
+};
+
+    return (
+        <div style={styles.centeredContainer}>
+            <div style={{ ...styles.screenPadding, padding: '0' }}>
+
+                {/* --- HEADER IMAGE BANNER --- */}
+                <ImageBanner
+                    itemType={itemType}
+                    imageUrl={HEADER_IMAGE_URL}
+                />
+
+                <div style={contentPaddingStyle}>
+                    {/* Main Content Area */}
+                    <h3 style={{ ...styles.headerText, color: styles.COLOR_PRIMARY }}>
+                        {isEditMode ? 'Edit' : 'Configure'} Your {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+                    </h3>
+
+                    <hr style={{ border: 'none', borderTop: `1px solid ${styles.BORDER_LIGHT}`, marginBottom: '20px' }} />
+
+                    {/* SELECT TYPE (BUTTONS) - CONDITIONALLY RENDERED */}
+                    {/* Only show this section if type options exist (e.g., for Coffee, Tea, Milk, Water). Hides completely for Jaljeera, Shikanji, Maggie. */}
+                    {typeOptions.length > 0 && (
+                        <>
+                            <label style={styles.label}>☕ Select Type:</label>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+                                {typeOptions.map(type => (
+                                    <button
+                                        key={type}
+                                        // Type buttons use Accent (Green)
+                                        style={{ ...buttonStyle(itemConfig.type === type, true), flex: '1 1 auto' }} // Added flex for even spacing/wrapping
+                                        onClick={() => handleToggle('type', type)}
+                                    >
+                                        {type}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* SUGAR LEVEL (BUTTONS + CUSTOM INPUT) */}
+                    {(itemType === 'coffee' || itemType === 'tea' || itemType === 'shikanji' || itemType === 'jaljeera') && (
+                        <>
+                            <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
+                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                                {/* Standard Levels (0, 1, 2, 3) */}
+                                {SUGAR_LEVELS.map(level => (
+                                    <button
+                                        key={level}
+                                        // Sugar buttons use Accent (Green)
+                                        style={{ ...buttonStyle(itemConfig.sugarLevel === level), flex: '1 1 auto' }} // Added flex for even spacing/wrapping
+                                        onClick={() => handleSugarSelect(level)}
+                                    >
+                                        {level}
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+{/* Add-Ons (BUTTONS) - For Coffee and Tea */}
+{(itemType === 'coffee' || itemType === 'tea') && (
+<>
+<label style={styles.label}>🌿 Spice Add-Ons (Select Multiple):</label>
+<div style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+    gap: '12px',
+    marginBottom: '20px'
+}}>
+{ADD_ONS.map(addOn => (
+<button
+key={addOn}
+// For Add-Ons, use primary blue color scheme
+style={{
+    ...buttonStyle(itemConfig.selectedAddOns.includes(addOn), false),
+    width: '100%',
+    minHeight: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center'
+}}
+onClick={() => handleToggle('selectedAddOns', addOn)}
+>
+{addOn}
+</button>
+))}
+</div>
+</>
+)}
+
+                    {/* QUANTITY CONTROL (- 1 +) */}
+                    <label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
+                    <div style={quantityControlStyle}>
+                        <button 
+                            style={quantityButtonStyle} 
+                            onClick={() => handleQuantityChange(-1)} 
+                            disabled={itemConfig.quantity <= 1} 
+                        >
+                            <FaMinus />
+                        </button>
+                        <div style={quantityDisplay}>
+                            {itemConfig.quantity}
+                        </div>
+                        <button 
+                            style={quantityButtonStyle} 
+                            onClick={() => handleQuantityChange(1)}
+                        >
+                            <FaPlus />
+                        </button>
+                    </div>
+
+                    {/* LOCATION SELECTION (FILTERED DROPDOWN) */}
+                    <label style={styles.label}>📍 Delivery Location:</label>
+                    <select
+                        style={styles.selectField}
+                        value={itemConfig.location}
+                        onChange={e => setItemConfig({...itemConfig, location: e.target.value, tableNo: null, customLocation: ''})}
+                    >
+                        {/* Uses the dynamically generated allowed locations */}
+                        {allowedLocations.map(({ key, name }) => (
+                            <option key={key} value={key}>{name}</option>
+                        ))}
+                    </select>
+
+                    {/* Table Number (Only visible if 'Others' is selected) */}
+                    {itemConfig.location === 'Others' && (
+                        <>
+                            <label style={styles.label}>#️⃣ Table Number (1-25):</label>
+                            <select
+                                style={styles.selectField}
+                                value={itemConfig.tableNo || ''}
+                                onChange={e => setItemConfig({...itemConfig, tableNo: parseInt(e.target.value)})}
+                            >
+                                <option value="">Select Table</option>
+                                {TABLE_NUMBERS.map(n => <option key={n} value={n}>{n}</option>)}
+                            </select>
+                        </>
+                    )}
+
+                    {/* Notes */}
+                    <label style={styles.label}>📝 Notes / Preferences:</label>
+                    <textarea
+                        style={{ ...styles.inputField, height: '80px', marginBottom: '30px' }}
+                        value={itemConfig.notes}
+                        onChange={e => setItemConfig({...itemConfig, notes: e.target.value})}
+                        placeholder="E.g., Extra hot, light milk"
+                    />
+
+                    <button style={styles.primaryButton} onClick={handleSave}>
+                        {isEditMode ? 'Update Item' : 'Add Item'}
+                    </button>
+
+                    <button
+                        style={{ ...styles.secondaryButton, marginTop: '15px', marginBottom: '30px' }} 
+                        onClick={() => setPage('home')}
+                    >
+                        <FaChevronLeft /> Back to Slot Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default ItemConfigPage;

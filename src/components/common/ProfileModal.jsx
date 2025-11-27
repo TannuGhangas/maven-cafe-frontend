@@ -1,13 +1,11 @@
 // src/components/common/ProfileModal.jsx
 
 import React, { useState, useEffect } from 'react';
-// Added FaTimes for the modern close icon
-import { FaUserCircle, FaSignOutAlt, FaEdit, FaListAlt, FaUsers, FaTimes } from 'react-icons/fa'; 
+import { FaSignOutAlt, FaListAlt, FaUsers, FaTimes, FaUserCircle, FaEdit, FaCamera, FaTrash } from 'react-icons/fa';
 
-const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, styles }) => {
-    const [userData, setUserData] = useState({ name: user.name, email: user.email || '' });
-    const [isEditing, setIsEditing] = useState(false);
+const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
     const [profilePic, setProfilePic] = useState(localStorage.getItem(`profilePic_${user.id}`) || null);
+    const [showImageOptions, setShowImageOptions] = useState(false);
 
     // --- LOCAL STYLES to achieve the Side Drawer look for mobile ---
     const ACCENT_COLOR = styles.PRIMARY_COLOR || '#FF7A3D';
@@ -89,35 +87,6 @@ const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, 
     };
     // ---------------------------------------------------------------------
 
-    const fetchUserData = async () => {
-        // Using existing user object for initial data, but fetching for latest updates
-        const data = await callApi(`/user/${user.id}?userId=${user.id}&userRole=${user.role}`);
-        if (data) {
-            setUserData({ name: data.name, email: data.email || '' });
-        }
-    };
-
-    const handleUpdate = async () => {
-        if (!userData.name) {
-            alert("Name cannot be empty.");
-            return;
-        }
-        const data = await callApi(`/user/${user.id}`, 'PUT', { 
-            userId: user.id, 
-            userRole: user.role, 
-            name: userData.name, 
-            email: userData.email,
-        });
-        if (data && data.success) {
-            alert('Profile updated successfully!');
-            // Update app-level user state and localStorage
-            const updatedUser = { ...user, name: data.user.name, email: data.user.email };
-            setUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
-            setIsEditing(false);
-        }
-    };
-
     const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
@@ -125,14 +94,17 @@ const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, 
             reader.onloadend = () => {
                 setProfilePic(reader.result);
                 localStorage.setItem(`profilePic_${user.id}`, reader.result);
+                setShowImageOptions(false);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    useEffect(() => {
-        fetchUserData();
-    }, []);
+    const handleDeleteImage = () => {
+        setProfilePic(null);
+        localStorage.removeItem(`profilePic_${user.id}`);
+        setShowImageOptions(false);
+    };
 
     const navigateToPage = (pageName) => {
         setPage(pageName);
@@ -152,19 +124,102 @@ const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, 
                 
                 {/* Profile Header Section */}
                 <div style={localStyles.profileHeader}>
-                    <div style={styles.profilePicContainer}>
-                        <div style={styles.profileFrame(profilePic)}>
-                            {!profilePic && <FaUserCircle size={60} style={{ color: '#ccc' }} />}
+                    <div style={{ position: 'relative', display: 'inline-block' }}>
+                        <div style={styles.profilePicContainer}>
+                            <div style={styles.profileFrame(profilePic)}>
+                                {!profilePic && <FaUserCircle size={60} style={{ color: '#ccc' }} />}
+                            </div>
                         </div>
-                        {/* File input is hidden */}
-                        <input type="file" id="file-upload" accept="image/*" onChange={handleImageUpload} style={styles.fileInput} />
-                        {/* Label acts as the visible upload button */}
-                        <label htmlFor="file-upload" style={{ color: ACCENT_COLOR, cursor: 'pointer', fontSize: '0.9em', marginTop: '5px', display: 'block' }}>
-                           <FaEdit size={10} style={{marginRight: '5px'}}/> Upload Photo
-                        </label>
+                        <button
+                            onClick={() => setShowImageOptions(!showImageOptions)}
+                            style={{
+                                position: 'absolute',
+                                bottom: '5px',
+                                right: '5px',
+                                backgroundColor: ACCENT_COLOR,
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '50%',
+                                width: '30px',
+                                height: '30px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                fontSize: '0.8rem'
+                            }}
+                            title="Edit Image"
+                        >
+                            <FaEdit />
+                        </button>
+
+                        {showImageOptions && (
+                            <div style={{
+                                position: 'absolute',
+                                top: '100%',
+                                right: '0',
+                                backgroundColor: 'white',
+                                border: '1px solid #ddd',
+                                borderRadius: '8px',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                zIndex: 1000,
+                                minWidth: '150px',
+                                marginTop: '5px'
+                            }}>
+                                <div style={{ padding: '10px', borderBottom: '1px solid #eee' }}>
+                                    <strong style={{ fontSize: '0.9rem', color: SECONDARY_COLOR }}>Edit Profile Image</strong>
+                                </div>
+                                <button
+                                    onClick={() => document.getElementById('profile-image-upload').click()}
+                                    style={{
+                                        width: '100%',
+                                        padding: '10px 15px',
+                                        border: 'none',
+                                        backgroundColor: 'transparent',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        color: SECONDARY_COLOR,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
+                                    }}
+                                >
+                                    <FaCamera /> Change Image
+                                </button>
+                                {profilePic && (
+                                    <button
+                                        onClick={handleDeleteImage}
+                                        style={{
+                                            width: '100%',
+                                            padding: '10px 15px',
+                                            border: 'none',
+                                            backgroundColor: 'transparent',
+                                            textAlign: 'left',
+                                            cursor: 'pointer',
+                                            fontSize: '0.9rem',
+                                            color: '#e74c3c',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '8px'
+                                        }}
+                                    >
+                                        <FaTrash /> Delete Image
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
 
-                    <h2 style={localStyles.profileName}>{userData.name}'s Profile</h2>
+                    <input
+                        type="file"
+                        id="profile-image-upload"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                    />
+
+                    <h2 style={localStyles.profileName}>{user.name}'s Profile</h2>
                 </div>
                 
                 {/* Detail Rows - Using local clean style */}
@@ -172,17 +227,7 @@ const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, 
                 {/* Name */}
                 <div style={localStyles.cleanDetailRow}>
                     <label>Name:</label>
-                    {isEditing ? (
-                        <input 
-                            style={localStyles.detailInputField}
-                            value={userData.name} 
-                            onChange={(e) => setUserData({...userData, name: e.target.value})} 
-                        />
-                    ) : (
-                        <span style={styles.detailValue} onClick={() => setIsEditing(true)}>
-                            {userData.name} <FaEdit size={14} style={{color: ACCENT_COLOR}}/>
-                        </span>
-                    )}
+                    <span style={styles.detailValue}>{user.name}</span>
                 </div>
 
                 {/* Username */}
@@ -196,33 +241,14 @@ const ProfileModal = ({ user, onClose, handleLogout, setUser, setPage, callApi, 
                     <label>Role:</label>
                     <span style={styles.detailValue}>{user.role.toUpperCase()}</span>
                 </div>
-
-                {/* Email */}
-                <div style={localStyles.cleanDetailRow}>
-                    <label>Email (Optional):</label>
-                    {isEditing ? (
-                        <input 
-                            style={localStyles.detailInputField}
-                            value={userData.email} 
-                            onChange={(e) => setUserData({...userData, email: e.target.value})} 
-                        />
-                    ) : (
-                        <span style={styles.detailValue} onClick={() => setIsEditing(true)}>
-                            {userData.email || 'N/A'} 
-                            <FaEdit size={14} style={{color: ACCENT_COLOR}}/>
-                        </span>
-                    )}
-                </div>
                 
                 {/* Action Buttons */}
                 <div style={{ marginTop: '30px', padding: '0 5px' }}>
-                    {isEditing && (
-                        <button style={localStyles.actionButton()} onClick={handleUpdate}>Save Changes</button>
+                    {user.role === 'user' && (
+                        <button style={localStyles.actionButton(false)} onClick={() => navigateToPage('orders-list')}>
+                            <FaListAlt /> View My Orders
+                        </button>
                     )}
-
-                    <button style={localStyles.actionButton(false)} onClick={() => navigateToPage('orders-list')}>
-                        <FaListAlt /> View My Orders
-                    </button>
 
                     {user.role === 'admin' && (
                         <button style={localStyles.actionButton(false)} onClick={() => navigateToPage('admin-users')}>

@@ -1,190 +1,401 @@
 import React from 'react';
-// The FaChevronLeft import is present but not used on this page, as per your original file.
+import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
 
-// Defining the inline CSS styles based on the image's aesthetics (orange accents, rounded corners, shadows).
-const styles = {
-    screenPadding: {
-        padding: '0 0 24px 0', // Remove horizontal padding for full-width banner
-        fontFamily: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif',
-        minHeight: '100vh',
-        backgroundColor: '#fcfcfc',
-    },
-    // --- NEW STYLES FOR IMAGE HEADER ---
-    headerBanner: {
-        height: '250px', // Height remains 250px
-        width: '100%',
-        marginBottom: '25px',
-        position: 'relative',
-        borderRadius: '0 0 24px 24px', // Rounded bottom edge for the banner
-        overflow: 'hidden',
-        boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
-    },
-    backgroundImage: (url) => ({
-        // Using a slightly lighter gradient for a softer look
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.4)), url(${url || 'https://placehold.co/800x250/4a4a4a/ffffff?text=Add+Image+URL'})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'flex-start', 
-        padding: '50px 24px 24px 24px', // Added top padding (50px) to move text down slightly
-    }),
-    bannerTitle: {
-        fontSize: '1.8rem',
-        fontWeight: '800',
-        color: '#ffffff',
-        textShadow: '0 2px 4px rgba(0, 0, 0, 0.7)', 
-    },
-    bannerSubtitle: {
-        fontSize: '0.95rem',
-        color: 'rgba(255, 255, 255, 0.85)',
-        fontWeight: '500',
-        marginTop: '5px',
-        textShadow: '0 1px 3px rgba(0, 0, 0, 0.7)',
-    },
-    // ------------------------------------
-    contentArea: {
-        padding: '0 24px', // Re-introduce horizontal padding for content
-    },
-    headerText: {
-        fontSize: '1.5rem',
-        fontWeight: '800', // Bold header
-        color: '#333333',
-        marginBottom: '20px',
-        textAlign: 'left',
-    },
-    slotContainer: {
-        display: 'flex',
-        gap: '20px', // Increased gap
-        marginTop: '25px',
-        flexWrap: 'wrap',
-        justifyContent: 'space-around',
-    },
-    slotButton: (isSelected) => ({
-        // Base styling for the buttons (rounded, soft shadow)
-        flexGrow: 1,
-        minWidth: '150px', // Slightly wider min width
-        maxWidth: '250px',
-        padding: '25px 15px', // Slightly increased vertical padding
-        borderRadius: '16px',
-        border: 'none',
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        textAlign: 'center',
-        lineHeight: '1.4',
+/**
+ * 🎨 THEME VARIABLES - PRESERVED KEYS
+ * Changed values for a fresher, cleaner aesthetic.
+ */
+const VARS = {
+    // ☕ Color Palette - UPDATED TO USER REQUESTED COLORS
+    COLOR_PRIMARY: '#103c7f', // Dark Blue
+    COLOR_ACCENT: '#a1db40', // Green
+    COLOR_BG_LIGHT: '#fcfcfc',
+    COLOR_TEXT_DARK: '#212121',
+    COLOR_TEXT_MUTED: '#757575',
+    
+    // 📐 Sizing & Radius
+    BORDER_RADIUS_LG: '18px',
+    BORDER_RADIUS_SM: '10px',
 
-        // Conditional styling (Orange is the highlight color from the image)
-        backgroundColor: isSelected ? '#FF7A3D' : '#ffffff',
-        color: isSelected ? '#ffffff' : '#4a4a4a',
-        fontWeight: isSelected ? '700' : '600',
-        fontSize: '1.2rem', // Slightly larger text
-        boxShadow: isSelected
-            ? '0 10px 25px rgba(255, 122, 61, 0.6)' // Stronger shadow for selected
-            : '0 5px 15px rgba(0, 0, 0, 0.08)', // Refined subtle shadow for unselected
-
-        // Adding a pseudo-element or class for hover effects is complex with inline styles. 
-        // We'll rely on the transition for smooth interaction.
-        ':hover': {
-            transform: 'translateY(-2px)', // Subtle lift on hover (not fully supported in inline styles, but good intent)
-            boxShadow: isSelected 
-                ? '0 12px 30px rgba(255, 122, 61, 0.7)' 
-                : '0 7px 20px rgba(0, 0, 0, 0.12)',
-        }
-    }),
-    smallText: (isSelected) => ({
-        fontSize: '0.9rem',
-        color: isSelected ? 'rgba(255, 255, 255, 0.85)' : '#888888',
-        fontWeight: 'normal',
-    }),
-    // --- NEW STYLES FOR BREAK CARD ---
-    breakCard: {
-        marginTop: '55px',
-        backgroundColor: '#FFFFFF',
-        borderRadius: '25px', // Even larger radius
-        padding: '50px 30px', 
-        alignItems: 'center',
-        // Floating effect
-        boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)', 
-        textAlign: 'center',
-        margin: '0 auto',
-        width: '100%',
-        boxSizing: 'border-box',
-        border: 'none', // Remove subtle border
-        transition: 'all 0.5s ease',
-    },
-    breakTitle: {
-        fontSize: '32px', // Larger title
-        fontWeight: '900', // Extra bold
-        color: '#FF7A3D', 
-        marginBottom: '15px', 
-        margin: 0,
-        // Adding a subtle shake or pulse animation would require defining a <style> block, 
-        // which we avoid in React components if possible. I'll rely on large font/color contrast.
-    },
-    breakSubtitle: {
-        fontSize: '16px', // Slightly larger subtitle
-        color: '#555', 
-        margin: '0 0 5px 0'
-    },
-    breakInspiration: {
-        fontSize: '18px', // Larger and clearer
-        color: '#333',
-        fontWeight: '600',
-        marginTop: '15px',
-    }
+    // ✨ Shadows (Updated to use new ACCENT color)
+    SHADOW_ELEVATION_1: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    SHADOW_ELEVATION_2: '0 8px 20px rgba(161, 219, 64, 0.5)', // Using new Green ACCENT color for selection shadow
+    SHADOW_ELEVATION_3: '0 10px 30px rgba(0, 0, 0, 0.1)',
 };
 
+/**
+ * 💅 STYLES_THEME - BEAUTIFIED & ORGANIZED (KEYS PRESERVED)
+ * Adjusted vertical margins for less gap/space.
+ */
+export const STYLES_THEME = {
+    // --- LAYOUT & BASE STYLES ---
+    centeredContainer: {
+        maxWidth: '480px',
+        margin: '0 auto',
+        boxShadow: VARS.SHADOW_ELEVATION_1,
+        backgroundColor: VARS.COLOR_BG_LIGHT,
+        minHeight: '100vh',
+    },
+    screenPadding: {
+        padding: '0 0 30px 0', // Reduced bottom padding
+        fontFamily: 'Inter, system-ui, sans-serif',
+        minHeight: '100vh',
+        backgroundColor: VARS.COLOR_BG_LIGHT,
+    },
+    contentArea: {
+        padding: '0 24px',
+    },
+    
+    // --- TYPOGRAPHY & HEADERS ---
+headerText: {
+fontSize: '1.3rem',
+fontWeight: '800',
+color: VARS.COLOR_TEXT_DARK,
+marginBottom: '20px', // Reduced margin
+borderLeft: `5px solid ${VARS.COLOR_ACCENT}`, // Use Green ACCENT color
+paddingLeft: '10px',
+fontFamily: 'Cambria, serif',
+},
+    label: {
+        display: 'block',
+        fontSize: '0.95rem',
+        fontWeight: '700',
+        color: VARS.COLOR_TEXT_DARK,
+        marginTop: '20px',
+        marginBottom: '8px',
+    },
+
+    // --- FORMS & INPUTS ---
+    inputField: {
+        width: '100%',
+        padding: '14px',
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        border: '1px solid #e0e0e0',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        backgroundColor: '#ffffff',
+        boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.03)',
+        transition: 'border-color 0.3s',
+    },
+    selectField: {
+        width: '100%',
+        padding: '14px',
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        border: '1px solid #e0e0e0',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        backgroundColor: '#ffffff',
+        appearance: 'none',
+        backgroundImage: 'url("https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg")',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'right 15px center',
+        backgroundSize: '12px',
+    },
+
+    // --- BUTTONS ---
+    primaryButton: {
+        width: '100%',
+        padding: '18px',
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        backgroundColor: VARS.COLOR_PRIMARY, // Dark Blue PRIMARY
+        color: 'white',
+        border: 'none',
+        fontSize: '1.1rem',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        boxShadow: `0 6px 15px ${VARS.COLOR_PRIMARY}60`,
+        transition: 'all 0.3s ease',
+        marginTop: '30px',
+    },
+    secondaryButton: {
+        width: '100%',
+        padding: '15px',
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        backgroundColor: VARS.COLOR_ACCENT, // Green ACCENT for secondary
+        color: VARS.COLOR_TEXT_DARK,
+        border: `1px solid ${VARS.COLOR_ACCENT}50`,
+        fontSize: '1rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+        boxShadow: VARS.SHADOW_ELEVATION_1,
+        transition: 'all 0.3s ease',
+    },
+    
+    // --- COMPONENT: HEADER BANNER ---
+    headerBanner: {
+        height: '200px',
+        width: '100%',
+        marginBottom: '30px', // Reduced margin
+        borderRadius: `0 0 ${VARS.BORDER_RADIUS_LG} ${VARS.BORDER_RADIUS_LG}`,
+        overflow: 'hidden',
+        boxShadow: VARS.SHADOW_ELEVATION_3,
+        position: 'relative',
+    },
+    backgroundImage: (url) => ({
+        // Reduced dark overlay (0.4 max) for brighter header image
+        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%), url(${url || 'https://placehold.co/800x230/4a4a4a/ffffff?text=Add+Image+URL'})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '0 24px',
+        textAlign: 'center',
+    }),
+bannerTitle: {
+fontSize: '2rem',
+fontWeight: '900',
+color: '#ffffff',
+textShadow: '0 3px 8px rgba(0, 0, 0, 0.9)',
+lineHeight: '1.1',
+margin: '0',
+fontFamily: 'Cambria, serif',
+},
+    bannerSubtitle: {
+        fontSize: '1rem',
+        color: 'rgba(255, 255, 255, 0.95)',
+        fontWeight: '500',
+        marginTop: '8px',
+        textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
+        margin: '0',
+    },
+
+    // --- COMPONENT: SLOT SELECTION ---
+    slotContainer: {
+        display: 'flex',
+        gap: '10px', // Reduced gap
+        marginBottom: '30px', // Reduced margin
+        flexWrap: 'wrap',
+        justifyContent: 'space-between', // Use space-between for better small button layout
+    },
+    slotButton: (isSelected) => ({
+        // MADE BUTTONS MUCH SMALLER
+        flex: '1 1 48%',
+        minWidth: '100px',
+        padding: '10px 15px', // Reduced padding significantly
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        border: isSelected ? 'none' : `1px solid #e0e0e0`,
+        cursor: 'pointer',
+        transition: 'all 0.3s ease',
+        textAlign: 'center',
+        backgroundColor: isSelected ? VARS.COLOR_PRIMARY : '#ffffff', // Dark Blue PRIMARY
+        color: isSelected ? '#ffffff' : VARS.COLOR_TEXT_DARK,
+        fontWeight: isSelected ? '700' : '600',
+        fontSize: '0.9rem', // Reduced font size
+        boxShadow: isSelected ? VARS.SHADOW_ELEVATION_2 : VARS.SHADOW_ELEVATION_1,
+        transform: isSelected ? 'scale(1.03)' : 'scale(1)',
+        display: 'flex',
+        flexDirection: 'column',
+    }),
+    smallText: (isSelected) => ({
+        fontSize: '0.75rem', // Reduced font size
+        color: isSelected ? 'rgba(255, 255, 255, 0.9)' : VARS.COLOR_TEXT_MUTED,
+        fontWeight: '500',
+        display: 'block',
+        marginTop: '5px',
+    }),
+
+    // --- COMPONENT: ITEM SELECTION ---
+    itemHeader: {
+        fontSize: '1.2rem',
+        fontWeight: '800',
+        color: VARS.COLOR_TEXT_DARK,
+        marginBottom: '20px',
+        textAlign: 'left',
+    },
+    itemSelectionGrid: {
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr',
+        gap: '15px',
+        marginBottom: '30px', // Reduced margin
+    },
+    itemButton: {
+        // FIX: Removed redundant 'display: 'block'' that caused the warning.
+        width: '100%',
+        height: '150px', // Keep height consistent for now
+        padding: '0',
+        borderRadius: VARS.BORDER_RADIUS_SM,
+        border: 'none',
+        overflow: 'hidden',
+        position: 'relative',
+        cursor: 'pointer',
+        boxShadow: VARS.SHADOW_ELEVATION_1,
+        backgroundColor: '#ffffff', // Card background color
+        textAlign: 'left',
+        transition: 'transform 0.2s, box-shadow 0.2s',
+        display: 'flex', // Make button a flex container (KEEP THIS)
+        flexDirection: 'column', // Stack image and text
+        justifyContent: 'space-between', // Distribute space
+    },
+    imageContainer: (itemName, itemImages) => ({
+        width: '100%',
+        height: '100%', // Take up most of the card height
+        // Removed linear gradient for a bright image
+        background: `${itemImages[itemName]}`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        // Removed flex properties as text will be separate
+        // Removed color and text-shadow as text is now outside this container
+    }),
+    itemText: {
+        margin: '0',
+        display: 'block', // Ensure text is visible
+        padding: '10px 15px', // Padding for the text at the bottom
+        color: VARS.COLOR_TEXT_DARK, // Dark text color
+        fontWeight: '600', // Semibold
+        fontSize: '1.1rem', // Adjust font size
+    },
+
+    // --- COMPONENT: BREAK CARD ---
+    breakCard: {
+        marginTop: '40px', // Reduced margin
+        backgroundColor: '#FFFFFF',
+        borderRadius: VARS.BORDER_RADIUS_LG,
+        padding: '30px 25px',
+        boxShadow: VARS.SHADOW_ELEVATION_3,
+        textAlign: 'center',
+        margin: '40px 24px 0 24px', // Consolidated margin. Top margin is the one that's reduced
+        width: 'auto',
+        border: `1px solid #f0f0f0`,
+    },
+breakTitle: {
+fontSize: '1.6rem',
+fontWeight: '900',
+color: VARS.COLOR_PRIMARY, // Dark Blue PRIMARY
+marginBottom: '10px',
+fontFamily: 'Cambria, serif',
+},
+    breakSubtitle: {
+        fontSize: '0.9rem',
+        color: VARS.COLOR_TEXT_MUTED,
+        margin: '0 0 10px 0'
+    },
+    breakInspiration: {
+        fontSize: '1rem',
+        color: VARS.COLOR_TEXT_DARK,
+        fontWeight: '600',
+        marginTop: '10px',
+    },
+};
+
+// --- ITEM DATA ---
+const itemButtons = [
+    { name: 'coffee', icon: FaCoffee },
+    { name: 'tea', icon: FaMugHot },
+    { name: 'milk', icon: FaGlassWhiskey },
+    { name: 'water', icon: FaTint },
+    { name: 'shikanji', icon: FaLemon }, // Added Shikanji
+    { name: 'jaljeera', icon: FaCube },  // Added Jaljeera
+    { name: 'soup', icon: FaTint },
+    { name: 'maggie', icon: FaTint },
+    { name: 'oats', icon: FaTint },
+];
+
+const itemImages = {
+    // KEPT ORIGINAL USER URLs
+    tea: 'url("https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg")',
+    coffee: 'url("https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg")',
+    milk: 'url("https://www.shutterstock.com/image-photo/almond-milk-cup-glass-on-600nw-2571172141.jpg")',
+    water: 'url("https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg")',
+    shikanji: 'url("https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg")',
+    jaljeera: 'url("https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg")',
+    soup: 'url("https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg")',
+    maggie: 'url("https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg")',
+    oats: 'url("https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900")',
+};
+// -----------------
+
+const timeSlots = [
+    // Added description for the small text
+    { title: 'Morning', slot: 'morning (9:00-12:00)'},
+    { title: 'Afternoon', slot: 'afternoon (1:00 - 5:30)'},
+];
+
 const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, styles: _propStyles }) => {
-    // === HERE IS WHERE YOU CAN PASTE YOUR IMAGE ADDRESS ===
-    // Replace the empty string '' below with the URL of your desired background image.
-    const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg'; 
-    // Example: const HEADER_IMAGE_URL = 'https://i.imgur.com/your-cafe-image.jpg';
-    // ======================================================
+    // KEPT ORIGINAL USER URL
+    const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
+    
+    const currentHour = new Date().getHours();
+    const greeting = currentHour < 12 ? 'Good Morning!' : 'Hello there!';
+    const primaryMessage = `${greeting} Ready to order?`;
 
-    return (
-        <div style={styles.screenPadding}>
-            {/* Image Header Section */}
-            <div style={styles.headerBanner}>
-                <div style={styles.backgroundImage(HEADER_IMAGE_URL)}>
-                    <h1 style={styles.bannerTitle}>Hello</h1>                                              
-                    {/* Greeting text add "Hello" instead of Good Morning */}
-                    <p style={styles.bannerSubtitle}>Start your day with a warm cup</p>
-                </div>
-            </div>
+    const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
-            <div style={styles.contentArea}>
-                {/* Slot Selection Content */}
-                <h2 style={styles.headerText}>Select Slot:</h2>
-                <div style={styles.slotContainer}>
-                    {['morning (9:00-12:00)', 'afternoon (1:00 - 5:30)'].map(slot => (
-                        <button 
-                            key={slot}
-                            style={styles.slotButton(currentOrder.slot === slot)}
-                            onClick={() => {
-                                setCurrentOrder(prev => ({ ...prev, slot }));
-                                setPage('item-selection');
-                            }}
-                        >
-                            {slot.split('(')[0].trim()}
-                            <br /><small style={styles.smallText(currentOrder.slot === slot)}>({slot.split('(')[1]}</small>
-                        </button>
-                    ))}
-                </div>
+    return (
+        <div style={STYLES_THEME.centeredContainer}>
+            <div style={STYLES_THEME.screenPadding}>
+                {/* Image Header Section */}
+                <div style={STYLES_THEME.headerBanner}>
+                    <div style={STYLES_THEME.backgroundImage(HEADER_IMAGE_URL)}>
+                        <h1 style={STYLES_THEME.bannerTitle}>{primaryMessage}</h1>
+                        <p style={STYLES_THEME.bannerSubtitle}>Fuel your day with a delicious order.</p>
+                    </div>
+                </div>
 
-                {/* Updated "Time for a break" card with better aesthetics and additional text */}
-                <div style={styles.breakCard}>
-                    <h3 style={styles.breakTitle}>☕ Time for a break ☕</h3>
-                    <p style={styles.breakSubtitle}>
-                        -Crafted with 💖 in Maven jobs, Panipat
-                    </p>
-                    <p style={styles.breakInspiration}>
-                        The next slot is available for you to plan your perfect pause.
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
+                <div style={STYLES_THEME.contentArea}>
+                    {/* Slot Selection Content */}
+                    <h2 style={STYLES_THEME.headerText}>Select Your Time Slot: 🕓</h2>
+                    <div style={STYLES_THEME.slotContainer}>
+                        {timeSlots.map(({ title, slot, description }) => (
+                            <button
+                                key={slot}
+                                style={STYLES_THEME.slotButton(currentOrder.slot === slot)}
+                                onClick={() => {
+                                    setCurrentOrder(prev => ({ ...prev, slot }));
+                                }}
+                            >
+                                {title}
+                                <small style={STYLES_THEME.smallText(currentOrder.slot === slot)}>
+                                    {description}
+                                </small>
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Item Selection Grid (Rendered only when a slot is selected) */}
+                    {currentOrder.slot && (
+                        <>
+                            <h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
+                            <div style={STYLES_THEME.itemSelectionGrid}>
+                                {itemButtons.map(item => (
+                                    <button
+                                        key={item.name}
+                                        style={STYLES_THEME.itemButton}
+                                        onClick={() => setPage(`item-config-${item.name}`)}
+                                    >
+                                        <div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
+                                            {/* Image will fill this div */}
+                                        </div>
+                                        <p style={STYLES_THEME.itemText}>
+                                            {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+                                        </p>
+                                    </button>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                {/* Break Card */}
+                <div style={STYLES_THEME.breakCard}>
+                    <h3 style={STYLES_THEME.breakTitle}>☕ Time for a break ☕</h3>
+                    <p style={STYLES_THEME.breakSubtitle}>
+                        -Crafted with 💖 in Maven jobs, Panipat-
+                    </p>
+                    <p style={STYLES_THEME.breakInspiration}>
+                        The next slot is available for you to plan your perfect pause.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default UserHomePage;

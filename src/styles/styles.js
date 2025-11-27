@@ -1,13 +1,13 @@
-// src/styles/styles.js
+// Color Palette: White (#ffffff), Dark Blue (#103c7f), Green (#a1db40)
 
-const PRIMARY_COLOR = '#FF7F41'; // Bright Orange (Maven Cafe theme)
-const SECONDARY_COLOR = '#333333'; // Dark Gray for text/icons
-const DANGER_COLOR = '#dc3545'; // Red for cancellation/logout
-const SUCCESS_COLOR = '#4CAF50'; // Bright Green for confirmation
-const BACKGROUND_COLOR = '#fbfbfb'; // Light body background (Updated for better contrast)
-const CARD_RADIUS = '12px'; // Standard rounded corners for aesthetic fit
+const PRIMARY_COLOR = '#103c7f'; // Dark Blue (Main action/text/logo color)
+const ACCENT_COLOR = '#a1db40'; // Green (Success, highlights)
+const TEXT_COLOR = '#103c7f'; // Dark Blue for main text
+const DANGER_COLOR = '#e74c3c'; // Red for delete (Kept as an exception for danger, but used sparingly)
+const BACKGROUND_COLOR = '#ffffff'; // White body background
+const CARD_RADIUS = '12px'; // Standard rounded corners
 
-// --- IMAGE FILE REFERENCES ---
+// --- IMAGE FILE REFERENCES (Retained) ---
 const PLACEHOLDER_HOME_BG = 'uploaded:image_92fbe9.jpg';
 const PLACEHOLDER_TEA_CARD = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
 const PLACEHOLDER_COFFEE_CARD = 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg';
@@ -16,9 +16,14 @@ const PLACEHOLDER_WATER_CARD = 'https://images.stockcake.com/public/d/f/f/dffca7
 const PLACEHOLDER_CONFIRM_BG = 'uploaded:image_92fc9d.jpg';
 // --------------------------------------------------------
 
-
 export const styles = {
-    // Expose the image constants in the exported styles object
+    // Expose the color and image constants
+    PRIMARY_COLOR,
+    ACCENT_COLOR,
+    TEXT_COLOR,
+    DANGER_COLOR,
+    BACKGROUND_COLOR,
+    CARD_RADIUS,
     PLACEHOLDER_TEA_CARD,
     PLACEHOLDER_COFFEE_CARD,
     PLACEHOLDER_MILK_CARD,
@@ -28,67 +33,129 @@ export const styles = {
 
     // I. Layout and Base
     appContainer: {
-        fontFamily: 'Roboto, Arial, sans-serif',
-        maxWidth: '450px',
+        fontFamily: 'Calibri, Arial, sans-serif',
+        width: '100%',
+        margin: '0',
+        minHeight: '100vh',
+        backgroundColor: BACKGROUND_COLOR, // White
+        overflowX: 'hidden',
+    },
+
+    kitchenAppContainer: {
+        fontFamily: 'Calibri, Arial, sans-serif',
+        maxWidth: '1400px',
+        width: 'auto',
         margin: '0 auto',
         minHeight: '100vh',
-        backgroundColor: BACKGROUND_COLOR,
-        boxShadow: '0 0 20px rgba(0,0,0,0.15)',
-        overflow: 'hidden',
+        backgroundColor: 'white', // White
+        overflowX: 'hidden',
+        boxShadow: '0 0 20px rgba(0,0,0,0.05)',
     },
+
+    contentWrapper: {
+        width: '100%', 
+        margin: '0', 
+        boxShadow: '0 0 10px rgba(0,0,0,0.05)', 
+        minHeight: '100vh',
+        backgroundColor: BACKGROUND_COLOR, // White
+    },
+
     contentArea: {
         flexGrow: 1,
     },
     screenPadding: {
-        padding: '20px', // Slightly increased padding
+        padding: '20px',
         paddingBottom: '100px',
     },
-    loadingContainer: {
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(100vh - 60px)',
-        color: PRIMARY_COLOR,
-        gap: '10px',
-        fontSize: '1.2em',
+    screenPaddingKitchen: { 
+        padding: '30px', 
+        paddingBottom: '40px',
     },
 
-    // II. Navigation Bar
+    // II. Navigation Bar Styles
+
+    // MOBILE NAV BAR (Used for regular 'user')
     navBar: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '10px 15px',
-        backgroundColor: 'white',
-        color: SECONDARY_COLOR,
+        padding: '10px 5px',
+        backgroundColor: 'white', // White
+        color: TEXT_COLOR, // Dark Blue
         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
         position: 'sticky',
         top: 0,
         zIndex: 10,
-        height: '60px', 
+        height: '50px',
+        maxWidth: '450px', 
+        margin: '0 auto',
     },
-    appTitle: {
-        margin: 0,
-        fontSize: '1.4em',
-        fontWeight: 'bold',
-        color: PRIMARY_COLOR,
+    mobileLogoStyle: { 
+        height: '45px', 
+        width: 'auto',
+        objectFit: 'contain',
     },
-    navIcons: {
+    mobileNavIcons: {
         display: 'flex',
-        gap: '10px',
+        gap: '12px',
     },
-    navButton: {
+    mobileNavButton: {
         background: 'none',
         border: 'none',
-        color: SECONDARY_COLOR,
+        color: TEXT_COLOR, // Dark Blue
         cursor: 'pointer',
         padding: '5px',
         borderRadius: '50%',
-        fontSize: '1.4em',
+        width: '40px',
+        height: '40px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '1.6em', 
     },
-    
-    // Bottom Navigation Bar
+
+    // KITCHEN/ADMIN NAV BAR (Full Width, Larger Elements)
+    kitchenNavBar: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '8px 0', 
+        backgroundColor: 'white', // White
+        color: TEXT_COLOR, // Dark Blue
+        boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+        height: '70px', 
+        width: '100%', 
+    },
+    kitchenLogoStyle: { 
+        height: '70px', 
+        width: 'auto',
+        objectFit: 'contain',
+    },
+    kitchenNavIcons: {
+        display: 'flex',
+        gap: '20px', 
+    },
+    kitchenNavButton: {
+        background: BACKGROUND_COLOR, // White
+        border: 'none',
+        color: PRIMARY_COLOR, // Dark Blue
+        cursor: 'pointer',
+        padding: '10px', 
+        borderRadius: '50%',
+        width: '50px', 
+        height: '50px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: '2em',
+        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+        transition: 'background-color 0.2s',
+    },
+
+    // Bottom Navigation Bar (Mobile-specific)
     bottomNav: {
         position: 'fixed',
         bottom: 0,
@@ -98,7 +165,7 @@ export const styles = {
         display: 'flex',
         justifyContent: 'space-around',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         boxShadow: '0 -4px 15px rgba(0,0,0,0.15)',
         zIndex: 100,
         maxWidth: '450px',
@@ -108,7 +175,7 @@ export const styles = {
     bottomNavItem: (isActive) => ({
         flex: 1,
         padding: '10px 0',
-        color: isActive ? PRIMARY_COLOR : '#999',
+        color: isActive ? PRIMARY_COLOR : '#ccc', // Dark Blue when active, light gray when inactive
         backgroundColor: 'transparent',
         border: 'none',
         cursor: 'pointer',
@@ -118,20 +185,20 @@ export const styles = {
         fontSize: '0.8em',
         fontWeight: '600',
     }),
-    
-    // III. Buttons (Updated to Aesthetic/Glow look)
+
+    // III. Buttons
     primaryButton: {
         width: '100%',
         padding: '18px',
         margin: '15px 0',
-        backgroundColor: '#ff4500', 
+        backgroundColor: PRIMARY_COLOR, // Dark Blue
         color: 'white',
         border: 'none',
         borderRadius: CARD_RADIUS,
         cursor: 'pointer',
-        fontSize: '1.15em', 
-        fontWeight: '900', 
-        boxShadow: `0 0 15px #ff450099, 0 6px 12px rgba(0, 0, 0, 0.2)`,
+        fontSize: '1.15em',
+        fontWeight: '900',
+        boxShadow: `0 0 15px ${PRIMARY_COLOR}99, 0 6px 12px rgba(0, 0, 0, 0.2)`,
         transition: 'all 0.2s',
         display: 'flex',
         alignItems: 'center',
@@ -143,9 +210,9 @@ export const styles = {
         width: '100%',
         padding: '16px',
         margin: '5px 0 10px 0',
-        backgroundColor: 'white',
-        color: SECONDARY_COLOR,
-        border: '2px solid #eee', 
+        backgroundColor: 'white', // White
+        color: TEXT_COLOR, // Dark Blue
+        border: `2px solid ${PRIMARY_COLOR}`, // Dark Blue border
         borderRadius: CARD_RADIUS,
         cursor: 'pointer',
         fontSize: '1.1em',
@@ -156,10 +223,25 @@ export const styles = {
         justifyContent: 'center',
         gap: '8px',
     },
+    successButton: {
+        backgroundColor: ACCENT_COLOR, // Green
+        color: 'white',
+        border: 'none',
+        padding: '12px 18px',
+        borderRadius: CARD_RADIUS,
+        cursor: 'pointer',
+        fontSize: '1em',
+        fontWeight: '600',
+        boxShadow: `0 2px 5px ${ACCENT_COLOR}40`,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px',
+    },
     deleteButton: {
         background: 'none',
         border: 'none',
-        color: DANGER_COLOR, 
+        color: DANGER_COLOR, // Retained for semantic meaning (Red)
         marginLeft: '10px',
         cursor: 'pointer',
         fontSize: '1.3em',
@@ -168,14 +250,14 @@ export const styles = {
     editButton: {
         background: 'none',
         border: 'none',
-        color: PRIMARY_COLOR, 
+        color: PRIMARY_COLOR, // Dark Blue
         marginLeft: '10px',
         cursor: 'pointer',
         fontSize: '1.3em',
         padding: '5px',
     },
-    cancelButton: { 
-        background: DANGER_COLOR,
+    cancelButton: {
+        background: DANGER_COLOR, // Retained for semantic meaning (Red)
         color: 'white',
         border: 'none',
         padding: '12px 18px',
@@ -184,13 +266,13 @@ export const styles = {
         cursor: 'pointer',
         fontWeight: '600',
     },
-    closeButton: { 
+    closeButton: {
         position: 'absolute',
         top: '20px',
         right: '20px',
         background: 'none',
         border: 'none',
-        color: SECONDARY_COLOR,
+        color: TEXT_COLOR, // Dark Blue
         fontSize: '1.8em',
         cursor: 'pointer',
         zIndex: 10,
@@ -199,14 +281,14 @@ export const styles = {
         width: '100%',
         padding: '16px',
         margin: '20px 0 10px 0',
-        backgroundColor: PRIMARY_COLOR,
+        backgroundColor: PRIMARY_COLOR, // Dark Blue
         color: 'white',
         border: 'none',
         borderRadius: '12px',
         cursor: 'pointer',
         fontSize: '1.1em',
         fontWeight: 'bold',
-        boxShadow: '0 4px 8px rgba(255, 127, 65, 0.4)',
+        boxShadow: `0 4px 8px ${PRIMARY_COLOR}40`,
     },
 
     // IV. Forms / Inputs
@@ -217,7 +299,7 @@ export const styles = {
         border: '1px solid #ddd',
         borderRadius: '12px',
         boxSizing: 'border-box',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     },
     selectField: {
@@ -226,7 +308,7 @@ export const styles = {
         margin: '5px 0 18px 0',
         border: '1px solid #ddd',
         borderRadius: '12px',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         boxSizing: 'border-box',
         boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
     },
@@ -235,9 +317,9 @@ export const styles = {
         fontWeight: '600',
         marginBottom: '8px',
         fontSize: '1em',
-        color: SECONDARY_COLOR,
+        color: TEXT_COLOR, // Dark Blue
     },
-    
+
     // V. Modals
     modalOverlay: {
         position: 'fixed',
@@ -252,18 +334,19 @@ export const styles = {
         zIndex: 1000,
     },
     modalContent: {
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         padding: '25px',
         borderTopLeftRadius: CARD_RADIUS,
         borderBottomLeftRadius: CARD_RADIUS,
         width: '85%',
+        maxWidth: '450px', 
         maxHeight: '100vh',
         overflowY: 'auto',
         transform: 'translateX(0)',
         boxShadow: '-5px 0 20px rgba(0,0,0,0.5)',
     },
 
-    // VI. Profile
+    // VI. Profile 
     profilePicContainer: {
         display: 'flex',
         flexDirection: 'column',
@@ -275,17 +358,16 @@ export const styles = {
         height: '85px',
         borderRadius: '50%',
         overflow: 'hidden',
-        border: `3px solid ${PRIMARY_COLOR}`,
-        backgroundColor: BACKGROUND_COLOR,
-        // Default to a placeholder if no profile picture is provided
-        backgroundImage: profilePic ? `url(${profilePic})` : `url(${'https://placehold.co/85x85/FF7F41/ffffff?text=P'})`,
+        border: `3px solid ${PRIMARY_COLOR}`, // Dark Blue border
+        backgroundColor: BACKGROUND_COLOR, // White
+        backgroundImage: profilePic ? `url(${profilePic})` : `url(${'https://placehold.co/85x85/103c7f/ffffff?text=P'})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         marginBottom: '10px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
     }),
     profileDetailCard: {
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         padding: '18px',
         borderRadius: '12px',
         marginBottom: '15px',
@@ -294,26 +376,26 @@ export const styles = {
         alignItems: 'flex-start',
         gap: '15px',
         fontWeight: '500',
-        color: SECONDARY_COLOR,
+        color: TEXT_COLOR, // Dark Blue
     },
-    
-    // VII. User Order Selection & List Items
+
+    // VII. User Order Selection & List Items (Mobile-focused)
     slotContainer: {
         display: 'flex',
         gap: '0px',
         justifyContent: 'space-around',
         margin: '20px 0',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         borderRadius: CARD_RADIUS,
         overflow: 'hidden',
         boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
-        border: '1px solid #eee',
+        border: '1px solid #ddd',
     },
     slotButton: (isActive) => ({
         flex: 1,
         padding: '15px 10px',
-        backgroundColor: isActive ? PRIMARY_COLOR : 'transparent',
-        color: isActive ? 'white' : SECONDARY_COLOR,
+        backgroundColor: isActive ? PRIMARY_COLOR : 'transparent', // Dark Blue when active
+        color: isActive ? 'white' : TEXT_COLOR, // Dark Blue when inactive
         border: 'none',
         cursor: 'pointer',
         fontWeight: 'bold',
@@ -322,88 +404,55 @@ export const styles = {
         transition: 'all 0.3s',
     }),
 
-    // 🛑 CRITICAL FIX: Ensure the itemButton (card frame) has a solid height.
     itemButton: {
         width: '100%',
-        height: '150px', // Fixed height for consistency
-        backgroundColor: 'white',
-        borderRadius: '10px', 
-        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)', 
+        height: '150px',
+        backgroundColor: 'white', // White
+        borderRadius: '10px',
+        boxShadow: '0 4px 10px rgba(0, 0, 0, 0.1)',
         border: 'none',
         cursor: 'pointer',
-        overflow: 'hidden', // Crucial: clips content/image to the card boundaries
-        padding: '0', 
+        overflow: 'hidden',
+        padding: '0',
         transition: 'transform 0.2s',
-        position: 'relative', 
+        position: 'relative',
     },
-    // -----------------------------------------------------------
-    
-    // Home Page Banner (Good Morning)
-    welcomeBanner: (imageUrl = PLACEHOLDER_HOME_BG) => ({ 
-        minHeight: '180px',
-        marginBottom: '25px',
-        padding: '20px',
-        borderRadius: CARD_RADIUS,
-        boxShadow: '0 5px 15px rgba(0,0,0,0.15)',
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.1)), url(${imageUrl})`,
+
+    /**
+     * UPDATED: itemImageOverlay using Dark Blue in the gradient for theme consistency
+     */
+    itemImageOverlay: (imageUrl) => ({
+        width: '100%',
+        height: '120px', 
+        // Gradient uses dark blue theme color over the image
+        backgroundImage: `linear-gradient(to top, ${PRIMARY_COLOR}b3 0%, ${PRIMARY_COLOR}80 40%, rgba(0, 0, 0, 0) 80%), url(${imageUrl})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        color: 'white',
+        backgroundRepeat: 'no-repeat',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'flex-end',
-        alignItems: 'flex-start',
-    }),
-    
-    itemSelectionGrid: {
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '15px',
-        margin: '0',
-    },
-    
-    // 🛑 CRITICAL FIX: The container for the text and white line (must take 100% height/width)
-    itemImageOverlay: (imageUrl) => ({ 
-        width: '100%',
-        height: '100%', // Must be 100% of itemButton height (150px) to prevent gaps
-        
-        // Darker, more abrupt gradient at the bottom for better text contrast
-        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.5) 40%, rgba(0, 0, 0, 0) 80%), url(${imageUrl})`,
-        backgroundSize: 'cover', // Ensures image covers the entire 150px height
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat', 
-
-        // Flex settings to stack text and line at the bottom-left
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'flex-start',
-        justifyContent: 'flex-end', // Aligns content to the very bottom
-        padding: '15px 20px 10px 20px', // Adjusted bottom padding to match image spacing
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        padding: '0', 
         boxSizing: 'border-box',
-        
-        // Text styling
         color: 'white',
-        fontWeight: '900', 
-        fontSize: '26px', 
-        letterSpacing: '1px', 
-        textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)', 
+        fontWeight: '900',
+        fontSize: '24px', 
+        letterSpacing: '1px',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
         textTransform: 'uppercase',
-        lineHeight: '1', 
+        lineHeight: '1',
     }),
-    
-    // 🛑 White line adjustment
+
     itemWhiteLine: {
-        backgroundColor: 'white',
-        height: '4px', 
-        width: '60px', 
-        marginTop: '6px', 
-        marginBottom: '0', 
-        borderRadius: '2px', 
+        backgroundColor: 'white', // White
+        height: '4px',
+        width: '60px',
+        marginTop: '6px',
+        marginBottom: '0',
+        borderRadius: '2px',
     },
-    
-    // ... (rest of styles remain the same)
-    
-    // Item Config buttons (Type selection, Sugar level)
+
     configButtonContainer: {
         display: 'flex',
         flexWrap: 'wrap',
@@ -412,8 +461,8 @@ export const styles = {
     },
     configButton: (isActive) => ({
         padding: '12px 20px',
-        backgroundColor: isActive ? PRIMARY_COLOR : 'white',
-        color: isActive ? 'white' : SECONDARY_COLOR,
+        backgroundColor: isActive ? PRIMARY_COLOR : 'white', // Dark Blue when active, White otherwise
+        color: isActive ? 'white' : TEXT_COLOR, // White when active, Dark Blue otherwise
         border: isActive ? `1px solid ${PRIMARY_COLOR}` : '1px solid #ddd',
         borderRadius: '10px',
         cursor: 'pointer',
@@ -421,14 +470,14 @@ export const styles = {
         boxShadow: isActive ? 'none' : '0 1px 3px rgba(0,0,0,0.05)',
         transition: 'all 0.2s',
     }),
-    
+
     quantityControl: {
         display: 'flex',
         alignItems: 'center',
         gap: '15px',
     },
     quantityButton: {
-        background: 'white',
+        background: 'white', // White
         border: '1px solid #ddd',
         borderRadius: '10px',
         padding: '10px 15px',
@@ -436,8 +485,9 @@ export const styles = {
         fontWeight: 'bold',
         cursor: 'pointer',
         boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+        color: TEXT_COLOR, // Dark Blue
     },
-    
+
     listContainer: {
         margin: '15px 0',
     },
@@ -445,33 +495,36 @@ export const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         padding: '18px',
         margin: '10px 0',
         borderRadius: '12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-        border: '1px solid #eee',
+        border: '1px solid #ddd',
+        color: TEXT_COLOR, // Dark Blue text
     },
 
-    // VIII. Confirmation Screen Specific
+    // VIII. Confirmation Screen Specific 
     confirmationCard: {
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         borderRadius: CARD_RADIUS,
         padding: '25px',
         margin: '20px 0',
         boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
     },
-    confirmationImageBanner: (imageUrl = PLACEHOLDER_CONFIRM_BG) => ({ 
-        backgroundColor: SECONDARY_COLOR,
+    confirmationImageBanner: (imageUrl = PLACEHOLDER_CONFIRM_BG) => ({
+        backgroundColor: PRIMARY_COLOR, // Dark Blue
         borderRadius: CARD_RADIUS,
         overflow: 'hidden',
         minHeight: '200px',
         marginBottom: '25px',
         boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
         position: 'relative',
-        backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${imageUrl})`,
+        // Dark Blue overlay for consistency
+        backgroundImage: `linear-gradient(${PRIMARY_COLOR}80, ${PRIMARY_COLOR}99), url(${imageUrl})`, 
         backgroundSize: 'cover',
         backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
@@ -483,8 +536,8 @@ export const styles = {
         width: '70px',
         height: '70px',
         borderRadius: '50%',
-        backgroundColor: 'white',
-        color: PRIMARY_COLOR,
+        backgroundColor: ACCENT_COLOR, // Green
+        color: PRIMARY_COLOR, // Dark Blue checkmark
         fontSize: '2.5em',
         display: 'flex',
         justifyContent: 'center',
@@ -495,84 +548,114 @@ export const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         padding: '8px 0',
-        borderBottom: '1px solid #eee',
-        fontSize: '0.95em',
+        borderBottom: '1px dashed #ddd',
+        fontSize: '1em',
+        color: TEXT_COLOR, // Dark Blue text
     },
-    successContainer: {
-        backgroundColor: SUCCESS_COLOR,
-        color: 'white',
-        padding: '30px 20px',
-        borderRadius: CARD_RADIUS,
-        margin: '20px 0',
-        textAlign: 'center',
-        boxShadow: '0 4px 10px rgba(76, 175, 80, 0.5)',
-        position: 'fixed',
-        bottom: '50%',
-        left: '50%',
-        transform: 'translate(-50%, 50%)',
-        width: '80%',
-        zIndex: 1000,
-    },
-    
+
     // IX. Kitchen Dashboard & Admin
+    kitchenNotification: {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: ACCENT_COLOR, // Green
+        color: PRIMARY_COLOR, // Dark Blue text on green
+        padding: '10px',
+        paddingBottom: '50px',
+        borderRadius: '20px',
+        textAlign: 'center',
+        zIndex: 2000,
+        boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
+        border: '5px solid white', // White border
+        width: '90%',
+        maxWidth: '600px',
+    },
+    kitchenOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        zIndex: 1999,
+    },
     kitchenCard: {
+        backgroundColor: 'white', // White
+        padding: '30px', 
+        borderRadius: '15px', 
+        boxShadow: '0 4px 15px rgba(0,0,0,0.1)', 
+        marginBottom: '20px', 
+        transition: 'all 0.3s',
+    },
+    kitchenDetailRow: {
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '18px',
-        borderLeft: `5px solid ${PRIMARY_COLOR}`,
-        borderRadius: '12px',
-        backgroundColor: 'white',
-        margin: '10px 0',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        cursor: 'pointer',
+        padding: '8px 0',
+        borderBottom: '1px solid #ddd',
+        fontSize: '1.2em', 
+        fontWeight: '500',
+        color: TEXT_COLOR, // Dark Blue
+    },
+    kitchenItemList: {
+        listStyleType: 'none',
+        padding: 0,
+        margin: '15px 0 0 0',
+    },
+    kitchenItem: {
+        padding: '10px 0',
+        fontSize: '1.4em', 
+        fontWeight: '700',
+        color: TEXT_COLOR, // Dark Blue
+        borderBottom: '1px dashed #ddd',
     },
     orderGroup: {
-        marginTop: '20px',
-        paddingTop: '10px',
+        marginBottom: '25px',
     },
-    groupHeader: (status) => ({
-        fontSize: '1.4em',
+    groupHeader: {
+        fontSize: '1.8em',
         fontWeight: 'bold',
-        color: SECONDARY_COLOR,
-        // Dynamic accent color based on status
-        borderBottom: `2px solid ${status === 'Ready' ? SUCCESS_COLOR : (status === 'Making' ? PRIMARY_COLOR : '#ccc')}`,
-        paddingBottom: '5px',
+        color: PRIMARY_COLOR, // Dark Blue
         marginBottom: '15px',
-    }),
-    
-    // X. Admin User Management
+        borderBottom: `3px solid ${ACCENT_COLOR}b3`, // Green underline
+        paddingBottom: '10px',
+        marginTop: '25px',
+        fontFamily: 'Cambria, serif',
+    },
+
+    // X. Admin User Management 
     adminControlGroup: {
         display: 'flex',
         gap: '8px',
     },
     controlButton: (color) => ({
-        background: color,
+        // color is passed from component (e.g., DANGER_COLOR or PRIMARY_COLOR)
+        background: color, 
         border: 'none',
         color: 'white',
-        padding: '10px',
+        padding: '12px 15px', 
         borderRadius: '8px',
         cursor: 'pointer',
-        fontSize: '1em',
+        fontSize: '1.1em', 
         fontWeight: '600',
     }),
-    userCard: { 
+    userCard: {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '18px',
         margin: '10px 0',
         borderRadius: '12px',
-        backgroundColor: 'white',
+        backgroundColor: 'white', // White
         boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        borderLeft: '5px solid #8e8e93', 
+        borderLeft: `5px solid ${PRIMARY_COLOR}`, // Dark Blue accent line
     },
     adminLinkButton: {
         width: '100%',
         padding: '14px',
         margin: '10px 0 20px 0',
-        backgroundColor: '#facc15', 
-        color: SECONDARY_COLOR,
+        backgroundColor: ACCENT_COLOR, // Green
+        color: PRIMARY_COLOR, // Dark Blue text on green
         border: 'none',
         borderRadius: CARD_RADIUS,
         cursor: 'pointer',
@@ -582,6 +665,6 @@ export const styles = {
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
-        boxShadow: '0 4px 8px rgba(250, 204, 21, 0.4)',
+        boxShadow: `0 4px 8px ${ACCENT_COLOR}40`,
     },
 };
