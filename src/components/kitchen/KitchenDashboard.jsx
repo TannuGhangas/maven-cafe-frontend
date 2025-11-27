@@ -113,7 +113,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
             
             const newActiveOrderCount = newOrders.filter(o => String(o?.status || "").toLowerCase() === "placed").length;
             
-            if (lastOrderCount.current > 0 && newActiveOrderCount > lastOrderCount.current) {
+            if (newActiveOrderCount > lastOrderCount.current) {
                 setNotificationAcknowledged(false); // Reset acknowledgment for new orders
 
                 // Play notification sound 3 times with 5 second intervals
