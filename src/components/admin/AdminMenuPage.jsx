@@ -202,28 +202,63 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         return IconComponent ? <IconComponent /> : <FaUtensilSpoon />;
     };
 
-    const fetchMenu = async () => {
-        setLoading(true);
-        const data = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET');
-        if (data) {
-            setMenuCategories(data.categories || []);
-            setAddOns(data.addOns || []);
-            setSugarLevels(data.sugarLevels || []);
-            setItemImages(data.itemImages || {});
-        }
-        setLoading(false);
-    };
-
-    const saveMenu = async () => {
-        const data = await callApi('/menu', 'PUT', { categories: menuCategories, addOns, sugarLevels, itemImages, userId: user.id, userRole: user.role });
-        if (data && data.success) {
-            alert('Menu updated successfully!');
-        }
-    };
-
     useEffect(() => {
-        fetchMenu();
+        // Load from localStorage
+        const savedCategories = localStorage.getItem('adminMenuCategories');
+        const savedAddOns = localStorage.getItem('adminAddOns');
+        const savedSugarLevels = localStorage.getItem('adminSugarLevels');
+        const savedItemImages = localStorage.getItem('adminItemImages');
+
+        if (savedCategories) {
+            setMenuCategories(JSON.parse(savedCategories));
+        } else {
+            setMenuCategories([
+                { name: 'Coffee', icon: 'FaCoffee', items: ["Black", "Milk", "Simple", "Cold"], color: '#8B4513' },
+                { name: 'Tea', icon: 'FaMugHot', items: ["Black", "Milk", "Green"], color: '#228B22' },
+                { name: 'Water', icon: 'FaTint', items: ["Warm", "Cold", "Hot", "Lemon"], color: '#87CEEB' },
+                { name: 'Shikanji', icon: 'FaLemon', items: ['Shikanji'], color: '#FFD700' },
+                { name: 'Jaljeera', icon: 'FaCube', items: ['Jaljeera'], color: '#8B0000' },
+                { name: 'Soup', icon: 'FaUtensilSpoon', items: ['Soup'], color: '#FFA500' },
+                { name: 'Maggie', icon: 'FaUtensilSpoon', items: ['Maggie'], color: '#FF6347' },
+                { name: 'Oats', icon: 'FaUtensilSpoon', items: ['Oats'], color: '#D2691E' },
+            ]);
+        }
+
+        if (savedAddOns) {
+            setAddOns(JSON.parse(savedAddOns));
+        } else {
+            setAddOns(["Ginger", "Cloves", "Fennel Seeds", "Cardamom", "Cinnamon"]);
+        }
+
+        if (savedSugarLevels) {
+            setSugarLevels(JSON.parse(savedSugarLevels));
+        } else {
+            setSugarLevels([0, 1, 2, 3]);
+        }
+
+        if (savedItemImages) {
+            setItemImages(JSON.parse(savedItemImages));
+        } else {
+            setItemImages({
+                tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+                coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+                milk: 'https://www.shutterstock.com/image/photo/almond-milk-cup-glass-on-600nw-2571172141.jpg',
+                water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+                shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
+                jaljeera: 'https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg',
+                soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
+                maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
+                oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
+            });
+        }
+
+        setLoading(false);
     }, []);
+
+    const saveMenu = () => {
+        saveToStorage();
+        alert('Menu updated successfully!');
+    };
 
     if (loading) return (
         <div style={enhancedStyles.loadingContainer}>

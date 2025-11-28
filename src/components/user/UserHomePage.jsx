@@ -329,7 +329,17 @@ const timeSlots = [
 
 const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, styles: _propStyles }) => {
 const [itemButtons, setItemButtons] = useState([]);
-const [itemImages, setItemImages] = useState({});
+const [itemImages, setItemImages] = useState({
+    tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+    coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+    milk: 'https://www.shutterstock.com/image/photo/almond-milk-cup-glass-on-600nw-2571172141.jpg',
+    water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
+    jaljeera: 'https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg',
+    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
+    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
+    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
+});
 
 // KEPT ORIGINAL USER URL
 const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
@@ -341,46 +351,17 @@ const primaryMessage = `${greeting} Ready to order?`;
 const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
 useEffect(() => {
-const fetchMenu = async () => {
-try {
-const user = JSON.parse(localStorage.getItem('user'));
-const data = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET');
-if (data && data.categories) {
-const buttons = data.categories.map(cat => ({
-name: cat.name.toLowerCase(),
-icon: cat.icon === 'FaCoffee' ? FaCoffee :
-cat.icon === 'FaMugHot' ? FaMugHot :
-cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
-cat.icon === 'FaTint' ? FaTint :
-cat.icon === 'FaLemon' ? FaLemon :
-cat.icon === 'FaCube' ? FaCube :
-FaUtensilSpoon
-}));
-setItemButtons(buttons);
-setItemImages(data.itemImages || {});
-// Also save to localStorage for other components
-localStorage.setItem('adminMenuCategories', JSON.stringify(data.categories));
-localStorage.setItem('adminAddOns', JSON.stringify(data.addOns));
-localStorage.setItem('adminSugarLevels', JSON.stringify(data.sugarLevels));
-localStorage.setItem('adminItemImages', JSON.stringify(data.itemImages));
-}
-} catch (error) {
-console.error('Failed to fetch menu:', error);
-// Fallback to default
-setItemButtons([
-{ name: 'coffee', icon: FaCoffee },
-{ name: 'tea', icon: FaMugHot },
-{ name: 'milk', icon: FaGlassWhiskey },
-{ name: 'water', icon: FaTint },
-{ name: 'shikanji', icon: FaLemon },
-{ name: 'jaljeera', icon: FaCube },
-{ name: 'soup', icon: FaUtensilSpoon },
-{ name: 'maggie', icon: FaUtensilSpoon },
-{ name: 'oats', icon: FaUtensilSpoon },
-]);
-}
-};
-fetchMenu();
+    // Use default item buttons
+    setItemButtons([
+        { name: 'coffee', icon: FaCoffee },
+        { name: 'tea', icon: FaMugHot },
+        { name: 'water', icon: FaTint },
+        { name: 'shikanji', icon: FaLemon },
+        { name: 'jaljeera', icon: FaCube },
+        { name: 'soup', icon: FaUtensilSpoon },
+        { name: 'maggie', icon: FaUtensilSpoon },
+        { name: 'oats', icon: FaUtensilSpoon },
+    ]);
 }, []);
 
     return (
