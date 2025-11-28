@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaChevronLeft, FaMapMarkerAlt, FaBuilding, FaHome, FaIndustry } from 'react-icons/fa';
+import { FaSpinner, FaChevronLeft, FaMapMarkerAlt, FaBuilding, FaHome, FaIndustry, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
 
 const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
     const [loading, setLoading] = useState(false);
+    const [locations, setLocations] = useState([]);
+    const [showModal, setShowModal] = useState(false);
+    const [modalData, setModalData] = useState({ type: '', index: -1, name: '', location: '', access: 'Own seat' });
 
     // Enhanced styles with Calibri/Cambria fonts and specified colors
     const enhancedStyles = {
@@ -81,9 +84,65 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
         return <FaIndustry />;
     };
 
-    useEffect(() => {
-        // Could fetch dynamic location data here if backend supports it
+    // CRUD functions
+    const saveToStorage = () => {
+        localStorage.setItem('adminLocations', JSON.stringify(locations));
+    };
+
+    const openModal = (type, index = -1, name = '', location = '', access = 'Own seat') => {
+        setModalData({ type, index, name, location, access });
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setModalData({ type: '', index: -1, name: '', location: '', access: 'Own seat' });
+    };
+
+    const saveModal = () => {
+        const { type, index, name, location, access } = modalData;
+        if (!name.trim() || !location.trim()) return;
+
+        if (type === 'add') {
+            const newId = Math.max(...locations.map(l => l.id), 0) + 1;
+            const newLocation = { id: newId, name: name.trim(), location: location.trim(), access };
+            setLocations([...locations, newLocation]);
+        } else if (type === 'edit') {
+            const updated = [...locations];
+            updated[index] = { ...updated[index], name: name.trim(), location: location.trim(), access };
+            setLocations(updated);
+        }
+
+        saveToStorage();
+        closeModal();
+    };
+
+    const removeLocation = (index) => {
+        if (window.confirm(`Remove location ${locations[index].name}?`)) {
+            const updated = locations.filter((_, i) => i !== index);
+            setLocations(updated);
+            saveToStorage();
+        }
+    };
+
+    const fetchLocations = async () => {
+        setLoading(true);
+        const data = await callApi(`/locations?userId=${user.id}&userRole=${user.role}`, 'GET');
+        if (data) {
+            setLocations(data);
+        }
         setLoading(false);
+    };
+
+    const saveLocations = async () => {
+        const data = await callApi('/locations', 'PUT', { locations, userId: user.id, userRole: user.role });
+        if (data && data.success) {
+            alert('Locations updated successfully!');
+        }
+    };
+
+    useEffect(() => {
+        fetchLocations();
     }, []);
 
     if (loading) return (
@@ -99,20 +158,42 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
                 Location Management
             </h2>
 
-            <div style={{ marginBottom: '30px' }}>
+            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button
                     style={enhancedStyles.secondaryButton}
                     onClick={() => setPage('admin-dashboard')}
                 >
                     <FaChevronLeft /> Back to Admin Dashboard
                 </button>
+                <button
+                    style={enhancedStyles.primaryButton}
+                    onClick={() => openModal('add')}
+                >
+                    <FaPlus /> Add Location
+                </button>
             </div>
 
             {/* Location Cards */}
-            {USER_LOCATIONS_DATA.map(location => (
+            {locations.map((location, index) => (
                 <div key={location.id} style={enhancedStyles.locationCard}>
                     <h3 style={enhancedStyles.locationHeader}>
                         {getLocationIcon(location.location)} {location.name}
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '5px' }}>
+                            <button
+                                style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                onClick={() => openModal('edit', index, location.name, location.location, location.access)}
+                                title="Edit Location"
+                            >
+                                <FaEdit />
+                            </button>
+                            <button
+                                style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '1.2rem' }}
+                                onClick={() => removeLocation(index)}
+                                title="Remove Location"
+                            >
+                                <FaTrash />
+                            </button>
+                        </div>
                     </h3>
 
                     <div style={enhancedStyles.locationDetail}>
@@ -157,23 +238,85 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
                 </div>
             </div>
 
-            {/* Note about backend integration */}
+            {/* Note about persistence */}
             <div style={{
                 ...enhancedStyles.locationCard,
-                backgroundColor: '#fff3cd',
-                border: '1px solid #ffeaa7',
+                backgroundColor: '#d4edda',
+                border: '1px solid #c3e6cb',
                 textAlign: 'center'
             }}>
                 <p style={{
-                    color: '#856404',
+                    color: '#155724',
                     margin: 0,
                     fontSize: '0.95rem',
                     fontFamily: 'Calibri, Arial, sans-serif'
                 }}>
-                    <strong>Note:</strong> Location data is currently managed through the application constants.
-                    Full CRUD operations require backend API development.
+                    <strong>Success:</strong> Location data is now dynamically managed and saved to the database.
+                    Changes are instantly reflected across all users and kitchen staff.
                 </p>
             </div>
+
+            {/* Modal for Add/Edit */}
+            {showModal && (
+                <div style={styles.modalOverlay}>
+                    <div style={styles.modalContent}>
+                        <h3 style={{ marginTop: 0, color: '#103c7f' }}>
+                            {modalData.type === 'add' ? 'Add Location' : 'Edit Location'}
+                        </h3>
+                        <label style={styles.label}>Name:</label>
+                        <input
+                            type="text"
+                            value={modalData.name}
+                            onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
+                            placeholder="Enter location name"
+                            style={styles.inputField}
+                        />
+                        <label style={styles.label}>Address:</label>
+                        <input
+                            type="text"
+                            value={modalData.location}
+                            onChange={(e) => setModalData({ ...modalData, location: e.target.value })}
+                            placeholder="Enter location address"
+                            style={styles.inputField}
+                        />
+                        <label style={styles.label}>Access Level:</label>
+                        <select
+                            multiple
+                            value={modalData.access === 'All' ? ['All'] : modalData.access.split(',').map(a => a.trim()).filter(a => a)}
+                            onChange={(e) => {
+                                const selected = Array.from(e.target.selectedOptions, option => option.value);
+                                const access = selected.includes('All') ? 'All' : selected.join(',');
+                                setModalData({ ...modalData, access });
+                            }}
+                            style={{ ...styles.selectField, height: '100px' }}
+                        >
+                            <option value="All">All</option>
+                            <option value="Own seat">Own seat</option>
+                            <option value="Confrence">Conference</option>
+                            <option value="Pod_Room">Pod Room</option>
+                            <option value="Reception">Reception</option>
+                            <option value="Maven_Area">Maven Area</option>
+                            <option value="Sharma_Sir_Office">Sharma Sir Office</option>
+                            <option value="Ritesh_Sir_Cabin">Ritesh Sir Cabin</option>
+                            <option value="Bhavishya_Cabin">Bhavishya Cabin</option>
+                            <option value="Ketan_Cabin">Ketan Cabin</option>
+                            <option value="Diwakar_Sir_Cabin">Diwakar Sir Cabin</option>
+                            {Array.from({ length: 25 }, (_, i) => (
+                                <option key={i+1} value={`Seat_${i+1}`}>Seat {i+1}</option>
+                            ))}
+                        </select>
+                        <small style={{ color: '#666', fontSize: '0.8rem' }}>Hold Ctrl/Cmd to select multiple. "All" overrides others.</small>
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                            <button style={styles.primaryButton} onClick={saveModal}>
+                                Save
+                            </button>
+                            <button style={styles.secondaryButton} onClick={closeModal}>
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

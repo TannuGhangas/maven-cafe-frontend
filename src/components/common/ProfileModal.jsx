@@ -250,12 +250,6 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
                         </button>
                     )}
 
-                    {user.role === 'admin' && (
-                        <button style={localStyles.actionButton(false)} onClick={() => navigateToPage('admin-users')}>
-                            <FaUsers /> Admin Users
-                        </button>
-                    )}
-
                     <button style={localStyles.logoutButton} onClick={handleLogout}>
                         <FaSignOutAlt /> Logout
                     </button>

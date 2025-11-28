@@ -7,6 +7,11 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL;
  * 🗺️ ALL_LOCATIONS_MAP
  * Maps location keys (for internal logic) to their display names (for UI).
  */
+const seatMap = {};
+for (let i = 1; i <= 25; i++) {
+    seatMap[`Seat_${i}`] = `Seat ${i}`;
+}
+
 export const ALL_LOCATIONS_MAP = {
     'Confrence': 'Conference Room',
     'Pod_Room': 'Pod Room',
@@ -18,11 +23,7 @@ export const ALL_LOCATIONS_MAP = {
     'Ketan_Cabin': 'Ketan Cabin',
     'Diwakar_Sir_Cabin': 'Diwakar Sir Cabin',
     'Others': 'Others',
-    // Seat numbers are dynamic and are handled via USER_LOCATIONS_DATA, 
-    // but the following are mapped for consistency:
-    'Seat_10': 'Seat 10',
-    'Seat_12': 'Seat 12',
-    'Seat_20': 'Seat 20',
+    ...seatMap,
 };
 
 // Global locations available for selection when user access permits ('All')
@@ -36,48 +37,83 @@ export const GLOBAL_LOCATIONS = [
     'Bhavishya_Cabin',
     'Ketan_Cabin',
     'Diwakar_Sir_Cabin',
-    'Others'
+    'Others',
+    ...Array.from({ length: 25 }, (_, i) => `Seat_${i + 1}`)
 ];
 
 
 /**
  * 👥 USER LOCATION DATA
  */
-export const USER_LOCATIONS_DATA = [
-    { name: 'Ajay', location: 'Seat_A1', access: 'Confrence' },
-    { name: 'Tannu', location: 'Seat_A2', access: 'Own seat' },
-    { name: 'Lovekush', location: 'Seat_A3', access: 'Own seat' },
-    { name: 'Ansh', location: 'Seat_A4', access: 'Own seat' },
-    { name: 'Vanshika', location: 'Seat_A5', access: 'Own seat' },
-    { name: 'Sonu', location: 'Seat_A6', access: 'Confrence' },
-    { name: 'Khushi', location: 'Seat_A7', access: 'Confrence' },
-    { name: 'Sneha', location: 'Reception', access: 'Own seat' },
-    { name: 'Muskan', location: 'Seat_A8', access: 'Own seat' },
-    { name: 'Nikita', location: 'Seat_A9', access: 'Own seat' },
-    { name: 'Saloni', location: 'Seat_A10', access: 'Own seat' },
-    { name: 'Babita', location: 'Reception', access: 'Own seat' },
-    { name: 'Monu', location: 'Seat_A11', access: 'Own seat' },
-    { name: 'Sourabh', location: 'Seat_A12', access: 'Own seat' },
-    { name: 'Gurmeet', location: 'Maven_Area', access: 'Confrence' },
-    { name: 'Sneha Lathwal', location: 'Seat_A13', access: 'Own seat' },
-    { name: 'Vanshika Jagga', location: 'Seat_A14', access: 'Own seat' },
-    { name: 'Nisha', location: 'Reception', access: 'Pod room/Confrence' },
-    { name: 'Suhana', location: 'Seat_10', access: 'All' },
-    { name: 'Ketan', location: 'Ketan_Cabin', access: 'All' },
-    { name: 'Bhavishya', location: 'Bhavishya_Cabin', access: 'All' },
-    { name: 'Satish', location: 'Seat_12', access: 'Own seat' },
-    { name: 'Sahil', location: 'Seat_20', access: 'Own seat/Confrence' },
-    { name: 'Diwakar', location: 'Diwakar_Sir_Cabin', access: 'All' },
-    { name: 'Sharma Sir', location: 'Sharma_Sir_Office', access: 'All' },
-    { name: 'Ritesh Sir', location: 'Ritesh_Sir_Cabin', access: 'All' },
-];
+export const USER_LOCATIONS_DATA = (() => {
+    try {
+        const saved = localStorage.getItem('adminLocations');
+        return saved ? JSON.parse(saved) : [
+            { id: 1, name: 'Ajay', location: 'Seat_7', access: 'Confrence' },
+            { id: 2, name: 'Tannu', location: 'Seat_8', access: 'Own seat' },
+            { id: 3, name: 'Lovekush', location: 'Seat_6', access: 'Own seat' },
+            { id: 4, name: 'Ansh', location: 'Seat_5', access: 'Own seat' },
+            { id: 5, name: 'Vanshika', location: 'Seat_4', access: 'Own seat' },
+            { id: 6, name: 'Sonu', location: 'Seat_3', access: 'Confrence' },
+            { id: 7, name: 'Khushi', location: 'Seat_15', access: 'Confrence' },
+            { id: 8, name: 'Sneha', location: 'Reception', access: 'Own seat' },
+            { id: 9, name: 'Muskan', location: 'Seat_11', access: 'Own seat' },
+            { id: 10, name: 'Nikita', location: 'Seat_16', access: 'Own seat' },
+            { id: 11, name: 'Saloni', location: 'Seat_14', access: 'Own seat' },
+            { id: 12, name: 'Babita', location: 'Reception', access: 'Own seat' },
+            { id: 13, name: 'Monu', location: 'Seat_1', access: 'Own seat' },
+            { id: 14, name: 'Sourabh', location: 'Seat_2', access: 'Own seat' },
+            { id: 15, name: 'Gurmeet', location: 'Maven_Area', access: 'Confrence' },
+            { id: 16, name: 'Sneha Lathwal', location: 'Maven_Area', access: 'Own seat' },
+            { id: 17, name: 'Vanshika Jagga', location: 'Maven_Area', access: 'Own seat' },
+            { id: 18, name: 'Nisha', location: 'Reception', access: 'Pod room/Confrence' },
+            { id: 19, name: 'Suhana', location: 'Seat_10', access: 'All' },
+            { id: 20, name: 'Ketan', location: 'Ketan_Cabin', access: 'All' },
+            { id: 21, name: 'Bhavishya', location: 'Bhavishya_Cabin', access: 'All' },
+            { id: 22, name: 'Satish', location: 'Seat_12', access: 'Own seat' },
+            { id: 23, name: 'Sahil', location: 'Seat_20', access: 'Own seat/Confrence' },
+            { id: 24, name: 'Diwakar', location: 'Diwakar_Sir_Cabin', access: 'All' },
+            { id: 25, name: 'Sharma Sir', location: 'Sharma_Sir_Office', access: 'All' },
+            { id: 26, name: 'Ritesh Sir', location: 'Ritesh_Sir_Cabin', access: 'All' },
+        ];
+    } catch {
+        return [
+            { id: 1, name: 'Ajay', location: 'Seat_7', access: 'Confrence' },
+            { id: 2, name: 'Tannu', location: 'Seat_8', access: 'Own seat' },
+            { id: 3, name: 'Lovekush', location: 'Seat_6', access: 'Own seat' },
+            { id: 4, name: 'Ansh', location: 'Seat_5', access: 'Own seat' },
+            { id: 5, name: 'Vanshika', location: 'Seat_4', access: 'Own seat' },
+            { id: 6, name: 'Sonu', location: 'Seat_3', access: 'Confrence' },
+            { id: 7, name: 'Khushi', location: 'Seat_15', access: 'Confrence' },
+            { id: 8, name: 'Sneha', location: 'Reception', access: 'Own seat' },
+            { id: 9, name: 'Muskan', location: 'Seat_11', access: 'Own seat' },
+            { id: 10, name: 'Nikita', location: 'Seat_16', access: 'Own seat' },
+            { id: 11, name: 'Saloni', location: 'Seat_14', access: 'Own seat' },
+            { id: 12, name: 'Babita', location: 'Reception', access: 'Own seat' },
+            { id: 13, name: 'Monu', location: 'Seat_1', access: 'Own seat' },
+            { id: 14, name: 'Sourabh', location: 'Seat_2', access: 'Own seat' },
+            { id: 15, name: 'Gurmeet', location: 'Maven_Area', access: 'Confrence' },
+            { id: 16, name: 'Sneha Lathwal', location: 'Maven_Area', access: 'Own seat' },
+            { id: 17, name: 'Vanshika Jagga', location: 'Maven_Area', access: 'Own seat' },
+            { id: 18, name: 'Nisha', location: 'Reception', access: 'Pod room/Confrence' },
+            { id: 19, name: 'Suhana', location: 'Seat_10', access: 'All' },
+            { id: 20, name: 'Ketan', location: 'Ketan_Cabin', access: 'All' },
+            { id: 21, name: 'Bhavishya', location: 'Bhavishya_Cabin', access: 'All' },
+            { id: 22, name: 'Satish', location: 'Seat_12', access: 'Own seat' },
+            { id: 23, name: 'Sahil', location: 'Seat_20', access: 'Own seat/Confrence' },
+            { id: 24, name: 'Diwakar', location: 'Diwakar_Sir_Cabin', access: 'All' },
+            { id: 25, name: 'Sharma Sir', location: 'Sharma_Sir_Office', access: 'All' },
+            { id: 26, name: 'Ritesh Sir', location: 'Ritesh_Sir_Cabin', access: 'All' },
+        ];
+    }
+})();
 
 /**
  * 🔧 FUNCTION to determine allowed location options for a user.
  */
 export const getAllowedLocations = (locationKey, accessType) => {
-    const userLocationName = locationKey.startsWith('Seat_') ? 
-        `Seat ${locationKey.substring(5).replace('A','')}` : 
+    const userLocationName = locationKey.startsWith('Seat_') ?
+        `Seat ${locationKey.substring(5).replace('A','')}` :
         ALL_LOCATIONS_MAP[locationKey] || locationKey;
 
     let allowedOptions = [{ key: locationKey, name: userLocationName }];
@@ -94,16 +130,24 @@ export const getAllowedLocations = (locationKey, accessType) => {
             Object.keys(globalLocationsMap).map(key => ({ key, name: globalLocationsMap[key] }))
         );
 
+    } else if (accessType.includes(',')) {
+        // Handle comma-separated locations
+        const additionalLocations = accessType.split(',').map(loc => loc.trim());
+        additionalLocations.forEach(loc => {
+            if (loc !== locationKey && GLOBAL_LOCATIONS.includes(loc)) {
+                allowedOptions.push({ key: loc, name: ALL_LOCATIONS_MAP[loc] });
+            }
+        });
     } else if (accessType.includes('Confrence')) {
         if (locationKey !== 'Confrence') {
-             allowedOptions.push({ key: 'Confrence', name: ALL_LOCATIONS_MAP.Confrence });
+              allowedOptions.push({ key: 'Confrence', name: ALL_LOCATIONS_MAP.Confrence });
         }
 
         if (accessType.includes('Pod room') && locationKey !== 'Pod_Room') {
             allowedOptions.push({ key: 'Pod_Room', name: ALL_LOCATIONS_MAP.Pod_Room });
         }
     }
-    
+
     const uniqueKeys = new Set();
     return allowedOptions.filter(option => {
         if (!uniqueKeys.has(option.key)) {
@@ -115,19 +159,51 @@ export const getAllowedLocations = (locationKey, accessType) => {
 };
 
 
-// Other constants remain the same
-export const COFFEE_TYPES = ["Black", "Milk", "Simple", "Cold"];
-export const TEA_TYPES = ["Black", "Milk", "Green"];
-export const MILK_TYPES = ["Hot", "Cold"];
-export const WATER_TYPES = ["Warm", "Cold", "Hot", "Lemon"];
-export const SUGAR_LEVELS = [0, 1, 2, 3];
-export const TABLE_NUMBERS = Array.from({ length: 25 }, (_, i) => i + 1);
+// Dynamic menu constants that read from admin changes
+const getMenuCategories = () => {
+    try {
+        const saved = localStorage.getItem('adminMenuCategories');
+        return saved ? JSON.parse(saved) : null;
+    } catch {
+        return null;
+    }
+};
 
-// New constant for Add-Ons that support multiple selections
-export const ADD_ONS = [
-    "Ginger",
-    "Cloves",
-    "Fennel Seeds",
-    "Cardamom",
-    "Cinnamon",
-];
+const categories = getMenuCategories();
+
+export const COFFEE_TYPES = categories ? (categories.find(c => c.name === 'Coffee')?.items || ["Black", "Milk", "Simple", "Cold"]) : ["Black", "Milk", "Simple", "Cold"];
+export const TEA_TYPES = categories ? (categories.find(c => c.name === 'Tea')?.items || ["Black", "Milk", "Green"]) : ["Black", "Milk", "Green"];
+export const MILK_TYPES = categories ? (categories.find(c => c.name === 'Milk')?.items || ["Hot", "Cold"]) : ["Hot", "Cold"];
+export const WATER_TYPES = categories ? (categories.find(c => c.name === 'Water')?.items || ["Warm", "Cold", "Hot", "Lemon"]) : ["Warm", "Cold", "Hot", "Lemon"];
+
+export const SUGAR_LEVELS = (() => {
+    try {
+        const saved = localStorage.getItem('adminSugarLevels');
+        return saved ? JSON.parse(saved) : [0, 1, 2, 3];
+    } catch {
+        return [0, 1, 2, 3];
+    }
+})();
+
+export const ADD_ONS = (() => {
+    try {
+        const saved = localStorage.getItem('adminAddOns');
+        return saved ? JSON.parse(saved) : [
+            "Ginger",
+            "Cloves",
+            "Fennel Seeds",
+            "Cardamom",
+            "Cinnamon",
+        ];
+    } catch {
+        return [
+            "Ginger",
+            "Cloves",
+            "Fennel Seeds",
+            "Cardamom",
+            "Cinnamon",
+        ];
+    }
+})();
+
+export const TABLE_NUMBERS = Array.from({ length: 25 }, (_, i) => i + 1);

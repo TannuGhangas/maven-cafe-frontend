@@ -1,5 +1,6 @@
-import React from 'react';
-import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
+import React, { useState, useEffect } from 'react';
+import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaUtensilSpoon } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
+import { callApi } from '../../api/apiService';
 
 /**
  * 🎨 THEME VARIABLES - PRESERVED KEYS
@@ -233,17 +234,17 @@ fontFamily: 'Cambria, serif',
         flexDirection: 'column', // Stack image and text
         justifyContent: 'space-between', // Distribute space
     },
-    imageContainer: (itemName, itemImages) => ({
-        width: '100%',
-        height: '100%', // Take up most of the card height
-        // Removed linear gradient for a bright image
-        background: `${itemImages[itemName]}`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        // Removed flex properties as text will be separate
-        // Removed color and text-shadow as text is now outside this container
-    }),
+imageContainer: (itemName, itemImages) => ({
+width: '100%',
+height: '100%', // Take up most of the card height
+// Removed linear gradient for a bright image
+backgroundImage: itemImages[itemName] ? `url(${itemImages[itemName]})` : 'none',
+backgroundSize: 'cover',
+backgroundPosition: 'center',
+backgroundRepeat: 'no-repeat',
+// Removed flex properties as text will be separate
+// Removed color and text-shadow as text is now outside this container
+}),
     itemText: {
         margin: '0',
         display: 'block', // Ensure text is visible
@@ -286,30 +287,38 @@ fontFamily: 'Cambria, serif',
 };
 
 // --- ITEM DATA ---
-const itemButtons = [
-    { name: 'coffee', icon: FaCoffee },
-    { name: 'tea', icon: FaMugHot },
-    { name: 'milk', icon: FaGlassWhiskey },
-    { name: 'water', icon: FaTint },
-    { name: 'shikanji', icon: FaLemon }, // Added Shikanji
-    { name: 'jaljeera', icon: FaCube },  // Added Jaljeera
-    { name: 'soup', icon: FaTint },
-    { name: 'maggie', icon: FaTint },
-    { name: 'oats', icon: FaTint },
-];
-
-const itemImages = {
-    // KEPT ORIGINAL USER URLs
-    tea: 'url("https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg")',
-    coffee: 'url("https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg")',
-    milk: 'url("https://www.shutterstock.com/image-photo/almond-milk-cup-glass-on-600nw-2571172141.jpg")',
-    water: 'url("https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg")',
-    shikanji: 'url("https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg")',
-    jaljeera: 'url("https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg")',
-    soup: 'url("https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg")',
-    maggie: 'url("https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg")',
-    oats: 'url("https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900")',
+const getItemButtons = () => {
+    try {
+        const saved = localStorage.getItem('adminMenuCategories');
+        if (saved) {
+            const categories = JSON.parse(saved);
+            return categories.map(cat => ({
+                name: cat.name.toLowerCase(),
+                icon: cat.icon === 'FaCoffee' ? FaCoffee :
+                      cat.icon === 'FaMugHot' ? FaMugHot :
+                      cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
+                      cat.icon === 'FaTint' ? FaTint :
+                      cat.icon === 'FaLemon' ? FaLemon :
+                      cat.icon === 'FaCube' ? FaCube :
+                      FaUtensilSpoon
+            }));
+        }
+    } catch {}
+    // Default
+    return [
+        { name: 'coffee', icon: FaCoffee },
+        { name: 'tea', icon: FaMugHot },
+        { name: 'milk', icon: FaGlassWhiskey },
+        { name: 'water', icon: FaTint },
+        { name: 'shikanji', icon: FaLemon },
+        { name: 'jaljeera', icon: FaCube },
+        { name: 'soup', icon: FaUtensilSpoon },
+        { name: 'maggie', icon: FaUtensilSpoon },
+        { name: 'oats', icon: FaUtensilSpoon },
+    ];
 };
+
+
 // -----------------
 
 const timeSlots = [
@@ -319,14 +328,60 @@ const timeSlots = [
 ];
 
 const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, styles: _propStyles }) => {
-    // KEPT ORIGINAL USER URL
-    const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
-    
-    const currentHour = new Date().getHours();
-    const greeting = currentHour < 12 ? 'Good Morning!' : 'Hello there!';
-    const primaryMessage = `${greeting} Ready to order?`;
+const [itemButtons, setItemButtons] = useState([]);
+const [itemImages, setItemImages] = useState({});
 
-    const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
+// KEPT ORIGINAL USER URL
+const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
+
+const currentHour = new Date().getHours();
+const greeting = currentHour < 12 ? 'Good Morning!' : 'Hello there!';
+const primaryMessage = `${greeting} Ready to order?`;
+
+const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
+
+useEffect(() => {
+const fetchMenu = async () => {
+try {
+const user = JSON.parse(localStorage.getItem('user'));
+const data = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET');
+if (data && data.categories) {
+const buttons = data.categories.map(cat => ({
+name: cat.name.toLowerCase(),
+icon: cat.icon === 'FaCoffee' ? FaCoffee :
+cat.icon === 'FaMugHot' ? FaMugHot :
+cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
+cat.icon === 'FaTint' ? FaTint :
+cat.icon === 'FaLemon' ? FaLemon :
+cat.icon === 'FaCube' ? FaCube :
+FaUtensilSpoon
+}));
+setItemButtons(buttons);
+setItemImages(data.itemImages || {});
+// Also save to localStorage for other components
+localStorage.setItem('adminMenuCategories', JSON.stringify(data.categories));
+localStorage.setItem('adminAddOns', JSON.stringify(data.addOns));
+localStorage.setItem('adminSugarLevels', JSON.stringify(data.sugarLevels));
+localStorage.setItem('adminItemImages', JSON.stringify(data.itemImages));
+}
+} catch (error) {
+console.error('Failed to fetch menu:', error);
+// Fallback to default
+setItemButtons([
+{ name: 'coffee', icon: FaCoffee },
+{ name: 'tea', icon: FaMugHot },
+{ name: 'milk', icon: FaGlassWhiskey },
+{ name: 'water', icon: FaTint },
+{ name: 'shikanji', icon: FaLemon },
+{ name: 'jaljeera', icon: FaCube },
+{ name: 'soup', icon: FaUtensilSpoon },
+{ name: 'maggie', icon: FaUtensilSpoon },
+{ name: 'oats', icon: FaUtensilSpoon },
+]);
+}
+};
+fetchMenu();
+}, []);
 
     return (
         <div style={STYLES_THEME.centeredContainer}>

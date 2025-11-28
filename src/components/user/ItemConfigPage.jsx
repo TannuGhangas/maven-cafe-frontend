@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronLeft, FaMinus, FaPlus } from 'react-icons/fa'; // Import FaMinus and FaPlus
+import { FaChevronLeft, FaMinus, FaPlus, FaSpinner } from 'react-icons/fa'; // Import FaMinus and FaPlus
 // Import the centralized theme styles and external constants
 import { STYLES_THEME } from './UserHomePage';
 import {
-    COFFEE_TYPES, TEA_TYPES,
-    MILK_TYPES, WATER_TYPES, SUGAR_LEVELS,
-    TABLE_NUMBERS, ADD_ONS,
-    // 🔑 UPDATED IMPORTS: Removed LOCATIONS and added necessary location logic
-    getAllowedLocations, USER_LOCATIONS_DATA
+TABLE_NUMBERS,
+// 🔑 UPDATED IMPORTS: Removed LOCATIONS and added necessary location logic
+getAllowedLocations, USER_LOCATIONS_DATA
 } from '../../config/constants';
 
 // --- Configuration Image URL ---
@@ -173,29 +171,85 @@ const ImageBanner = ({ itemType, imageUrl }) => {
     );
 };
 
+// Helper function to get menu types from localStorage
+const getMenuTypes = (itemType) => {
+    try {
+        const saved = localStorage.getItem('adminMenuCategories');
+        if (saved) {
+            const categories = JSON.parse(saved);
+            const cat = categories.find(c => c.name.toLowerCase() === itemType);
+            return cat ? cat.items : [];
+        }
+    } catch {}
+    // Default fallbacks
+    const defaults = {
+        coffee: ["Black", "Milk", "Simple", "Cold"],
+        tea: ["Black", "Milk", "Green"],
+        milk: ["Hot", "Cold"],
+        water: ["Warm", "Cold", "Hot", "Lemon"],
+    };
+    return defaults[itemType] || [];
+};
+
+const getSugarLevels = () => {
+    try {
+        const saved = localStorage.getItem('adminSugarLevels');
+        return saved ? JSON.parse(saved) : [0, 1, 2, 3];
+    } catch {
+        return [0, 1, 2, 3];
+    }
+};
+
+const getAddOns = () => {
+    try {
+        const saved = localStorage.getItem('adminAddOns');
+        return saved ? JSON.parse(saved) : [
+            "Ginger",
+            "Cloves",
+            "Fennel Seeds",
+            "Cardamom",
+            "Cinnamon",
+        ];
+    } catch {
+        return [
+            "Ginger",
+            "Cloves",
+            "Fennel Seeds",
+            "Cardamom",
+            "Cinnamon",
+        ];
+    }
+};
+
 // Main Component
 const ItemConfigPage = ({
-itemType, setPage, currentOrder,
-setCurrentOrder, isEditMode, itemIndex, user, styles: _propStyles
-}) => {
+ itemType, setPage, currentOrder,
+ setCurrentOrder, isEditMode, itemIndex, user, styles: _propStyles, callApi
+ }) => {
 // Use the enhanced styles
 const styles = ENHANCED_STYLES;
 
+const [userLocations, setUserLocations] = useState([]);
+
+// Get dynamic data
+const typeOptions = getMenuTypes(itemType);
+const SUGAR_LEVELS = getSugarLevels();
+const ADD_ONS = getAddOns();
+
+useEffect(() => {
+    // Locations are now handled statically from constants
+    setUserLocations(USER_LOCATIONS_DATA);
+}, []);
+
 // --- START USER LOCATION LOGIC ---
 // Use the actual logged-in user
-const currentUser = USER_LOCATIONS_DATA.find(u => u.name === user.name) || USER_LOCATIONS_DATA[0];
+const currentUser = userLocations.find(u => u.name === user.name) || userLocations[0];
 
-    // Calculate allowed locations for the current user 
-    const allowedLocations = getAllowedLocations(currentUser.location, currentUser.access);
-    const defaultLocationKey = allowedLocations[0]?.key || 'Others';
-    // --- END USER LOCATION LOGIC ---
+// Calculate allowed locations for the current user
+const allowedLocations = currentUser ? getAllowedLocations(currentUser.location, currentUser.access) : [];
+const defaultLocationKey = allowedLocations[0]?.key || 'Others';
+// --- END USER LOCATION LOGIC ---
 
-    // Determine type options. If none exist (like for 'jaljeera', 'maggie'), typeOptions will be empty.
-    const typeOptions =
-        itemType === 'coffee' ? COFFEE_TYPES :
-        itemType === 'tea' ? TEA_TYPES :
-        itemType === 'milk' ? MILK_TYPES :
-        itemType === 'water' ? WATER_TYPES : [];
 
     // **CORE LOGIC**: Set default type to the item name itself if no sub-types exist.
     const defaultType = typeOptions.length > 0 ? typeOptions[0] : itemType;
@@ -310,11 +364,6 @@ const handleQuantityChange = (delta) => {
              return;
         }
 
-        // Validate table number if 'Others' is selected
-        if (itemConfig.location === 'Others' && (itemConfig.tableNo === null || isNaN(itemConfig.tableNo))) {
-            alert("Please select a table number for 'Others' location.");
-            return;
-        }
 
         if (isEditMode) {
             const newItems = [...currentOrder.items];
@@ -420,9 +469,10 @@ color: styles.COLOR_TEXT_DARK,
 borderRadius: styles.BORDER_RADIUS_PILL,
 };
 
-    return (
-        <div style={styles.centeredContainer}>
-            <div style={{ ...styles.screenPadding, padding: '0' }}>
+
+return (
+<div style={styles.centeredContainer}>
+<div style={{ ...styles.screenPadding, padding: '0' }}>
 
                 {/* --- HEADER IMAGE BANNER --- */}
                 <ImageBanner
@@ -530,33 +580,16 @@ onClick={() => handleToggle('selectedAddOns', addOn)}
                         </button>
                     </div>
 
-                    {/* LOCATION SELECTION (FILTERED DROPDOWN) */}
-                    <label style={styles.label}>📍 Delivery Location:</label>
-                    <select
-                        style={styles.selectField}
-                        value={itemConfig.location}
-                        onChange={e => setItemConfig({...itemConfig, location: e.target.value, tableNo: null, customLocation: ''})}
-                    >
-                        {/* Uses the dynamically generated allowed locations */}
-                        {allowedLocations.map(({ key, name }) => (
-                            <option key={key} value={key}>{name}</option>
-                        ))}
-                    </select>
-
-                    {/* Table Number (Only visible if 'Others' is selected) */}
-                    {itemConfig.location === 'Others' && (
-                        <>
-                            <label style={styles.label}>#️⃣ Table Number (1-25):</label>
-                            <select
-                                style={styles.selectField}
-                                value={itemConfig.tableNo || ''}
-                                onChange={e => setItemConfig({...itemConfig, tableNo: parseInt(e.target.value)})}
-                            >
-                                <option value="">Select Table</option>
-                                {TABLE_NUMBERS.map(n => <option key={n} value={n}>{n}</option>)}
-                            </select>
-                        </>
-                    )}
+{/* LOCATION DISPLAY (ONLY DEFAULT) */}
+<label style={styles.label}>📍 Delivery Location:</label>
+<div style={{
+    ...styles.inputField,
+    backgroundColor: '#f5f5f5',
+    cursor: 'default',
+    color: styles.COLOR_TEXT_DARK
+}}>
+    {allowedLocations.find(loc => loc.key === defaultLocationKey)?.name || 'Default Location'}
+</div>
 
                     {/* Notes */}
                     <label style={styles.label}>📝 Notes / Preferences:</label>

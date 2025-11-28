@@ -138,6 +138,7 @@ function App() {
                     isEditMode={isEditMode}
                     itemIndex={itemIndex}
                     user={user}
+                    callApi={callApi}
                     styles={styles}
                 />
             );

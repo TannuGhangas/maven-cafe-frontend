@@ -29,6 +29,14 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
     // Tracks the ID of the order card that is EXPANDED inline for ALL ITEMS.
     const [expandedOrderId, setExpandedOrderId] = useState(null);
 
+    // Mobile detection
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     // Use same styles as user side with Calibri/Cambria fonts
     const enhancedStyles = {
         ...styles,
@@ -176,7 +184,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                         key: combinedKey,
                         itemCategory: itemKey, 
                         // Replacement for Line 113 (Conditional Naming)
-                        name: `${typeName.toUpperCase()} ${itemKey.toUpperCase()}`,
+                        name: (typeName && typeName !== itemKey) ? `${typeName.toUpperCase()} ${itemKey.toUpperCase()}` : itemKey.toUpperCase(),
                         totalQty: 0,
                     };
                 }
@@ -288,7 +296,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
     };
     
     const renderSlotButtons = () => (
-        <div style={{ display: "flex", gap: 12, marginBottom: 18 }}>
+        <div style={{ display: "flex", gap: isMobile ? 6 : 12, marginBottom: isMobile ? 12 : 18 }}>
             {["morning", "afternoon"].map((slot) => {
                 const total = slotOrders(slot).reduce(
                     (sum, o) =>
@@ -308,20 +316,20 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                         }}
                         style={{
                             flex: 1,
-                            padding: 24,
+                            padding: isMobile ? 12 : 24,
                             borderRadius: 12,
                             border: "none",
                             backgroundColor:
                                 selectedSlot === slot ? "#103c7f" : "#f0f0f0",
                             color: selectedSlot === slot ? "#fff" : "#333",
-                            fontSize: 24,
+                            fontSize: isMobile ? 16 : 24,
                             fontWeight: 700,
                             cursor: "pointer",
-                            minWidth: '150px'
+                            minWidth: isMobile ? 'auto' : '150px'
                         }}
                     >
                         {slot.toUpperCase()}
-                        <div style={{ fontSize: 18, marginTop: 5 }}>{total} items</div>
+                        <div style={{ fontSize: isMobile ? 12 : 18, marginTop: 3 }}>{total} items</div>
                     </button>
                 );
             })}
@@ -340,8 +348,8 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
             <div
                 style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
-                    gap: 20, 
+                    gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(auto-fit, minmax(250px, 1fr))",
+                    gap: isMobile ? 10 : 20,
                 }}
             >
                 {totals.map((t) => (
@@ -354,13 +362,13 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             setExpandedOrderId(null); 
                         }}
                         style={{
-                            padding: 30, 
-                            minHeight: 180, 
+                            padding: isMobile ? 15 : 30,
+                            minHeight: isMobile ? 100 : 180,
                             borderRadius: 14,
                             backgroundImage: `linear-gradient(
-                                rgba(0,0,0,0.55), 
+                                rgba(0,0,0,0.55),
                                 rgba(0,0,0,0.55)
-                            ), url('${itemImages[t.itemCategory]}')`, 
+                            ), url('${itemImages[t.itemCategory]}')`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                             color: "#fff",
@@ -368,10 +376,10 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             cursor: "pointer",
                         }}
                     >
-                        <div style={{ fontSize: 48, fontWeight: 800 }}>
+                        <div style={{ fontSize: isMobile ? 32 : 48, fontWeight: 800 }}>
                             {t.totalQty}
                         </div>
-                        <div style={{ fontSize: 24, fontWeight: 700, marginTop: 10 }}>
+                        <div style={{ fontSize: isMobile ? 16 : 24, fontWeight: 700, marginTop: 10 }}>
                             {t.name.toUpperCase()}
                         </div>
                     </div>
@@ -386,7 +394,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
         const { counts } = computeStatusCountsForItemType(selectedSlot, selectedItemTypeKey);
 
         return (
-            <div style={{ display: "flex", gap: 20, flexWrap: 'wrap' }}>
+            <div style={{ display: "grid", gridTemplateColumns: isMobile ? "repeat(2, 1fr)" : "repeat(3, 1fr)", gap: isMobile ? 8 : 20 }}>
                 {["Placed", "Making", "Ready"].map((st) => (
                     <div
                         key={st}
@@ -395,9 +403,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             setExpandedOrderId(null);
                         }}
                         style={{
-                            flex: 1,
-                            minWidth: '100px', 
-                            padding: 20, 
+                            padding: isMobile ? 12 : 20,
                             background: "#fff",
                             borderRadius: 15,
                             textAlign: "center",
@@ -406,10 +412,10 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             border: selectedStatus === st ? `4px solid ${styles.PRIMARY_COLOR}` : 'none'
                         }}
                     >
-                        <div style={{ fontSize: 48, fontWeight: 800, color: st === 'Ready' ? styles.SUCCESS_COLOR : (st === 'Making' ? styles.PRIMARY_COLOR : styles.SECONDARY_COLOR) }}>
+                        <div style={{ fontSize: isMobile ? 28 : 48, fontWeight: 800, color: st === 'Ready' ? styles.SUCCESS_COLOR : (st === 'Making' ? styles.PRIMARY_COLOR : styles.SECONDARY_COLOR) }}>
                             {counts[st]}
                         </div>
-                        <div style={{ fontSize: 20, fontWeight: 700 }}>{st}</div>
+                        <div style={{ fontSize: isMobile ? 14 : 20, fontWeight: 700 }}>{st}</div>
                     </div>
                 ))}
             </div>
@@ -430,13 +436,13 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
         const [itemKey, typeKey] = selectedItemTypeKey.split('_');
 
         const list = selectedStatus ? ordersPerStatus[selectedStatus] || [] : [];
-        const combinedName = `${typeKey} ${itemKey}`.toUpperCase();
+        const combinedName = (typeKey && typeKey !== itemKey) ? `${typeKey} ${itemKey}`.toUpperCase() : itemKey.toUpperCase();
 
         if (!list.length)
             return <div style={{ padding: 24, fontSize: 24, color: '#666' }}>No orders currently in the **{selectedStatus}** status for {combinedName}.</div>;
 
         return (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: isMobile ? 10 : 20 }}>
                 {list.map((order) => {
                     const orderId = order?._id;
                     const isCardExpanded = expandedOrderId === orderId;
@@ -583,7 +589,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                             {/* END: Relevant Item Details */}
 
                             {/* Status Buttons - Equal Width */}
-                            <div style={{ marginBottom: 10, display: 'flex', gap: 10 }}>
+                            <div style={{ marginBottom: 10, display: 'flex', gap: isMobile ? 6 : 10 }}>
                                 {nextStatus && nextStatus !== 'Delivered' && (
                                     <button
                                         style={{
@@ -591,24 +597,24 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                                             backgroundColor: '#103c7f', // Dark Blue
                                             color: 'white',
                                             border: 'none',
-                                            borderRadius: '8px',
-                                            fontSize: '1rem',
+                                            borderRadius: '6px',
+                                            fontSize: isMobile ? '0.9rem' : '1rem',
                                             fontWeight: '600',
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            gap: '8px',
-                                            height: '48px',
+                                            gap: '6px',
+                                            height: isMobile ? '36px' : '48px',
                                             fontFamily: 'Calibri, Arial, sans-serif',
-                                            padding: '12px 15px'
+                                            padding: isMobile ? '8px 10px' : '12px 15px'
                                         }}
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             updateOrderStatus(orderId, nextStatus);
                                         }}
                                     >
-                                        <FaCheckCircle size={14} /> Mark as {nextStatus}
+                                        <FaCheckCircle size={isMobile ? 12 : 14} /> {isMobile ? nextStatus : `Mark as ${nextStatus}`}
                                     </button>
                                 )}
 
@@ -618,16 +624,16 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                                         backgroundColor: '#a1db40', // Green
                                         color: '#333333',
                                         border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '1rem',
+                                        borderRadius: '6px',
+                                        fontSize: isMobile ? '0.9rem' : '1rem',
                                         fontWeight: '600',
                                         cursor: 'pointer',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        height: '48px',
+                                        height: isMobile ? '36px' : '48px',
                                         fontFamily: 'Calibri, Arial, sans-serif',
-                                        padding: '12px 15px'
+                                        padding: isMobile ? '8px 10px' : '12px 15px'
                                     }}
                                     onClick={(e) => {
                                         e.stopPropagation();
@@ -735,49 +741,49 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
         );
 
     return (
-        <div style={{ 
-            ...styles.kitchenAppContainer, 
-            padding: '20px 10px' 
+        <div style={{
+            ...styles.kitchenAppContainer,
+            padding: isMobile ? '15px 15px' : '20px 10px'
         }}>
             {/* HEADER */}
             <div
                 style={{
-                    width: "100%", 
-                    height: 200, 
+                    width: "100%",
+                    height: isMobile ? 120 : 200,
                     borderRadius: 15,
                     backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('${headerImageUrl}')`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
-                    marginBottom: 20,
-                    padding: '30px 20px', 
+                    marginBottom: isMobile ? 15 : 20,
+                    padding: isMobile ? '15px 15px' : '30px 20px',
                     color: "#fff",
-                    display: 'flex', 
-                    flexDirection: 'column', 
+                    display: 'flex',
+                    flexDirection: 'column',
                     justifyContent: 'flex-end',
                     boxShadow: '0 5px 15px rgba(0,0,0,0.2)'
                 }}
             >
-               <div style={{ fontSize: 48, fontWeight: 900, width: '100%', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+               <div style={{ fontSize: isMobile ? 28 : 48, fontWeight: 900, width: '100%', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
                     KITCHEN DASHBOARD
-                </div>
-                <div style={{ fontSize: 24, fontWeight: 500, marginTop: 5, width: '100%', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+               </div>
+               <div style={{ fontSize: isMobile ? 16 : 24, fontWeight: 500, marginTop: 5, width: '100%', textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
                     Manage & track active orders
-                </div>
+               </div>
             </div>
 
             {/* HOME (Slot selection and Totals) */}
             {view === "home" && (
                 <>
-                    <div style={{ fontSize: 30, fontWeight: 700, marginBottom: 15 }}>
+                    <div style={{ fontSize: isMobile ? 24 : 30, fontWeight: 700, marginBottom: isMobile ? 10 : 15 }}>
                         Select Slot
                     </div>
                     {renderSlotButtons()}
                     
                     {selectedSlot && (
                         <>
-                            <div style={{ fontSize: 30, fontWeight: 700, marginTop: 30, marginBottom: 15 }}>
-                                {selectedSlot.toUpperCase()} 
-                                
+                            <div style={{ fontSize: isMobile ? 24 : 30, fontWeight: 700, marginTop: isMobile ? 20 : 30, marginBottom: isMobile ? 10 : 15 }}>
+                                {selectedSlot.toUpperCase()}
+
                             </div>
                             {renderSlotTotals()}
                         </>
@@ -799,7 +805,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                     >
                         ← Back to Totals
                     </button>
-                    <div style={{ fontSize: 30, fontWeight: 700, marginBottom: 15 }}>
+                    <div style={{ fontSize: isMobile ? 24 : 30, fontWeight: 700, marginBottom: isMobile ? 10 : 15 }}>
                         {Object.values(computeTotalsForSlot(selectedSlot)).find(t => t.key === selectedItemTypeKey)?.name.toUpperCase() || 'Item Type'} Statuses
                     </div>
 
@@ -807,7 +813,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                     
                     {selectedStatus && (
                         <>
-                            <div style={{ fontSize: 30, fontWeight: 700, marginTop: 30, marginBottom: 15 }}>
+                            <div style={{ fontSize: isMobile ? 24 : 30, fontWeight: 700, marginTop: isMobile ? 20 : 30, marginBottom: isMobile ? 10 : 15 }}>
                                 {selectedStatus} Orders for {Object.values(computeTotalsForSlot(selectedSlot)).find(t => t.key === selectedItemTypeKey)?.name.toUpperCase()}
                             </div>
                             {renderOrdersForStatus()}
