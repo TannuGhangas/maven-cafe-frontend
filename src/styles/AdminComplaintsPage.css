@@ -1,0 +1,288 @@
+/* AdminComplaintsPage.css */
+.admin-complaints-container {
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-complaints-header {
+    font-family: 'Cambria, serif';
+    color: #103c7f;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.admin-complaints-subtitle {
+    color: #888;
+    margin-bottom: 20px;
+}
+
+.admin-complaints-filter-tabs {
+    display: flex;
+    gap: 1px;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ddd;
+}
+
+.admin-complaints-filter-tab {
+    padding: 10px 15px;
+    cursor: pointer;
+    background-color: #f8f8f8;
+    border: none;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+    color: #666;
+    font-weight: 500;
+    flex-grow: 1;
+    border-radius: 5px 5px 0 0;
+    transition: all 0.2s;
+}
+
+.admin-complaints-filter-tab.active {
+    background-color: #fff;
+    border-top: 2px solid currentColor;
+    font-weight: 700;
+    transform: translateY(1px);
+}
+
+.admin-complaints-filter-tab.new {
+    color: #FF5722;
+}
+
+.admin-complaints-filter-tab.in-progress {
+    color: #2196F3;
+}
+
+.admin-complaints-filter-tab.resolved {
+    color: #4CAF50;
+}
+
+.admin-complaints-list {
+    /* Using styles.listContainer equivalent */
+}
+
+.admin-complaints-empty {
+    text-align: center;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.admin-complaints-back-btn {
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+/* Complaint Card Styles */
+.complaint-card {
+    flex-direction: column;
+    padding: 0;
+    margin-bottom: 15px;
+    border-left: 5px solid currentColor;
+    cursor: pointer;
+    transition: box-shadow 0.2s;
+}
+
+.complaint-card.expanded {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.complaint-card.new {
+    border-left-color: #FF5722;
+}
+
+.complaint-card.in-progress {
+    border-left-color: #2196F3;
+}
+
+.complaint-card.resolved {
+    border-left-color: #4CAF50;
+}
+
+.complaint-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: none;
+    background-color: #ffffff;
+    border-radius: 8px 8px 0 0;
+}
+
+.complaint-card-header.expanded {
+    border-bottom: 1px solid #f0f0f0;
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.complaint-card-left {
+    flex-grow: 1;
+}
+
+.complaint-card-title {
+    margin: 0 0 5px 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    font-size: 1.1em;
+}
+
+.complaint-card-title-icon {
+    margin-right: 8px;
+}
+
+.complaint-card-timestamp {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.complaint-card-timestamp-icon {
+    margin-right: 5px;
+}
+
+.complaint-card-right {
+    display: flex;
+    align-items: center;
+}
+
+.complaint-card-status {
+    color: currentColor;
+    font-weight: bold;
+    padding: 5px 10px;
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+}
+
+.complaint-card-toggle {
+    margin-left: 10px;
+    color: #333;
+}
+
+.complaint-card-body {
+    padding: 15px;
+    border-top: 1px dashed #eee;
+}
+
+.complaint-card-tags {
+    margin-bottom: 15px;
+}
+
+.complaint-card-tag {
+    font-size: 0.75em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    background-color: #eee;
+    color: #333;
+    display: inline-flex;
+    align-items: center;
+    margin-right: 8px;
+}
+
+.complaint-card-tag.user {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.complaint-card-tag.location {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+.complaint-card-tag.reference {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.complaint-card-tag-icon {
+    margin-right: 5px;
+}
+
+.complaint-card-description {
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+    border-left: 3px solid rgba(255, 87, 34, 0.4);
+}
+
+.complaint-card-description-label {
+    margin: 0;
+    font-weight: 600;
+    color: #555;
+}
+
+.complaint-card-description-text {
+    margin: 5px 0 0 0;
+    white-space: pre-wrap;
+}
+
+.complaint-card-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.complaint-card-resolve-btn {
+    padding: 8px 15px;
+}
+
+.complaint-card-review-btn {
+    padding: 8px 15px;
+    background-color: #2196F3;
+}
+
+.complaint-card-revert-btn {
+    padding: 8px 15px;
+}
+
+.complaint-card-kitchen-msg {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-complaints-header {
+        font-size: 1.5rem;
+    }
+
+    .admin-complaints-filter-tabs {
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .admin-complaints-filter-tab {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+
+    .admin-complaints-filter-tab.active {
+        border-top: none;
+        border-bottom: 2px solid currentColor;
+        transform: none;
+    }
+
+    .complaint-card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .complaint-card-right {
+        align-self: flex-end;
+    }
+
+    .complaint-card-actions {
+        flex-direction: column;
+    }
+
+    .complaint-card-actions button {
+        width: 100%;
+    }
+}

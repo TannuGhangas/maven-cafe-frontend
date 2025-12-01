@@ -1,0 +1,265 @@
+/* AdminLocationsPage.css */
+.admin-locations-container {
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-locations-header {
+    font-family: 'Cambria, serif';
+    color: #103c7f;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-locations-header-icon {
+    margin-right: 10px;
+}
+
+.admin-locations-actions {
+    margin-bottom: 30px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-locations-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-locations-card-header {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #103c7f;
+    font-family: 'Cambria, serif';
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-locations-card-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 5px;
+}
+
+.admin-locations-edit-btn,
+.admin-locations-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.2rem;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.admin-locations-edit-btn {
+    color: #007aff;
+}
+
+.admin-locations-edit-btn:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.admin-locations-delete-btn {
+    color: #ff3b30;
+}
+
+.admin-locations-delete-btn:hover {
+    background-color: rgba(255, 59, 48, 0.1);
+}
+
+.admin-locations-detail {
+    margin: 8px 0;
+    padding: 8px 12px;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    font-size: 0.95rem;
+}
+
+.admin-locations-access-title {
+    color: #103c7f;
+    font-family: 'Cambria, serif';
+    font-size: 1rem;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.admin-locations-access-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.admin-locations-access-item {
+    background-color: #a1db40;
+    color: #103c7f;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.admin-locations-success-card {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+}
+
+.admin-locations-success-text {
+    color: #155724;
+    margin: 0;
+    font-size: 0.95rem;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+/* Modal styles */
+.admin-locations-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.admin-locations-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.admin-locations-modal-title {
+    margin-top: 0;
+    color: #103c7f;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.admin-locations-modal-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-locations-modal-input,
+.admin-locations-modal-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-locations-modal-select {
+    height: 100px;
+}
+
+.admin-locations-modal-help {
+    color: #666;
+    font-size: 0.8rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.admin-locations-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Loading state */
+.admin-locations-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 50px;
+    font-size: 1.2rem;
+    color: #666;
+}
+
+.admin-locations-loading-spinner {
+    margin-bottom: 15px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-locations-header {
+        font-size: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .admin-locations-actions {
+        flex-direction: column;
+    }
+
+    .admin-locations-actions button {
+        width: 100%;
+    }
+
+    .admin-locations-card {
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .admin-locations-card-header {
+        font-size: 1.1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .admin-locations-card-actions {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+
+    .admin-locations-access-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+    }
+
+    .admin-locations-access-item {
+        font-size: 0.8rem;
+        padding: 4px 8px;
+    }
+
+    .admin-locations-modal-content {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    .admin-locations-modal-actions {
+        flex-direction: column;
+    }
+
+    .admin-locations-modal-actions button {
+        width: 100%;
+    }
+}

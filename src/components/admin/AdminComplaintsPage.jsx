@@ -1,89 +1,54 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    FaSpinner, 
-    FaFilter, 
-    FaCheckCircle, 
-    FaExclamationTriangle, 
+import {
+    FaSpinner,
+    FaFilter,
+    FaCheckCircle,
+    FaExclamationTriangle,
     FaMapMarkerAlt,
-    FaRegClock, 
-    FaUser, 
-    FaClipboardList, 
-    FaAngleDown, 
+    FaRegClock,
+    FaUser,
+    FaClipboardList,
+    FaAngleDown,
     FaAngleUp,
-    FaChevronLeft 
+    FaChevronLeft
 } from 'react-icons/fa';
+import '../../styles/AdminComplaintsPage.css';
 
 // --- HELPER COMPONENT: Single Complaint Card ---
 const ComplaintCard = ({ complaint, styles, statusMap, handleUpdateStatus, user }) => {
     const [showDetails, setShowDetails] = useState(false);
     const { color, icon } = statusMap[complaint.status];
 
-    const cardStyle = {
-        ...styles.orderItemCard, // Reusing card styling
-        flexDirection: 'column',
-        padding: '0', 
-        marginBottom: '15px',
-        borderLeft: `5px solid ${color}`,
-        cursor: 'pointer',
-        boxShadow: showDetails ? styles.SHADOW_ELEVATION_2 : styles.SHADOW_ELEVATION_1,
-        transition: 'box-shadow 0.2s',
-    };
-
-    const headerStyle = {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '15px',
-        borderBottom: showDetails ? `1px solid ${styles.COLOR_BACKGROUND_LIGHT}` : 'none',
-        backgroundColor: showDetails ? styles.COLOR_BACKGROUND_LIGHT : '#ffffff',
-        borderRadius: showDetails ? `${styles.BORDER_RADIUS_SM} ${styles.BORDER_RADIUS_SM} 0 0` : styles.BORDER_RADIUS_SM,
-    };
-
-    const Tag = ({ children, icon, bgColor, color }) => (
-        <span style={{ 
-            fontSize: '0.75em', 
-            padding: '4px 8px', 
-            borderRadius: styles.BORDER_RADIUS_SM, 
-            backgroundColor: bgColor || '#eee', 
-            color: color || '#333',
-            display: 'inline-flex',
-            alignItems: 'center',
-            marginRight: '8px'
-        }}>
-            {icon && <span style={{ marginRight: '5px' }}>{icon}</span>}
+    const Tag = ({ children, icon, bgColor, color, type }) => (
+        <span className={`complaint-card-tag ${type || ''}`}>
+            {icon && <span className="complaint-card-tag-icon">{icon}</span>}
             {children}
         </span>
     );
     
     return (
-        <div style={cardStyle}>
+        <div className={`complaint-card ${complaint.status.toLowerCase().replace(' ', '-')} ${showDetails ? 'expanded' : ''}`}>
             {/* Header: Clickable Summary */}
-            <div style={headerStyle} onClick={() => setShowDetails(!showDetails)}>
-                
+            <div className={`complaint-card-header ${showDetails ? 'expanded' : ''}`} onClick={() => setShowDetails(!showDetails)}>
+
                 {/* Left: Status & Type */}
-                <div style={{ flexGrow: 1 }}>
-                    <h4 style={{ margin: '0 0 5px 0', color: styles.COLOR_TEXT_DARK, display: 'flex', alignItems: 'center', fontSize: '1.1em' }}>
-                        <span style={{ color: color, marginRight: '8px' }}>{icon}</span>
+                <div className="complaint-card-left">
+                    <h4 className="complaint-card-title">
+                        <span className="complaint-card-title-icon">{icon}</span>
                         {complaint.type}
                     </h4>
-                    <small style={{ color: '#888' }}>
-                        <FaRegClock style={{ marginRight: '5px' }} /> 
+                    <small className="complaint-card-timestamp">
+                        <FaRegClock className="complaint-card-timestamp-icon" />
                         {new Date(complaint.timestamp).toLocaleString()}
                     </small>
                 </div>
 
                 {/* Right: Status Tag and Arrow */}
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <span style={{ 
-                        color: color, 
-                        fontWeight: 'bold', 
-                        padding: '5px 10px', 
-                        backgroundColor: `${color}22`, // Light background color
-                        borderRadius: styles.BORDER_RADIUS_SM 
-                    }}>
+                <div className="complaint-card-right">
+                    <span className="complaint-card-status">
                         {complaint.status}
                     </span>
-                    <span style={{ marginLeft: '10px', color: styles.COLOR_TEXT_DARK }}>
+                    <span className="complaint-card-toggle">
                         {showDetails ? <FaAngleUp /> : <FaAngleDown />}
                     </span>
                 </div>
@@ -91,81 +56,73 @@ const ComplaintCard = ({ complaint, styles, statusMap, handleUpdateStatus, user 
 
             {/* Body: Full Details and Actions (Accordion Content) */}
             {showDetails && (
-                <div style={{ padding: '15px', borderTop: '1px dashed #eee' }}>
-                    
+                <div className="complaint-card-body">
+
                     {/* Key Tags Row */}
-                    <div style={{ marginBottom: '15px' }}>
-                        <Tag icon={<FaUser />} bgColor="#e3f2fd" color={styles.PRIMARY_COLOR}>
+                    <div className="complaint-card-tags">
+                        <Tag icon={<FaUser />} type="user">
                             {complaint.userName}
                         </Tag>
-                        <Tag icon={<FaMapMarkerAlt />} bgColor="#fff3e0" color={styles.SECONDARY_COLOR}>
+                        <Tag icon={<FaMapMarkerAlt />} type="location">
                             {complaint.location}
                         </Tag>
-                        <Tag icon={<FaClipboardList />} bgColor="#f3e5f5">
+                        <Tag icon={<FaClipboardList />} type="reference">
                             Ref: {complaint.orderReference || 'N/A'}
                         </Tag>
                     </div>
 
                     {/* Detailed Description */}
-                    <div style={{ padding: '10px', backgroundColor: '#f9f9f9', borderRadius: styles.BORDER_RADIUS_SM, borderLeft: `3px solid ${color}66` }}>
-                        <p style={{ margin: 0, fontWeight: '600', color: '#555' }}>
+                    <div className="complaint-card-description">
+                        <p className="complaint-card-description-label">
                             Description:
                         </p>
-                        <p style={{ margin: '5px 0 0 0', whiteSpace: 'pre-wrap' }}>
+                        <p className="complaint-card-description-text">
                             {complaint.details}
                         </p>
                     </div>
 
                     {/* Action Buttons - Only show for admin users, not kitchen */}
                     {user.role === 'admin' && (
-                        <div style={{ marginTop: '15px', display: 'flex', gap: '10px' }}>
+                        <div className="complaint-card-actions">
 
                              {/* Resolve Button */}
                              {complaint.status !== 'Resolved' && (
-                                 <button
-                                     style={{ ...styles.successButton, padding: '8px 15px' }}
-                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'Resolved'); }}
-                                 >
-                                     <FaCheckCircle /> Resolve
-                                 </button>
-                             )}
+                                  <button
+                                      className="complaint-card-resolve-btn success-button"
+                                      onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'Resolved'); }}
+                                  >
+                                      <FaCheckCircle /> Resolve
+                                  </button>
+                              )}
 
                              {/* Start Review Button */}
                              {complaint.status === 'New' && (
-                                 <button
-                                     style={{ ...styles.primaryButton, padding: '8px 15px', backgroundColor: styles.PRIMARY_COLOR }}
-                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'In Progress'); }}
-                                 >
-                                     Start Review
-                                 </button>
-                             )}
+                                  <button
+                                      className="complaint-card-review-btn primary-button"
+                                      onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'In Progress'); }}
+                                  >
+                                      Start Review
+                                  </button>
+                              )}
 
                              {/* Mark New (If In Progress) */}
                              {complaint.status === 'In Progress' && (
-                                 <button
-                                     style={{ ...styles.secondaryButton, padding: '8px 15px' }}
-                                     onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'New'); }}
-                                 >
-                                     Revert to New
-                                 </button>
-                             )}
-                         </div>
-                    )}
+                                  <button
+                                      className="complaint-card-revert-btn secondary-button"
+                                      onClick={(e) => { e.stopPropagation(); handleUpdateStatus(complaint._id, 'New'); }}
+                                  >
+                                      Revert to New
+                                  </button>
+                              )}
+                          </div>
+                     )}
 
-                    {/* Read-only message for kitchen users */}
-                    {user.role === 'kitchen' && (
-                        <div style={{
-                            marginTop: '15px',
-                            padding: '10px',
-                            backgroundColor: '#f8f9fa',
-                            borderRadius: '8px',
-                            textAlign: 'center',
-                            color: '#666',
-                            fontSize: '0.9rem'
-                        }}>
-                            Kitchen staff can view complaints but cannot update status.
-                        </div>
-                    )}
+                     {/* Read-only message for kitchen users */}
+                     {user.role === 'kitchen' && (
+                         <div className="complaint-card-kitchen-msg">
+                             Kitchen staff can view complaints but cannot update status.
+                         </div>
+                     )}
                 </div>
             )}
         </div>
@@ -244,34 +201,20 @@ const AdminComplaintsPage = ({ setPage, user, callApi, styles }) => {
         return acc;
     }, {});
     
-    if (loading) return <div style={styles.loadingContainer}><FaSpinner className="spinner" size={30} /> Loading Complaints...</div>;
+    if (loading) return <div className="loading-container"><FaSpinner className="spinner" size={30} /> Loading Complaints...</div>;
 
     return (
-        <div style={styles.screenPadding}>
-            <h2 style={{ ...styles.headerText, marginBottom: '5px' }}>Feedback Triage Center 🚨</h2>
-            <p style={{ color: '#888', marginBottom: '20px' }}>Total feedback items: {complaints.length}</p>
-            
+        <div className="admin-complaints-container">
+            <h2 className="admin-complaints-header">Feedback Triage Center 🚨</h2>
+            <p className="admin-complaints-subtitle">Total feedback items: {complaints.length}</p>
+
             {/* 1. Tabbed Filter Controls */}
-            <div style={{ display: 'flex', gap: '1px', marginBottom: '20px', borderBottom: `2px solid #ddd` }}>
+            <div className="admin-complaints-filter-tabs">
                 {Object.keys(statusMap).map(status => (
-                    <button 
+                    <button
                         key={status}
                         onClick={() => setFilterStatus(status)}
-                        style={{
-                            padding: '10px 15px',
-                            cursor: 'pointer',
-                            backgroundColor: filterStatus === status ? '#fff' : '#f8f8f8',
-                            border: 'none',
-                            borderTop: filterStatus === status ? `2px solid ${statusMap[status].color}` : 'none',
-                            borderLeft: '1px solid #eee',
-                            borderRight: '1px solid #eee',
-                            color: filterStatus === status ? statusMap[status].color : '#666',
-                            fontWeight: filterStatus === status ? '700' : '500',
-                            flexGrow: 1,
-                            borderRadius: '5px 5px 0 0',
-                            transform: filterStatus === status ? 'translateY(1px)' : 'translateY(0)',
-                            transition: 'all 0.2s'
-                        }}
+                        className={`admin-complaints-filter-tab ${status.toLowerCase().replace(' ', '-')} ${filterStatus === status ? 'active' : ''}`}
                     >
                         {statusMap[status].icon} {status} ({statusCounts[status] || 0})
                     </button>
@@ -279,9 +222,9 @@ const AdminComplaintsPage = ({ setPage, user, callApi, styles }) => {
             </div>
 
             {/* 2. Complaints List */}
-            <div style={styles.listContainer}>
+            <div className="admin-complaints-list">
                 {filteredComplaints.length === 0 ? (
-                    <p style={{ textAlign: 'center', padding: '30px', backgroundColor: '#fff', borderRadius: styles.BORDER_RADIUS_SM, boxShadow: styles.SHADOW_ELEVATION_1, marginTop: '20px' }}>
+                    <p className="admin-complaints-empty">
                         No **{filterStatus}** complaints. Great job!
                     </p>
                 ) : (
@@ -297,9 +240,9 @@ const AdminComplaintsPage = ({ setPage, user, callApi, styles }) => {
                     ))
                 )}
             </div>
-            
+
             <button
-                style={{ ...styles.secondaryButton, marginTop: '30px', marginBottom: '20px' }}
+                className="admin-complaints-back-btn secondary-button"
                 onClick={() => setPage(user.role === 'admin' ? 'admin-dashboard' : 'kitchen-dashboard')}
             >
                 <FaChevronLeft /> Back to Dashboard

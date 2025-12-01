@@ -89,11 +89,12 @@ function App() {
         // USER PAGES
         if (page === 'home') {
             return (
-                <UserHomePage 
-                    setPage={setPage} 
-                    currentOrder={currentOrder} 
-                    setCurrentOrder={setCurrentOrder} 
-                    styles={styles} 
+                <UserHomePage
+                    setPage={setPage}
+                    currentOrder={currentOrder}
+                    setCurrentOrder={setCurrentOrder}
+                    user={user}
+                    styles={styles}
                 />
             );
         }

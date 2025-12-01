@@ -1,0 +1,312 @@
+/* AdminMenuPage.css */
+.admin-menu-container {
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-menu-header {
+    font-family: 'Cambria, serif';
+    color: #103c7f;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-menu-header-icon {
+    margin-right: 10px;
+}
+
+.admin-menu-actions {
+    margin-bottom: 30px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.admin-menu-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-menu-category-header {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #103c7f;
+    font-family: 'Cambria, serif';
+    margin-bottom: 15px;
+    border-bottom: 2px solid #a1db40;
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.admin-menu-category-actions {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.admin-menu-edit-btn,
+.admin-menu-delete-btn,
+.admin-menu-image-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.admin-menu-edit-btn {
+    color: #007aff;
+}
+
+.admin-menu-edit-btn:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.admin-menu-delete-btn {
+    color: #ff3b30;
+}
+
+.admin-menu-delete-btn:hover {
+    background-color: rgba(255, 59, 48, 0.1);
+}
+
+.admin-menu-image-btn {
+    color: #28a745;
+    font-size: 0.8rem;
+}
+
+.admin-menu-image-btn:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.admin-menu-add-btn {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+}
+
+.admin-menu-item-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.admin-menu-item {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
+    text-align: center;
+    position: relative;
+}
+
+.admin-menu-item-actions {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    gap: 2px;
+}
+
+.admin-menu-item-edit,
+.admin-menu-item-image,
+.admin-menu-item-delete {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 2px;
+    border-radius: 2px;
+    transition: background-color 0.2s;
+}
+
+.admin-menu-item-edit {
+    color: #007aff;
+}
+
+.admin-menu-item-edit:hover {
+    background-color: rgba(0, 122, 255, 0.1);
+}
+
+.admin-menu-item-image {
+    color: #28a745;
+}
+
+.admin-menu-item-image:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+}
+
+.admin-menu-item-delete {
+    color: #ff3b30;
+}
+
+.admin-menu-item-delete:hover {
+    background-color: rgba(255, 59, 48, 0.1);
+}
+
+.admin-menu-no-items {
+    color: #666;
+    font-style: italic;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.admin-menu-success-card {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+}
+
+.admin-menu-success-text {
+    color: #155724;
+    margin: 0;
+    font-size: 0.95rem;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+/* Sugar levels special styling */
+.admin-menu-sugar-item {
+    position: relative;
+}
+
+.admin-menu-sugar-item.default {
+    background-color: #a1db40;
+    color: #103c7f;
+}
+
+.admin-menu-sugar-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: none;
+    border: none;
+    color: #ff3b30;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+/* Modal styles */
+.admin-menu-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.admin-menu-modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.admin-menu-modal-title {
+    margin-top: 0;
+    color: #103c7f;
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.admin-menu-modal-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-menu-modal-input,
+.admin-menu-modal-select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-menu-modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-menu-header {
+        font-size: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .admin-menu-actions {
+        flex-direction: column;
+    }
+
+    .admin-menu-actions button {
+        width: 100%;
+    }
+
+    .admin-menu-card {
+        padding: 15px;
+        margin: 10px 0;
+    }
+
+    .admin-menu-category-header {
+        font-size: 1.1rem;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .admin-menu-category-actions {
+        margin-top: 10px;
+    }
+
+    .admin-menu-item-list {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .admin-menu-item {
+        padding: 10px;
+        font-size: 0.9rem;
+    }
+
+    .admin-menu-modal-content {
+        padding: 20px;
+        margin: 20px;
+    }
+
+    .admin-menu-modal-actions {
+        flex-direction: column;
+    }
+
+    .admin-menu-modal-actions button {
+        width: 100%;
+    }
+}

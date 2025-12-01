@@ -1,0 +1,292 @@
+/* UserHomePage.css */
+.user-home-container {
+    max-width: 480px;
+    margin: 0 auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: #fcfcfc;
+    min-height: 100vh;
+    font-family: 'Inter, system-ui, sans-serif';
+}
+
+.user-home-screen-padding {
+    padding: 0 0 30px 0;
+    min-height: 100vh;
+    background-color: #fcfcfc;
+}
+
+.user-home-content-area {
+    padding: 0 24px;
+}
+
+/* Header Banner */
+.user-home-header-banner {
+    height: 200px;
+    width: 100%;
+    margin-bottom: 30px;
+    border-radius: 0 0 18px 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.user-home-background-image {
+    background-size: cover;
+    background-position: center;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.user-home-banner-title {
+    font-size: 2rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.9);
+    line-height: 1.1;
+    margin: 0;
+    font-family: 'Cambria, serif';
+}
+
+.user-home-banner-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    margin-top: 8px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+    margin: 0;
+}
+
+/* Typography */
+.user-home-header-text {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #212121;
+    margin-bottom: 20px;
+    border-left: 5px solid #a1db40;
+    padding-left: 10px;
+    font-family: 'Cambria, serif';
+}
+
+.user-home-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #212121;
+    margin-top: 20px;
+    margin-bottom: 8px;
+}
+
+.user-home-item-header {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #212121;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+/* Slot Selection */
+.user-home-slot-container {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.user-home-slot-button {
+    flex: 1 1 48%;
+    min-width: 100px;
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    background-color: #ffffff;
+    color: #212121;
+    font-weight: 600;
+    font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transform: scale(1);
+    display: flex;
+    flex-direction: column;
+}
+
+.user-home-slot-button.selected {
+    background-color: #103c7f;
+    color: #ffffff;
+    font-weight: 700;
+    box-shadow: 0 8px 20px rgba(161, 219, 64, 0.5);
+    transform: scale(1.03);
+    border: none;
+}
+
+.user-home-small-text {
+    font-size: 0.75rem;
+    color: #757575;
+    font-weight: 500;
+    display: block;
+    margin-top: 5px;
+}
+
+.user-home-slot-button.selected .user-home-small-text {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* Item Selection */
+.user-home-item-selection-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.user-home-item-button {
+    width: 100%;
+    height: 150px;
+    padding: 0;
+    border-radius: 10px;
+    border: none;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: #ffffff;
+    text-align: left;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.user-home-item-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-home-image-container {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.user-home-item-text {
+    margin: 0;
+    display: block;
+    padding: 10px 15px;
+    color: #212121;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+/* Break Card */
+.user-home-break-card {
+    margin-top: 40px;
+    background-color: #FFFFFF;
+    border-radius: 18px;
+    padding: 30px 25px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin: 40px 24px 0 24px;
+    width: auto;
+    border: 1px solid #f0f0f0;
+}
+
+.user-home-break-title {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #103c7f;
+    margin-bottom: 10px;
+    font-family: 'Cambria, serif';
+}
+
+.user-home-break-subtitle {
+    font-size: 0.9rem;
+    color: #757575;
+    margin: 0 0 10px 0;
+}
+
+.user-home-break-inspiration {
+    font-size: 1rem;
+    color: #212121;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .user-home-container {
+        max-width: 100%;
+    }
+
+    .user-home-header-banner {
+        height: 180px;
+        margin-bottom: 20px;
+    }
+
+    .user-home-banner-title {
+        font-size: 1.8rem;
+    }
+
+    .user-home-banner-subtitle {
+        font-size: 0.9rem;
+    }
+
+    .user-home-header-text {
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+    }
+
+    .user-home-slot-container {
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .user-home-slot-button {
+        flex: 1 1 48%;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .user-home-small-text {
+        font-size: 0.7rem;
+    }
+
+    .user-home-item-selection-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .user-home-item-button {
+        height: 130px;
+    }
+
+    .user-home-item-text {
+        padding: 8px 12px;
+        font-size: 1rem;
+    }
+
+    .user-home-break-card {
+        margin: 30px 16px 0 16px;
+        padding: 20px 15px;
+    }
+
+    .user-home-break-title {
+        font-size: 1.4rem;
+    }
+
+    .user-home-break-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .user-home-break-inspiration {
+        font-size: 0.95rem;
+    }
+}

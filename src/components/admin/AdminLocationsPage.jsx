@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaSpinner, FaChevronLeft, FaMapMarkerAlt, FaBuilding, FaHome, FaIndustry, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import { getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
+import '../../styles/AdminLocationsPage.css';
 
 const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
     const [loading, setLoading] = useState(false);
@@ -8,74 +9,6 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState({ type: '', index: -1, name: '', location: '', access: 'Own seat' });
 
-    // Enhanced styles with Calibri/Cambria fonts and specified colors
-    const enhancedStyles = {
-        ...styles,
-        appContainer: {
-            ...styles.appContainer,
-            fontFamily: 'Calibri, Arial, sans-serif',
-        },
-        headerText: {
-            ...styles.headerText,
-            fontFamily: 'Cambria, serif',
-            color: '#103c7f', // Dark Blue
-            fontSize: '2rem',
-            fontWeight: '700',
-            marginBottom: '20px',
-        },
-        secondaryButton: {
-            ...styles.secondaryButton,
-            fontFamily: 'Calibri, Arial, sans-serif',
-            fontSize: '1rem',
-            fontWeight: '600',
-        },
-        locationCard: {
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            padding: '20px',
-            margin: '15px 0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            border: '1px solid #ddd',
-            fontFamily: 'Calibri, Arial, sans-serif',
-        },
-        locationHeader: {
-            fontSize: '1.3rem',
-            fontWeight: '700',
-            color: '#103c7f', // Dark Blue
-            fontFamily: 'Cambria, serif',
-            marginBottom: '10px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-        },
-        locationDetail: {
-            margin: '8px 0',
-            padding: '8px 12px',
-            backgroundColor: '#f8f9fa',
-            borderRadius: '6px',
-            border: '1px solid #e9ecef',
-            fontSize: '0.95rem',
-        },
-        accessList: {
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-            gap: '8px',
-            marginTop: '10px',
-        },
-        accessItem: {
-            backgroundColor: '#a1db40', // Green
-            color: '#103c7f', // Dark Blue
-            padding: '6px 10px',
-            borderRadius: '6px',
-            fontSize: '0.85rem',
-            fontWeight: '600',
-            textAlign: 'center',
-        },
-        screenPadding: {
-            ...styles.screenPadding,
-            fontFamily: 'Calibri, Arial, sans-serif',
-        },
-    };
 
     // Location type icons
     const getLocationIcon = (locationName) => {
@@ -146,27 +79,28 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
     }, []);
 
     if (loading) return (
-        <div style={enhancedStyles.loadingContainer}>
-            <FaSpinner className="spinner" size={30} /> Loading Locations...
+        <div className="admin-locations-loading">
+            <FaSpinner className="admin-locations-loading-spinner" size={30} />
+            Loading Locations...
         </div>
     );
 
     return (
-        <div style={enhancedStyles.screenPadding}>
-            <h2 style={enhancedStyles.headerText}>
-                <FaMapMarkerAlt style={{ marginRight: '10px' }} />
+        <div className="admin-locations-container">
+            <h2 className="admin-locations-header">
+                <FaMapMarkerAlt className="admin-locations-header-icon" />
                 Location Management
             </h2>
 
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <div className="admin-locations-actions">
                 <button
-                    style={enhancedStyles.secondaryButton}
+                    className="secondary-button"
                     onClick={() => setPage('admin-dashboard')}
                 >
                     <FaChevronLeft /> Back to Admin Dashboard
                 </button>
                 <button
-                    style={enhancedStyles.primaryButton}
+                    className="primary-button"
                     onClick={() => openModal('add')}
                 >
                     <FaPlus /> Add Location
@@ -175,19 +109,19 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
 
             {/* Location Cards */}
             {locations.map((location, index) => (
-                <div key={location.id} style={enhancedStyles.locationCard}>
-                    <h3 style={enhancedStyles.locationHeader}>
+                <div key={location.id} className="admin-locations-card">
+                    <h3 className="admin-locations-card-header">
                         {getLocationIcon(location.location)} {location.name}
-                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '5px' }}>
+                        <div className="admin-locations-card-actions">
                             <button
-                                style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '1.2rem' }}
+                                className="admin-locations-edit-btn"
                                 onClick={() => openModal('edit', index, location.name, location.location, location.access)}
                                 title="Edit Location"
                             >
                                 <FaEdit />
                             </button>
                             <button
-                                style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '1.2rem' }}
+                                className="admin-locations-delete-btn"
                                 onClick={() => removeLocation(index)}
                                 title="Remove Location"
                             >
@@ -196,25 +130,21 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
                         </div>
                     </h3>
 
-                    <div style={enhancedStyles.locationDetail}>
+                    <div className="admin-locations-detail">
                         <strong>Location:</strong> {location.location}
                     </div>
 
-                    <div style={enhancedStyles.locationDetail}>
+                    <div className="admin-locations-detail">
                         <strong>Access Level:</strong> {location.access}
                     </div>
 
-                    <div style={{ marginTop: '15px' }}>
-                        <strong style={{
-                            color: '#103c7f',
-                            fontFamily: 'Cambria, serif',
-                            fontSize: '1rem'
-                        }}>
+                    <div>
+                        <strong className="admin-locations-access-title">
                             Allowed Delivery Locations:
                         </strong>
-                        <div style={enhancedStyles.accessList}>
+                        <div className="admin-locations-access-list">
                             {getAllowedLocations(location.location, location.access).map(loc => (
-                                <div key={loc.key} style={enhancedStyles.accessItem}>
+                                <div key={loc.key} className="admin-locations-access-item">
                                     {loc.name}
                                 </div>
                             ))}
@@ -224,14 +154,14 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
             ))}
 
             {/* Table Numbers Section */}
-            <div style={enhancedStyles.locationCard}>
-                <h3 style={enhancedStyles.locationHeader}>
+            <div className="admin-locations-card">
+                <h3 className="admin-locations-card-header">
                     <FaBuilding style={{ marginRight: '8px' }} />
                     Table Numbers (For "Others" Location)
                 </h3>
-                <div style={enhancedStyles.accessList}>
+                <div className="admin-locations-access-list">
                     {Array.from({ length: 25 }, (_, i) => i + 1).map(tableNum => (
-                        <div key={tableNum} style={enhancedStyles.accessItem}>
+                        <div key={tableNum} className="admin-locations-access-item">
                             Table {tableNum}
                         </div>
                     ))}
@@ -239,18 +169,8 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
             </div>
 
             {/* Note about persistence */}
-            <div style={{
-                ...enhancedStyles.locationCard,
-                backgroundColor: '#d4edda',
-                border: '1px solid #c3e6cb',
-                textAlign: 'center'
-            }}>
-                <p style={{
-                    color: '#155724',
-                    margin: 0,
-                    fontSize: '0.95rem',
-                    fontFamily: 'Calibri, Arial, sans-serif'
-                }}>
+            <div className="admin-locations-card admin-locations-success-card">
+                <p className="admin-locations-success-text">
                     <strong>Success:</strong> Location data is now dynamically managed and saved to the database.
                     Changes are instantly reflected across all users and kitchen staff.
                 </p>
@@ -258,28 +178,28 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
 
             {/* Modal for Add/Edit */}
             {showModal && (
-                <div style={styles.modalOverlay}>
-                    <div style={styles.modalContent}>
-                        <h3 style={{ marginTop: 0, color: '#103c7f' }}>
+                <div className="admin-locations-modal-overlay">
+                    <div className="admin-locations-modal-content">
+                        <h3 className="admin-locations-modal-title">
                             {modalData.type === 'add' ? 'Add Location' : 'Edit Location'}
                         </h3>
-                        <label style={styles.label}>Name:</label>
+                        <label className="admin-locations-modal-label">Name:</label>
                         <input
                             type="text"
                             value={modalData.name}
                             onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
                             placeholder="Enter location name"
-                            style={styles.inputField}
+                            className="admin-locations-modal-input"
                         />
-                        <label style={styles.label}>Address:</label>
+                        <label className="admin-locations-modal-label">Address:</label>
                         <input
                             type="text"
                             value={modalData.location}
                             onChange={(e) => setModalData({ ...modalData, location: e.target.value })}
                             placeholder="Enter location address"
-                            style={styles.inputField}
+                            className="admin-locations-modal-input"
                         />
-                        <label style={styles.label}>Access Level:</label>
+                        <label className="admin-locations-modal-label">Access Level:</label>
                         <select
                             multiple
                             value={modalData.access === 'All' ? ['All'] : modalData.access.split(',').map(a => a.trim()).filter(a => a)}
@@ -288,7 +208,7 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
                                 const access = selected.includes('All') ? 'All' : selected.join(',');
                                 setModalData({ ...modalData, access });
                             }}
-                            style={{ ...styles.selectField, height: '100px' }}
+                            className="admin-locations-modal-select"
                         >
                             <option value="All">All</option>
                             <option value="Own seat">Own seat</option>
@@ -305,12 +225,12 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
                                 <option key={i+1} value={`Seat_${i+1}`}>Seat {i+1}</option>
                             ))}
                         </select>
-                        <small style={{ color: '#666', fontSize: '0.8rem' }}>Hold Ctrl/Cmd to select multiple. "All" overrides others.</small>
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                            <button style={styles.primaryButton} onClick={saveModal}>
+                        <small className="admin-locations-modal-help">Hold Ctrl/Cmd to select multiple. "All" overrides others.</small>
+                        <div className="admin-locations-modal-actions">
+                            <button className="primary-button" onClick={saveModal}>
                                 Save
                             </button>
-                            <button style={styles.secondaryButton} onClick={closeModal}>
+                            <button className="secondary-button" onClick={closeModal}>
                                 Cancel
                             </button>
                         </div>

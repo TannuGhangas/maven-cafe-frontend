@@ -1,0 +1,264 @@
+/* OrderCard.css */
+.order-card {
+    background: #fff;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-left: 6px solid #666;
+    transition: all 0.3s ease;
+}
+
+.order-card.placed {
+    border-left-color: #666;
+}
+
+.order-card.making {
+    border-left-color: #103c7f;
+}
+
+.order-card.ready {
+    border-left-color: #28a745;
+}
+
+.order-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.order-customer-name {
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.order-quantity {
+    font-weight: 700;
+    font-size: 24px;
+    color: #103c7f;
+}
+
+.order-details {
+    margin-bottom: 15px;
+}
+
+.order-summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 3px 0;
+    align-items: center;
+}
+
+.order-summary-label {
+    font-size: 1em;
+    font-weight: 500;
+    color: #333333;
+    min-width: 100px;
+}
+
+.order-summary-value {
+    font-size: 1em;
+    font-weight: 700;
+    color: #333333;
+    text-align: right;
+}
+
+.order-preparation-section {
+    background: #f7f7f7;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+}
+
+.order-preparation-title {
+    font-weight: 700;
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.order-item-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    background-color: #fff;
+    border: 1px solid #eee;
+}
+
+.order-item-details {
+    flex: 1;
+}
+
+.order-item-quantity {
+    font-weight: 800;
+    font-size: 15px;
+    color: #103c7f;
+    margin-bottom: 4px;
+}
+
+.order-prep-detail {
+    font-size: 14px;
+    margin-top: 4px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.order-custom-location {
+    font-size: 13px;
+    color: darkblue;
+    margin-top: 5px;
+}
+
+.order-action-buttons {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 6px;
+}
+
+.order-action-button {
+    flex: 1;
+    background-color: #103c7f;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 36px;
+    font-family: 'Calibri, Arial, sans-serif';
+    padding: 8px 10px;
+    transition: all 0.3s ease;
+}
+
+.order-action-button.delivered {
+    background-color: #a1db40;
+    color: #333333;
+}
+
+.order-action-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.order-expand-toggle {
+    border-top: 1px dashed #eee;
+    padding-top: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+
+.order-expanded-content {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #f0f0f0;
+    border-radius: 4px;
+    background: #fafafa;
+}
+
+.order-expanded-title {
+    margin: 0 0 10px 0;
+    border-bottom: 1px dotted #ccc;
+    padding-bottom: 5px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.order-group-item {
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    background-color: #fff;
+    border-left: 4px solid #aaa;
+}
+
+.order-group-title {
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.order-group-detail {
+    font-size: 13px;
+    padding: 2px 0;
+    border-top: 1px dotted #eee;
+    color: #555;
+}
+
+.order-group-detail:first-child {
+    border-top: none;
+}
+
+/* Mobile responsive */
+@media (min-width: 768px) {
+    .order-card {
+        padding: 20px;
+    }
+
+    .order-card-header {
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+    }
+
+    .order-customer-name {
+        font-size: 20px;
+    }
+
+    .order-quantity {
+        font-size: 28px;
+    }
+
+    .order-details {
+        margin-bottom: 20px;
+    }
+
+    .order-preparation-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .order-preparation-title {
+        font-size: 18px;
+    }
+
+    .order-item-row {
+        padding: 10px 12px;
+    }
+
+    .order-item-quantity {
+        font-size: 16px;
+    }
+
+    .order-action-buttons {
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+    .order-action-button {
+        font-size: 1rem;
+        height: 48px;
+        padding: 12px 15px;
+    }
+
+    .order-expand-toggle {
+        font-size: 16px;
+        padding-top: 15px;
+    }
+
+    .order-expanded-content {
+        margin-top: 15px;
+        padding: 15px;
+    }
+}

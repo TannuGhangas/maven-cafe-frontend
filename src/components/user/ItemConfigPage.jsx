@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronLeft, FaMinus, FaPlus, FaSpinner } from 'react-icons/fa'; // Import FaMinus and FaPlus
+import { callApi } from '../../api/apiService';
 // Import the centralized theme styles and external constants
 import { STYLES_THEME } from './UserHomePage';
 import {
@@ -171,14 +172,20 @@ const ImageBanner = ({ itemType, imageUrl }) => {
     );
 };
 
-// Helper function to get menu types from localStorage
-const getMenuTypes = (itemType) => {
+// Helper function to get menu types from server
+const getMenuTypes = async (itemType, user) => {
     try {
-        const saved = localStorage.getItem('adminMenuCategories');
-        if (saved) {
-            const categories = JSON.parse(saved);
-            const cat = categories.find(c => c.name.toLowerCase() === itemType);
-            return cat ? cat.items : [];
+        const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
+        if (menu && menu.categories) {
+            const cat = menu.categories.find(c => c.name.toLowerCase() === itemType);
+            if (cat && cat.items) {
+                // For specific items, only show "normal"
+                const specificItems = ['shikanji', 'maggie', 'oats', 'soup', 'jaljeera'];
+                if (specificItems.includes(itemType.toLowerCase())) {
+                    return ['normal'];
+                }
+                return cat.items;
+            }
         }
     } catch {}
     // Default fallbacks
@@ -187,6 +194,11 @@ const getMenuTypes = (itemType) => {
         tea: ["Black", "Milk", "Green"],
         milk: ["Hot", "Cold"],
         water: ["Warm", "Cold", "Hot", "Lemon"],
+        shikanji: ["normal"],
+        maggie: ["normal"],
+        oats: ["normal"],
+        soup: ["normal"],
+        jaljeera: ["normal"],
     };
     return defaults[itemType] || [];
 };
@@ -231,15 +243,22 @@ const styles = ENHANCED_STYLES;
 
 const [userLocations, setUserLocations] = useState([]);
 
-// Get dynamic data
-const typeOptions = getMenuTypes(itemType);
+// State for dynamic data
+const [typeOptions, setTypeOptions] = useState([]);
 const SUGAR_LEVELS = getSugarLevels();
 const ADD_ONS = getAddOns();
 
 useEffect(() => {
     // Locations are now handled statically from constants
     setUserLocations(USER_LOCATIONS_DATA);
-}, []);
+
+    // Fetch type options
+    const fetchTypeOptions = async () => {
+        const options = await getMenuTypes(itemType, user);
+        setTypeOptions(options);
+    };
+    fetchTypeOptions();
+}, [itemType]);
 
 // --- START USER LOCATION LOGIC ---
 // Use the actual logged-in user
@@ -283,23 +302,20 @@ const defaultLocationKey = allowedLocations[0]?.key || 'Others';
         }
     }, [itemConfig.sugarLevel]);
 
-    useEffect(() => {
-        // Ensure the type is set, defaulting to itemType if no options exist.
-        if (!isEditMode) {
-            if (typeOptions.length > 0 && itemConfig.type === itemType) {
-                 // For items with types, ensure the first type is selected if no previous type was set
-                 setItemConfig(prev => ({ ...prev, type: typeOptions[0] }));
-            } else if (typeOptions.length === 0 && itemConfig.type !== itemType) {
-                 // For items without types (like jaljeera, maggie), ensure type is set to itemType
-                 setItemConfig(prev => ({ ...prev, type: itemType }));
-            }
-        }
+useEffect(() => {
+    // Ensure the type is set, defaulting to itemType if no options exist.
+    if (!isEditMode && typeOptions.length > 0) {
+        if (itemConfig.type === itemType || !itemConfig.type) {
+            // Set to first option
+            setItemConfig(prev => ({ ...prev, type: typeOptions[0] }));
+        }
+    }
 
-        // If in edit mode, ensure the default location is set if the current one is somehow invalid
-        if (isEditMode && !itemConfig.location && defaultLocationKey) {
-             setItemConfig(prev => ({ ...prev, location: defaultLocationKey }));
-        }
-    }, [isEditMode, itemType, typeOptions, defaultLocationKey]);
+    // If in edit mode, ensure the default location is set if the current one is somehow invalid
+    if (isEditMode && !itemConfig.location && defaultLocationKey) {
+        setItemConfig(prev => ({ ...prev, location: defaultLocationKey }));
+    }
+}, [isEditMode, itemType, typeOptions, defaultLocationKey]);
     
     // Handler for toggling Type/Add-Ons/Sugar Level
     const handleToggle = (key, value) => {

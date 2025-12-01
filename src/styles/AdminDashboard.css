@@ -1,0 +1,116 @@
+/* AdminDashboard.css */
+.admin-dashboard-container {
+    font-family: 'Calibri, Arial, sans-serif';
+}
+
+.admin-dashboard-header {
+    font-family: 'Cambria, serif';
+    color: #103c7f;
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.admin-dashboard-welcome {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.admin-dashboard-welcome-text {
+    font-size: 1.2rem;
+    color: #666;
+    font-family: 'Calibri, Arial, sans-serif';
+    margin-bottom: 20px;
+}
+
+.admin-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.admin-dashboard-card {
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px 0;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 1px solid #ddd;
+    text-align: center;
+    font-family: 'Calibri, Arial, sans-serif';
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.admin-dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.admin-dashboard-card-icon {
+    font-size: 3rem;
+    color: #103c7f;
+    margin-bottom: 15px;
+}
+
+.admin-dashboard-card-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #103c7f;
+    font-family: 'Cambria, serif';
+    margin-bottom: 10px;
+}
+
+.admin-dashboard-card-description {
+    font-size: 1rem;
+    color: #666;
+    font-family: 'Calibri, Arial, sans-serif';
+    line-height: 1.5;
+}
+
+.admin-dashboard-footer {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.admin-dashboard-footer-text {
+    color: #666;
+    font-family: 'Calibri, Arial, sans-serif';
+    font-size: 0.9rem;
+    margin-bottom: 15px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .admin-dashboard-header {
+        font-size: 2rem;
+    }
+
+    .admin-dashboard-welcome-text {
+        font-size: 1rem;
+    }
+
+    .admin-dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .admin-dashboard-card {
+        padding: 20px;
+        margin: 15px 0;
+    }
+
+    .admin-dashboard-card-icon {
+        font-size: 2.5rem;
+    }
+
+    .admin-dashboard-card-title {
+        font-size: 1.3rem;
+    }
+
+    .admin-dashboard-card-description {
+        font-size: 0.9rem;
+    }
+}

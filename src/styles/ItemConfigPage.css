@@ -1,0 +1,226 @@
+/* ItemConfigPage.css */
+.item-config-container {
+    max-width: 480px;
+    margin: 0 auto;
+    background-color: #fcfcfc;
+    min-height: 100vh;
+    font-family: 'Inter, system-ui, sans-serif';
+}
+
+.item-config-header {
+    background-size: cover;
+    background-position: center;
+    height: 180px;
+    width: 100%;
+    margin-bottom: 20px;
+    border-radius: 0 0 18px 18px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 24px;
+    text-align: center;
+}
+
+.item-config-back-btn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    color: #103c7f;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.item-config-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #ffffff;
+    text-shadow: 0 3px 8px rgba(0, 0, 0, 0.9);
+    line-height: 1.1;
+    margin: 0;
+    font-family: 'Cambria, serif';
+}
+
+.item-config-subtitle {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.95);
+    font-weight: 500;
+    margin-top: 8px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.item-config-content {
+    padding: 0 24px;
+}
+
+.item-config-form-group {
+    margin-bottom: 20px;
+}
+
+.item-config-label {
+    display: block;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #212121;
+    margin-bottom: 8px;
+}
+
+.item-config-input,
+.item-config-select,
+.item-config-textarea {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    box-sizing: border-box;
+    font-size: 1rem;
+    background-color: #ffffff;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+    transition: border-color 0.3s;
+}
+
+.item-config-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.item-config-options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.item-config-option-btn {
+    padding: 12px 8px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    color: #212121;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s;
+    text-align: center;
+}
+
+.item-config-option-btn.selected {
+    background-color: #103c7f;
+    color: #ffffff;
+    border-color: #103c7f;
+}
+
+.item-config-option-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.item-config-actions {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    flex-direction: column;
+}
+
+.item-config-add-btn,
+.item-config-order-btn {
+    width: 100%;
+    padding: 18px;
+    border-radius: 10px;
+    border: none;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.item-config-add-btn {
+    background-color: #a1db40;
+    color: #212121;
+    border: 1px solid #a1db40;
+    box-shadow: 0 6px 15px rgba(161, 219, 64, 0.5);
+}
+
+.item-config-order-btn {
+    background-color: #103c7f;
+    color: white;
+    box-shadow: 0 6px 15px rgba(16, 60, 127, 0.6);
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .item-config-container {
+        max-width: 100%;
+    }
+
+    .item-config-header {
+        height: 160px;
+        margin-bottom: 15px;
+    }
+
+    .item-config-title {
+        font-size: 1.6rem;
+    }
+
+    .item-config-subtitle {
+        font-size: 0.85rem;
+    }
+
+    .item-config-back-btn {
+        width: 32px;
+        height: 32px;
+        top: 12px;
+        left: 12px;
+    }
+
+    .item-config-content {
+        padding: 0 20px;
+    }
+
+    .item-config-form-group {
+        margin-bottom: 15px;
+    }
+
+    .item-config-input,
+    .item-config-select,
+    .item-config-textarea {
+        padding: 12px;
+        font-size: 0.95rem;
+    }
+
+    .item-config-options-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .item-config-option-btn {
+        padding: 10px 6px;
+        font-size: 0.85rem;
+    }
+
+    .item-config-actions {
+        margin-top: 20px;
+        gap: 12px;
+    }
+
+    .item-config-add-btn,
+    .item-config-order-btn {
+        padding: 16px;
+        font-size: 1rem;
+    }
+}

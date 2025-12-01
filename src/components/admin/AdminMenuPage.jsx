@@ -13,7 +13,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
     const [sugarLevels, setSugarLevels] = useState([]);
     const [itemImages, setItemImages] = useState({});
     const [showModal, setShowModal] = useState(false);
-    const [modalData, setModalData] = useState({ type: '', category: '', index: -1, value: '', name: '', icon: '', color: '', image: '' });
+    const [modalData, setModalData] = useState({ type: '', category: '', index: -1, value: '', name: '', icon: '', color: '' });
 
     // Enhanced styles with Calibri/Cambria fonts and specified colors
     const enhancedStyles = {
@@ -86,18 +86,18 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
     const openModal = (type, category = '', index = -1, value = '') => {
         if (type === 'editCategory') {
             const cat = menuCategories[index];
-            setModalData({ type, index, name: cat.name, icon: cat.icon, color: cat.color, image: cat.image });
+            setModalData({ type, index, name: cat.name, icon: cat.icon, color: cat.color });
         } else if (type === 'editImage') {
             setModalData({ type, category, index, value, image: itemImages[value.toLowerCase()] || '' });
         } else {
-            setModalData({ type, category, index, value, name: '', icon: '', color: '', image: '' });
+            setModalData({ type, category, index, value, name: '', icon: '', color: '' });
         }
         setShowModal(true);
     };
 
     const closeModal = () => {
         setShowModal(false);
-        setModalData({ type: '', category: '', index: -1, value: '' });
+        setModalData({ type: '', category: '', index: -1, value: '', name: '', icon: '', color: '' });
     };
 
     const saveModal = () => {
@@ -105,9 +105,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
 
         if (type === 'editCategory') {
             if (!name.trim()) return;
-            editCategory(index, { name: name.trim(), icon, color, image });
-        } else if (type === 'editImage') {
-            updateItemImage(value, image);
+            editCategory(index, { name: name.trim(), icon, color });
         } else if (type === 'addItem') {
             if (!value.trim()) return;
             const catIndex = menuCategories.findIndex(c => c.name === category);
@@ -170,7 +168,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
 
     // Category CRUD
     const addCategory = () => {
-        const newCat = { name: 'New Category', icon: 'FaUtensilSpoon', items: [], color: '#000000', image: '' };
+        const newCat = { name: 'New Category', icon: 'FaUtensilSpoon', items: [], color: '#000000' };
         setMenuCategories([...menuCategories, newCat]);
         saveToStorage();
     };
@@ -210,17 +208,26 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         const savedItemImages = localStorage.getItem('adminItemImages');
 
         if (savedCategories) {
-            setMenuCategories(JSON.parse(savedCategories));
+            const parsed = JSON.parse(savedCategories);
+            // For specific items, set to only "normal"
+            const updated = parsed.map(cat => {
+                const specificItems = ['Shikanji', 'Maggie', 'Oats', 'Soup', 'Jaljeera'];
+                if (specificItems.includes(cat.name)) {
+                    cat.items = ['normal'];
+                }
+                return cat;
+            });
+            setMenuCategories(updated);
         } else {
             setMenuCategories([
                 { name: 'Coffee', icon: 'FaCoffee', items: ["Black", "Milk", "Simple", "Cold"], color: '#8B4513' },
                 { name: 'Tea', icon: 'FaMugHot', items: ["Black", "Milk", "Green"], color: '#228B22' },
                 { name: 'Water', icon: 'FaTint', items: ["Warm", "Cold", "Hot", "Lemon"], color: '#87CEEB' },
-                { name: 'Shikanji', icon: 'FaLemon', items: ['Shikanji'], color: '#FFD700' },
-                { name: 'Jaljeera', icon: 'FaCube', items: ['Jaljeera'], color: '#8B0000' },
-                { name: 'Soup', icon: 'FaUtensilSpoon', items: ['Soup'], color: '#FFA500' },
-                { name: 'Maggie', icon: 'FaUtensilSpoon', items: ['Maggie'], color: '#FF6347' },
-                { name: 'Oats', icon: 'FaUtensilSpoon', items: ['Oats'], color: '#D2691E' },
+                { name: 'Shikanji', icon: 'FaLemon', items: ['normal'], color: '#FFD700' },
+                { name: 'Jaljeera', icon: 'FaCube', items: ['normal'], color: '#8B0000' },
+                { name: 'Soup', icon: 'FaUtensilSpoon', items: ['normal'], color: '#FFA500' },
+                { name: 'Maggie', icon: 'FaUtensilSpoon', items: ['normal'], color: '#FF6347' },
+                { name: 'Oats', icon: 'FaUtensilSpoon', items: ['normal'], color: '#D2691E' },
             ]);
         }
 
@@ -245,7 +252,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                 milk: 'https://www.shutterstock.com/image/photo/almond-milk-cup-glass-on-600nw-2571172141.jpg',
                 water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
                 shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
-                jaljeera: 'https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg',
+                jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
                 soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
                 maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
                 oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
@@ -255,9 +262,21 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         setLoading(false);
     }, []);
 
-    const saveMenu = () => {
-        saveToStorage();
-        alert('Menu updated successfully!');
+    const saveMenu = async () => {
+        try {
+            await callApi('/menu', 'PUT', {
+                userId: user.id,
+                userRole: user.role,
+                categories: menuCategories,
+                addOns,
+                sugarLevels,
+                itemImages
+            });
+            saveToStorage();
+            alert('Menu updated successfully!');
+        } catch (error) {
+            alert('Failed to update menu on server: ' + error.message);
+        }
     };
 
     if (loading) return (
@@ -335,13 +354,6 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                                             title="Edit Name"
                                         >
                                             <FaEdit />
-                                        </button>
-                                        <button
-                                            style={{ background: 'none', border: 'none', color: '#28a745', cursor: 'pointer', fontSize: '0.8rem' }}
-                                            onClick={() => openModal('editImage', category.name, itemIndex, item)}
-                                            title="Edit Image"
-                                        >
-                                            🖼️
                                         </button>
                                         <button
                                             style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
@@ -464,12 +476,11 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     <div style={styles.modalContent}>
                         <h3 style={{ marginTop: 0, color: '#103c7f' }}>
                             {modalData.type === 'editCategory' ? 'Edit Category' :
-                             modalData.type === 'editImage' ? `Edit Image for ${modalData.value}` :
-                             modalData.type === 'addItem' ? `Add ${modalData.category} Item` :
-                             modalData.type === 'editItem' ? `Edit ${modalData.category} Item` :
-                             modalData.type === 'addAddOn' ? 'Add Spice Add-On' :
-                             modalData.type === 'editAddOn' ? 'Edit Spice Add-On' :
-                             'Add Sugar Level'}
+                              modalData.type === 'addItem' ? `Add ${modalData.category} Item` :
+                              modalData.type === 'editItem' ? `Edit ${modalData.category} Item` :
+                              modalData.type === 'addAddOn' ? 'Add Spice Add-On' :
+                              modalData.type === 'editAddOn' ? 'Edit Spice Add-On' :
+                              'Add Sugar Level'}
                         </h3>
                         {modalData.type === 'editCategory' ? (
                             <div>
@@ -502,24 +513,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                                     onChange={(e) => setModalData({ ...modalData, color: e.target.value })}
                                     style={styles.inputField}
                                 />
-                                <label>Image URL:</label>
-                                <input
-                                    type="text"
-                                    value={modalData.image}
-                                    onChange={(e) => setModalData({ ...modalData, image: e.target.value })}
-                                    style={styles.inputField}
-                                    placeholder="Image URL"
-                                />
                             </div>
-                        ) : modalData.type === 'editImage' ? (
-                            <input
-                                type="text"
-                                value={modalData.image}
-                                onChange={(e) => setModalData({ ...modalData, image: e.target.value })}
-                                placeholder="Enter image URL"
-                                style={styles.inputField}
-                                autoFocus
-                            />
                         ) : (
                             <input
                                 type={modalData.type === 'addSugar' ? 'number' : 'text'}

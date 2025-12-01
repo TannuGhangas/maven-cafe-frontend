@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaUtensilSpoon } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
+import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaUtensilSpoon, FaSpinner } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
 import { callApi } from '../../api/apiService';
 
 /**
@@ -327,19 +327,10 @@ const timeSlots = [
     { title: 'Afternoon', slot: 'afternoon (1:00 - 5:30)'},
 ];
 
-const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, styles: _propStyles }) => {
+const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, user, styles: _propStyles }) => {
 const [itemButtons, setItemButtons] = useState([]);
-const [itemImages, setItemImages] = useState({
-    tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
-    coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
-    milk: 'https://www.shutterstock.com/image/photo/almond-milk-cup-glass-on-600nw-2571172141.jpg',
-    water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
-    jaljeera: 'https://www.shutterstock.com/image-photo/indian-summer-drink-jaljeera-jaljira-260nw-1110952079.jpg',
-    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
-    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
-    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
-});
+const [itemImages, setItemImages] = useState({});
+const [loading, setLoading] = useState(true);
 
 // KEPT ORIGINAL USER URL
 const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
@@ -351,87 +342,145 @@ const primaryMessage = `${greeting} Ready to order?`;
 const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
 useEffect(() => {
-    // Use default item buttons
-    setItemButtons([
-        { name: 'coffee', icon: FaCoffee },
-        { name: 'tea', icon: FaMugHot },
-        { name: 'water', icon: FaTint },
-        { name: 'shikanji', icon: FaLemon },
-        { name: 'jaljeera', icon: FaCube },
-        { name: 'soup', icon: FaUtensilSpoon },
-        { name: 'maggie', icon: FaUtensilSpoon },
-        { name: 'oats', icon: FaUtensilSpoon },
-    ]);
-}, []);
+    const fetchMenu = async () => {
+        try {
+            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
+            if (menu && menu.categories) {
+                const buttons = menu.categories.map(cat => ({
+                    name: cat.name.toLowerCase(),
+                    icon: cat.icon === 'FaCoffee' ? FaCoffee :
+                          cat.icon === 'FaMugHot' ? FaMugHot :
+                          cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
+                          cat.icon === 'FaTint' ? FaTint :
+                          cat.icon === 'FaLemon' ? FaLemon :
+                          cat.icon === 'FaCube' ? FaCube :
+                          FaUtensilSpoon
+                }));
+                setItemButtons(buttons);
+                setItemImages(menu.itemImages || {});
+            } else {
+                // Fallback
+                setItemButtons([
+                    { name: 'coffee', icon: FaCoffee },
+                    { name: 'tea', icon: FaMugHot },
+                    { name: 'water', icon: FaTint },
+                    { name: 'shikanji', icon: FaLemon },
+                    { name: 'jaljeera', icon: FaCube },
+                    { name: 'soup', icon: FaUtensilSpoon },
+                    { name: 'maggie', icon: FaUtensilSpoon },
+                    { name: 'oats', icon: FaUtensilSpoon },
+                ]);
+                setItemImages({
+                    tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+                    coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+                    water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+                    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
+                    jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
+                    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
+                    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
+                    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
+                });
+            }
+            setLoading(false);
+        } catch (error) {
+            console.error('Failed to fetch menu:', error);
+            // Fallback
+            setItemButtons([
+                { name: 'coffee', icon: FaCoffee },
+                { name: 'tea', icon: FaMugHot },
+                { name: 'water', icon: FaTint },
+                { name: 'shikanji', icon: FaLemon },
+                { name: 'jaljeera', icon: FaCube },
+                { name: 'soup', icon: FaUtensilSpoon },
+                { name: 'maggie', icon: FaUtensilSpoon },
+                { name: 'oats', icon: FaUtensilSpoon },
+            ]);
+        }
+    };
+    fetchMenu();
+    // Refetch every 30 seconds to get updates
+    const interval = setInterval(fetchMenu, 30000);
+    return () => clearInterval(interval);
+}, [user]);
 
-    return (
-        <div style={STYLES_THEME.centeredContainer}>
-            <div style={STYLES_THEME.screenPadding}>
-                {/* Image Header Section */}
-                <div style={STYLES_THEME.headerBanner}>
-                    <div style={STYLES_THEME.backgroundImage(HEADER_IMAGE_URL)}>
-                        <h1 style={STYLES_THEME.bannerTitle}>{primaryMessage}</h1>
-                        <p style={STYLES_THEME.bannerSubtitle}>Fuel your day with a delicious order.</p>
-                    </div>
-                </div>
+if (loading) {
+return (
+<div style={STYLES_THEME.centeredContainer}>
+<div style={{ ...STYLES_THEME.screenPadding, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
+<FaSpinner className="spinner" size={30} /> Loading menu...
+</div>
+</div>
+);
+}
 
-                <div style={STYLES_THEME.contentArea}>
-                    {/* Slot Selection Content */}
-                    <h2 style={STYLES_THEME.headerText}>Select Your Time Slot: 🕓</h2>
-                    <div style={STYLES_THEME.slotContainer}>
-                        {timeSlots.map(({ title, slot, description }) => (
-                            <button
-                                key={slot}
-                                style={STYLES_THEME.slotButton(currentOrder.slot === slot)}
-                                onClick={() => {
-                                    setCurrentOrder(prev => ({ ...prev, slot }));
-                                }}
-                            >
-                                {title}
-                                <small style={STYLES_THEME.smallText(currentOrder.slot === slot)}>
-                                    {description}
-                                </small>
-                            </button>
-                        ))}
-                    </div>
+return (
+<div style={STYLES_THEME.centeredContainer}>
+<div style={STYLES_THEME.screenPadding}>
+{/* Image Header Section */}
+<div style={STYLES_THEME.headerBanner}>
+<div style={STYLES_THEME.backgroundImage(HEADER_IMAGE_URL)}>
+<h1 style={STYLES_THEME.bannerTitle}>{primaryMessage}</h1>
+<p style={STYLES_THEME.bannerSubtitle}>Fuel your day with a delicious order.</p>
+</div>
+</div>
 
-                    {/* Item Selection Grid (Rendered only when a slot is selected) */}
-                    {currentOrder.slot && (
-                        <>
-                            <h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
-                            <div style={STYLES_THEME.itemSelectionGrid}>
-                                {itemButtons.map(item => (
-                                    <button
-                                        key={item.name}
-                                        style={STYLES_THEME.itemButton}
-                                        onClick={() => setPage(`item-config-${item.name}`)}
-                                    >
-                                        <div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
-                                            {/* Image will fill this div */}
-                                        </div>
-                                        <p style={STYLES_THEME.itemText}>
-                                            {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-                                        </p>
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
-                </div>
+<div style={STYLES_THEME.contentArea}>
+{/* Slot Selection Content */}
+<h2 style={STYLES_THEME.headerText}>Select Your Time Slot: 🕓</h2>
+<div style={STYLES_THEME.slotContainer}>
+{timeSlots.map(({ title, slot, description }) => (
+<button
+key={slot}
+style={STYLES_THEME.slotButton(currentOrder.slot === slot)}
+onClick={() => {
+setCurrentOrder(prev => ({ ...prev, slot }));
+}}
+>
+{title}
+<small style={STYLES_THEME.smallText(currentOrder.slot === slot)}>
+{description}
+</small>
+</button>
+))}
+</div>
 
-                {/* Break Card */}
-                <div style={STYLES_THEME.breakCard}>
-                    <h3 style={STYLES_THEME.breakTitle}>☕ Time for a break ☕</h3>
-                    <p style={STYLES_THEME.breakSubtitle}>
-                        -Crafted with 💖 in Maven jobs, Panipat-
-                    </p>
-                    <p style={STYLES_THEME.breakInspiration}>
-                        The next slot is available for you to plan your perfect pause.
-                    </p>
-                </div>
-            </div>
-        </div>
-    );
+{/* Item Selection Grid (Rendered only when a slot is selected) */}
+{currentOrder.slot && (
+<>
+<h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
+<div style={STYLES_THEME.itemSelectionGrid}>
+{itemButtons.map(item => (
+<button
+key={item.name}
+style={STYLES_THEME.itemButton}
+onClick={() => setPage(`item-config-${item.name}`)}
+>
+<div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
+    &nbsp; {/* Ensure div has content for background to show */}
+</div>
+<p style={STYLES_THEME.itemText}>
+{item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+</p>
+</button>
+))}
+</div>
+</>
+)}
+</div>
+
+{/* Break Card */}
+<div style={STYLES_THEME.breakCard}>
+<h3 style={STYLES_THEME.breakTitle}>☕ Time for a break ☕</h3>
+<p style={STYLES_THEME.breakSubtitle}>
+-Crafted with 💖 in Maven jobs, Panipat-
+</p>
+<p style={STYLES_THEME.breakInspiration}>
+The next slot is available for you to plan your perfect pause.
+</p>
+</div>
+</div>
+</div>
+);
 };
 
 export default UserHomePage;
