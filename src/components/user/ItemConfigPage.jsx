@@ -242,7 +242,7 @@ const styles = ENHANCED_STYLES;
 
 const [userLocations, setUserLocations] = useState([]);
 
-// State for dynamic data
+ // State for dynamic data
 const [typeOptions, setTypeOptions] = useState([]);
 const SUGAR_LEVELS = getSugarLevels();
 const ADD_ONS = getAddOns();
@@ -265,7 +265,7 @@ const currentUser = userLocations.find(u => u.name === user.name) || userLocatio
 
 // Calculate allowed locations for the current user
 const allowedLocations = currentUser ? getAllowedLocations(currentUser.location, currentUser.access) : [];
-const defaultLocationKey = allowedLocations[0]?.key || 'Others';
+const defaultLocationKey = allowedLocations[0]?.key || user.location || 'Others';
 // --- END USER LOCATION LOGIC ---
 
 

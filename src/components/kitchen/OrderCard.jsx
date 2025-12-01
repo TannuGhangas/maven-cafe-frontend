@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaCheckCircle, FaChevronDown, FaChevronUp, FaUtensilSpoon, FaStickyNote } from 'react-icons/fa';
+import { ALL_LOCATIONS_MAP, getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
 import '../../styles/OrderCard.css';
 
 const OrderCard = ({
@@ -10,11 +11,19 @@ const OrderCard = ({
     setExpandedOrderId,
     updateOrderStatus,
     styles,
-    enhancedStyles
+    enhancedStyles,
+    user
 }) => {
     const isMobile = window.innerWidth < 768;
     const orderId = order?._id;
     const isCardExpanded = expandedOrderId === orderId;
+
+    // Calculate user's default location
+    const userLocations = USER_LOCATIONS_DATA;
+    const currentUser = userLocations.find(u => u.name === order.userName) || userLocations[0];
+    const allowedLocations = currentUser ? getAllowedLocations(currentUser.location, currentUser.access) : [];
+    const defaultLocationKey = allowedLocations[0]?.key || (currentUser ? currentUser.location : null) || 'Others';
+    const defaultLocationName = allowedLocations.find(loc => loc.key === defaultLocationKey)?.name || ALL_LOCATIONS_MAP[defaultLocationKey] || defaultLocationKey;
 
     // Items relevant to the current selected item/type combo
     const relevantItems = (order?.items || []).filter(
@@ -72,7 +81,7 @@ const OrderCard = ({
                 <div className="order-summary-row">
                     <span className="order-summary-label">Location:</span>
                     <span className="order-summary-value">
-                        {relevantItems[0]?.location || "N/A"} {relevantItems[0]?.tableNo ? `(Table ${relevantItems[0]?.tableNo})` : ""}
+                        {relevantItems[0]?.location === 'Others' ? defaultLocationName : (ALL_LOCATIONS_MAP[relevantItems[0]?.location] || relevantItems[0]?.location || "N/A")} {relevantItems[0]?.tableNo ? `(Table ${relevantItems[0]?.tableNo})` : ""}
                     </span>
                 </div>
             </div>

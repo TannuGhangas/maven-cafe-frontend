@@ -1,5 +1,6 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { FaTrash, FaEdit, FaCheckCircle, FaPlus } from 'react-icons/fa';
+import { ALL_LOCATIONS_MAP, getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
 
 // --- Configuration Image URL ---
 const HEADER_IMAGE_URL = 'https://png.pngtree.com/thumb_back/fh260/background/20240614/pngtree-cup-of-tea-and-a-bouquet-of-white-flowering-jasmine-image_15754628.jpg'; 
@@ -297,7 +298,7 @@ const OrderConfirmedModal = ({ styles, onClose }) => {
 
 
 // --- Component for individual Item details using image style ---
-const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete }) => {
+const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete, defaultLocationName }) => {
     
     const DetailRow = ({ label, value }) => {
         if (!value || value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
@@ -312,7 +313,7 @@ const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete }) => {
         );
     }
     
-    const locationValue = `${item.location} ${item.tableNo ? `(Table ${item.tableNo})` : ''}`;
+    const locationValue = `${item.location === 'Others' ? defaultLocationName : (ALL_LOCATIONS_MAP[item.location] || item.location)} ${item.tableNo ? `(Table ${item.tableNo})` : ''}`;
     
     // Define the data points to be displayed (Primary details first)
     const dataPoints = [
@@ -390,9 +391,16 @@ const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete }) => {
 
 // --- Main Order Confirmation Component ---
 const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, callApi, styles: propStyles }) => {
-    const styles = ENHANCED_STYLES;
-    
-    const [showSuccessModal, setShowSuccessModal] = useState(false);
+const styles = ENHANCED_STYLES;
+
+const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+// Calculate user's default location
+const userLocations = USER_LOCATIONS_DATA;
+const currentUser = userLocations.find(u => u.name === user.name) || userLocations[0];
+const allowedLocations = currentUser ? getAllowedLocations(currentUser.location, currentUser.access) : [];
+const defaultLocationKey = allowedLocations[0]?.key || user.location || 'Others';
+const defaultLocationName = allowedLocations.find(loc => loc.key === defaultLocationKey)?.name || ALL_LOCATIONS_MAP[defaultLocationKey] || defaultLocationKey;
     
     const handleDelete = (index) => {
         const newItems = currentOrder.items.filter((_, i) => i !== index);
@@ -503,16 +511,17 @@ const handleProceed = async () => {
                         padding: '20px 0', // Add padding to the top and bottom of the list
                         backgroundColor: THEME_COLORS.BACKGROUND_MAIN // Ensure background shows between cards
                     }}>
-                        {currentOrder.items.map((item, index) => (
-                            <OrderSummaryCard 
-                                key={index}
-                                item={item}
-                                styles={styles}
-                                index={index}
-                                setPage={setPage}
-                                handleDelete={handleDelete}
-                            />
-                        ))}
+{currentOrder.items.map((item, index) => (
+    <OrderSummaryCard
+        key={index}
+        item={item}
+        styles={styles}
+        index={index}
+        setPage={setPage}
+        handleDelete={handleDelete}
+        defaultLocationName={defaultLocationName}
+    />
+))}
                     </div>
                 )}
                 

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { FaSpinner } from 'react-icons/fa';
 import { callApi } from './api/apiService';
 import { styles } from './styles/styles';
+import { USER_LOCATIONS_DATA } from './config/constants';
 
 // Imported Components
 import NavBar from './components/common/NavBar';
@@ -60,6 +61,12 @@ function App() {
         const data = await callApi('/login', 'POST', { username, password });
         if (data && data.success) {
             const loggedInUser = data.user;
+            // Add location and access from USER_LOCATIONS_DATA
+            const locationData = USER_LOCATIONS_DATA.find(u => u.name === loggedInUser.name);
+            if (locationData) {
+                loggedInUser.location = locationData.location;
+                loggedInUser.access = locationData.access;
+            }
             localStorage.setItem('user', JSON.stringify(loggedInUser));
             setUser(loggedInUser);
         } else {

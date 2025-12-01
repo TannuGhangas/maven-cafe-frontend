@@ -362,6 +362,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
                                                 updateOrderStatus={updateOrderStatus}
                                                 styles={styles}
                                                 enhancedStyles={enhancedStyles}
+                                                user={user}
                                             />
                                         ))}
                                     </div>
