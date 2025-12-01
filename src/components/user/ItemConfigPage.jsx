@@ -595,16 +595,30 @@ onClick={() => handleToggle('selectedAddOns', addOn)}
                         </button>
                     </div>
 
-{/* LOCATION DISPLAY (ONLY DEFAULT) */}
+{/* LOCATION SELECTION */}
 <label style={styles.label}>📍 Delivery Location:</label>
-<div style={{
-    ...styles.inputField,
-    backgroundColor: '#f5f5f5',
-    cursor: 'default',
-    color: styles.COLOR_TEXT_DARK
-}}>
-    {allowedLocations.find(loc => loc.key === defaultLocationKey)?.name || 'Default Location'}
-</div>
+{allowedLocations.length > 1 ? (
+    <select
+        style={styles.selectField}
+        value={itemConfig.location}
+        onChange={(e) => setItemConfig(prev => ({ ...prev, location: e.target.value }))}
+    >
+        {allowedLocations.map(loc => (
+            <option key={loc.key} value={loc.key}>
+                {loc.name}
+            </option>
+        ))}
+    </select>
+) : (
+    <div style={{
+        ...styles.inputField,
+        backgroundColor: '#f5f5f5',
+        cursor: 'default',
+        color: styles.COLOR_TEXT_DARK
+    }}>
+        {allowedLocations.find(loc => loc.key === defaultLocationKey)?.name || 'Default Location'}
+    </div>
+)}
 
                     {/* Notes */}
                     <label style={styles.label}>📝 Notes / Preferences:</label>
