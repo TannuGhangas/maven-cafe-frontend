@@ -173,7 +173,6 @@ const categories = getMenuCategories();
 
 export const COFFEE_TYPES = categories ? (categories.find(c => c.name === 'Coffee')?.items || ["Black", "Milk", "Simple", "Cold"]) : ["Black", "Milk", "Simple", "Cold"];
 export const TEA_TYPES = categories ? (categories.find(c => c.name === 'Tea')?.items || ["Black", "Milk", "Green"]) : ["Black", "Milk", "Green"];
-export const MILK_TYPES = categories ? (categories.find(c => c.name === 'Milk')?.items || ["Hot", "Cold"]) : ["Hot", "Cold"];
 export const WATER_TYPES = categories ? (categories.find(c => c.name === 'Water')?.items || ["Warm", "Cold", "Hot", "Lemon"]) : ["Warm", "Cold", "Hot", "Lemon"];
 
 export const SUGAR_LEVELS = (() => {

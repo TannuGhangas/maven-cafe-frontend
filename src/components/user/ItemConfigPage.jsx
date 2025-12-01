@@ -192,7 +192,6 @@ const getMenuTypes = async (itemType, user) => {
     const defaults = {
         coffee: ["Black", "Milk", "Simple", "Cold"],
         tea: ["Black", "Milk", "Green"],
-        milk: ["Hot", "Cold"],
         water: ["Warm", "Cold", "Hot", "Lemon"],
         shikanji: ["normal"],
         maggie: ["normal"],

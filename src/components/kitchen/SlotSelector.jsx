@@ -7,6 +7,7 @@ const SlotSelector = ({ selectedSlot, setSelectedSlot, slotOrders, setSelectedIt
     const itemImages = {
         coffee: "https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg",
         tea: "https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg",
+
         milk: "https://www.shutterstock.com/image-photo/almond-milk-cup-glass-on-600nw-2571172141.jpg",
         water: "https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg",
         shikanji: "https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg",

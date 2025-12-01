@@ -11,7 +11,6 @@ const CARD_RADIUS = '12px'; // Standard rounded corners
 const PLACEHOLDER_HOME_BG = 'uploaded:image_92fbe9.jpg';
 const PLACEHOLDER_TEA_CARD = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
 const PLACEHOLDER_COFFEE_CARD = 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg';
-const PLACEHOLDER_MILK_CARD = 'https://www.shutterstock.com/image-photo/almond-milk-cup-glass-on-600nw-2571172141.jpg';
 const PLACEHOLDER_WATER_CARD = 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg';
 const PLACEHOLDER_CONFIRM_BG = 'uploaded:image_92fc9d.jpg';
 // --------------------------------------------------------
@@ -24,9 +23,9 @@ export const styles = {
     DANGER_COLOR,
     BACKGROUND_COLOR,
     CARD_RADIUS,
+
     PLACEHOLDER_TEA_CARD,
     PLACEHOLDER_COFFEE_CARD,
-    PLACEHOLDER_MILK_CARD,
     PLACEHOLDER_WATER_CARD,
     PLACEHOLDER_CONFIRM_BG,
     PLACEHOLDER_HOME_BG,

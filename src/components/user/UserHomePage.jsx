@@ -308,7 +308,6 @@ const getItemButtons = () => {
     return [
         { name: 'coffee', icon: FaCoffee },
         { name: 'tea', icon: FaMugHot },
-        { name: 'milk', icon: FaGlassWhiskey },
         { name: 'water', icon: FaTint },
         { name: 'shikanji', icon: FaLemon },
         { name: 'jaljeera', icon: FaCube },
