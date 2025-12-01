@@ -345,7 +345,9 @@ useEffect(() => {
         try {
             const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
             if (menu && menu.categories) {
-                const buttons = menu.categories.map(cat => ({
+                // Filter out 'milk' category to prevent it from showing on home screen
+                const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
+                const buttons = filteredCategories.map(cat => ({
                     name: cat.name.toLowerCase(),
                     icon: cat.icon === 'FaCoffee' ? FaCoffee :
                           cat.icon === 'FaMugHot' ? FaMugHot :
