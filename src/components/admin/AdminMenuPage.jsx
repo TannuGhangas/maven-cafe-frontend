@@ -213,70 +213,45 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
     };
 
     useEffect(() => {
-        // Load from localStorage
-        const savedCategories = localStorage.getItem('adminMenuCategories');
-        const savedAddOns = localStorage.getItem('adminAddOns');
-        const savedSugarLevels = localStorage.getItem('adminSugarLevels');
-        const savedItemImages = localStorage.getItem('adminItemImages');
-
-        if (savedCategories) {
-            const parsed = JSON.parse(savedCategories);
-            // For specific items, set to only "normal"
-            const updated = parsed.map(cat => {
-                const specificItems = ['Shikanji', 'Maggie', 'Oats', 'Soup', 'Jaljeera'];
-                if (specificItems.includes(cat.name)) {
-                    cat.items = [{ name: 'normal', available: true }];
-                } else {
-                    // Convert string items to objects
-                    cat.items = (cat.items || []).map(item => typeof item === 'string' ? { name: item, available: true } : item);
+        const fetchMenu = async () => {
+            try {
+                const menu = await callApi('/menu', 'GET', {}, { userId: user.id, userRole: user.role });
+                if (menu) {
+                    setMenuCategories(menu.categories || []);
+                    setAddOns(menu.addOns || []);
+                    setSugarLevels(menu.sugarLevels || []);
+                    setItemImages(menu.itemImages || {});
                 }
-                return cat;
-            });
-            setMenuCategories(updated);
-        } else {
-            setMenuCategories([
-                { name: 'Coffee', icon: 'FaCoffee', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }], color: '#8B4513', enabled: true },
-                { name: 'Tea', icon: 'FaMugHot', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }], color: '#228B22', enabled: true },
-                { name: 'Water', icon: 'FaTint', items: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }], color: '#87CEEB', enabled: true },
-                { name: 'Shikanji', icon: 'FaLemon', items: [{ name: 'normal', available: true }], color: '#FFD700', enabled: true },
-                { name: 'Jaljeera', icon: 'FaCube', items: [{ name: 'normal', available: true }], color: '#8B0000', enabled: true },
-                { name: 'Soup', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FFA500', enabled: true },
-                { name: 'Maggie', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FF6347', enabled: true },
-                { name: 'Oats', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#D2691E', enabled: true },
-            ]);
-        }
-
-        if (savedAddOns) {
-            const parsed = JSON.parse(savedAddOns);
-            setAddOns(parsed.map(addOn => typeof addOn === 'string' ? { name: addOn, available: true } : addOn));
-        } else {
-            setAddOns(["Ginger", "Cloves", "Fennel Seeds", "Cardamom", "Cinnamon"].map(name => ({ name, available: true })));
-        }
-
-        if (savedSugarLevels) {
-            const parsed = JSON.parse(savedSugarLevels);
-            setSugarLevels(parsed.map(level => typeof level === 'number' ? { level, available: true } : level));
-        } else {
-            setSugarLevels([0, 1, 2, 3].map(level => ({ level, available: true })));
-        }
-
-        if (savedItemImages) {
-            setItemImages(JSON.parse(savedItemImages));
-        } else {
-            setItemImages({
-                tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
-                coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
-                water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-                shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
-                jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
-                soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
-                maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
-                oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
-            });
-        }
-
-        setLoading(false);
-    }, []);
+            } catch (error) {
+                console.error('Failed to fetch menu:', error);
+                // Fallback to defaults
+                setMenuCategories([
+                    { name: 'Coffee', icon: 'FaCoffee', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }], color: '#8B4513', enabled: true },
+                    { name: 'Tea', icon: 'FaMugHot', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }], color: '#228B22', enabled: true },
+                    { name: 'Water', icon: 'FaTint', items: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }], color: '#87CEEB', enabled: true },
+                    { name: 'Shikanji', icon: 'FaLemon', items: [{ name: 'normal', available: true }], color: '#FFD700', enabled: true },
+                    { name: 'Jaljeera', icon: 'FaCube', items: [{ name: 'normal', available: true }], color: '#8B0000', enabled: true },
+                    { name: 'Soup', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FFA500', enabled: true },
+                    { name: 'Maggie', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FF6347', enabled: true },
+                    { name: 'Oats', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#D2691E', enabled: true },
+                ]);
+                setAddOns([{ name: "Ginger", available: true }, { name: "Cloves", available: true }, { name: "Fennel Seeds", available: true }, { name: "Cardamom", available: true }, { name: "Cinnamon", available: true }]);
+                setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
+                setItemImages({
+                    tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+                    coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+                    water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+                    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
+                    jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
+                    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
+                    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
+                    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
+                });
+            }
+            setLoading(false);
+        };
+        fetchMenu();
+    }, [user, callApi]);
 
     const saveMenu = async (showAlert = true) => {
         try {
