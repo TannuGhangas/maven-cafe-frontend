@@ -21,6 +21,7 @@ import ComplaintPage from './components/user/ComplaintPage';
 
 // Kitchen/Admin Screens
 import KitchenDashboard from './components/kitchen/KitchenDashboard';
+import KitchenMenuPage from './components/kitchen/KitchenMenuPage';
 import AdminUsersPage from './components/admin/AdminUsersPage';
 import AdminComplaintsPage from './components/admin/AdminComplaintsPage';
 import AdminMembersPage from './components/admin/AdminMembersPage';
@@ -195,6 +196,17 @@ function App() {
             );
         }
 
+        if (page === 'kitchen-menu') {
+            return (
+                <KitchenMenuPage
+                    user={user}
+                    callApi={callApi}
+                    setPage={setPage}
+                    styles={styles}
+                />
+            );
+        }
+
         // ADMIN DASHBOARD
         if (page === 'admin-dashboard') {
             if (user.role === 'admin') {
@@ -323,7 +335,16 @@ function App() {
     // ------------------------------
     return (
         <div style={styles.appContainer}>
-            <NavBar user={user} setPage={setPage} setModal={setModal} styles={styles} onLogoClick={user?.role === 'kitchen' ? () => setKitchenView("home") : undefined} />
+            <NavBar user={user} setPage={setPage} setModal={setModal} setKitchenView={setKitchenView} styles={styles} onLogoClick={() => {
+                if (user.role === 'user') {
+                    setPage('home');
+                } else if (user.role === 'admin') {
+                    setPage('admin-dashboard');
+                } else if (user.role === 'kitchen') {
+                    setPage('kitchen-dashboard');
+                    setKitchenView("home");
+                }
+            }} />
 
             {/* Added content wrapper */}
             <div style={styles.contentArea}>

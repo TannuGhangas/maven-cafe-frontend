@@ -44,6 +44,11 @@ const AdminUsersPage = ({ user, callApi, setPage, styles }) => {
             method = 'POST';
             body = { ...value, userId: user.id, userRole: user.role };
             message = `User created.`;
+        } else if (action === 'update') {
+            url = `/users/${userIdToModify}`;
+            method = 'PUT';
+            body = { ...value, userId: user.id, userRole: user.role };
+            message = `User updated.`;
         } else {
             return; // Should not happen
         }
@@ -51,7 +56,7 @@ const AdminUsersPage = ({ user, callApi, setPage, styles }) => {
         const data = await callApi(url, method, body);
         if (data && data.success) {
             alert(data.message || message);
-            fetchUsers(); 
+            fetchUsers();
             setEditingUser(null);
         }
     };
@@ -89,43 +94,148 @@ const AdminUsersPage = ({ user, callApi, setPage, styles }) => {
                 />
             )}
             
-            <div style={styles.listContainer}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                gap: '20px',
+                marginTop: '20px'
+            }}>
                 {users.map(u => (
-                    // Styles.userCard is a getter function defined in styles.js
-                    <div key={u._id} style={styles.userCard}> 
-                        <div style={{ flexGrow: 1 }}>
-                            <strong>{u.name} (ID: {u._id.substring(20)})</strong>
-                            <small style={{ display: 'block', color: '#666' }}>
-                                Role: {u.role.toUpperCase()} | Username: {u.username}
-                            </small>
-                            <small style={{ display: 'block', color: u.enabled ? 'green' : 'red' }}>
-                                Access: {u.enabled ? 'Enabled' : 'Disabled'}
-                            </small>
+                    <div key={u._id} style={{
+                        background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+                        borderRadius: '20px',
+                        padding: '25px',
+                        boxShadow: '0 8px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)',
+                        border: '1px solid rgba(255,255,255,0.8)',
+                        position: 'relative',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        cursor: 'pointer',
+                        transform: 'translateY(0)',
+                        ':hover': {
+                            transform: 'translateY(-5px)',
+                            boxShadow: '0 12px 35px rgba(0,0,0,0.15), 0 6px 15px rgba(0,0,0,0.1)'
+                        }
+                    }}>
+                        <div style={{ marginBottom: '15px' }}>
+                            <h3 style={{
+                                margin: '0 0 10px 0',
+                                color: '#103c7f',
+                                fontSize: '1.2rem',
+                                fontWeight: '700'
+                            }}>
+                                {u.name}
+                            </h3>
+                            <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                gap: '5px',
+                                fontSize: '0.9rem',
+                                color: '#666'
+                            }}>
+                                <div><strong>ID:</strong> {u._id.substring(20)}</div>
+                                <div><strong>Username:</strong> {u.username}</div>
+                                <div><strong>Role:</strong> <span style={{
+                                    color: u.role === 'admin' ? '#ff3b30' : u.role === 'kitchen' ? '#ff9500' : '#4cd964',
+                                    fontWeight: '600'
+                                }}>{u.role.toUpperCase()}</span></div>
+                                <div><strong>Access:</strong> <span style={{
+                                    color: u.enabled ? '#4cd964' : '#ff3b30',
+                                    fontWeight: '600'
+                                }}>{u.enabled ? 'Enabled' : 'Disabled'}</span></div>
+                            </div>
                         </div>
 
                         {/* Control Buttons */}
-                        <div style={styles.adminControlGroup}>
+                        <div style={{
+                            display: 'flex',
+                            gap: '8px',
+                            justifyContent: 'flex-end',
+                            flexWrap: 'wrap'
+                        }}>
                             {/* Toggle Access */}
-                            <button 
-                                style={styles.controlButton(u.enabled ? '#ffcc00' : '#4cd964')} 
+                            <button
+                                style={{
+                                    background: u.enabled ? 'linear-gradient(135deg, #ffcc00 0%, #ff9500 100%)' : 'linear-gradient(135deg, #4cd964 0%, #34c759 100%)',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    padding: '10px 15px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                    transform: 'translateY(0)',
+                                    ':hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
+                                    }
+                                }}
                                 onClick={() => handleAction(u._id, 'access', !u.enabled)}
+                                title={u.enabled ? 'Disable Access' : 'Enable Access'}
                             >
                                 {u.enabled ? <FaBan /> : <FaUnlockAlt />}
+                                {u.enabled ? 'Disable' : 'Enable'}
                             </button>
-                            {/* Change Role */}
-                            <button 
-                                style={styles.controlButton('#007aff')} 
+                            {/* Edit User */}
+                            <button
+                                style={{
+                                    background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    padding: '10px 15px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 4px 12px rgba(0,122,255,0.3)',
+                                    transform: 'translateY(0)',
+                                    ':hover': {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(0,122,255,0.4)'
+                                    }
+                                }}
                                 onClick={() => setEditingUser(u)}
+                                title="Edit User"
                             >
                                 <FaEdit />
+                                Edit
                             </button>
                             {/* Delete */}
-                            <button 
-                                style={styles.controlButton('#ff3b30')} 
+                            <button
+                                style={{
+                                    background: u._id === user.id ? 'linear-gradient(135deg, #cccccc 0%, #aaaaaa 100%)' : 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)',
+                                    color: '#ffffff',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    padding: '10px 15px',
+                                    cursor: u._id === user.id ? 'not-allowed' : 'pointer',
+                                    fontSize: '0.9rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: u._id === user.id ? 'none' : '0 4px 12px rgba(255,59,48,0.3)',
+                                    transform: 'translateY(0)',
+                                    ':hover': u._id === user.id ? {} : {
+                                        transform: 'translateY(-2px)',
+                                        boxShadow: '0 6px 20px rgba(255,59,48,0.4)'
+                                    }
+                                }}
                                 onClick={() => handleAction(u._id, 'delete')}
                                 disabled={u._id === user.id} // Prevent admin from deleting self
+                                title="Delete User"
                             >
                                 <FaTrash />
+                                Delete
                             </button>
                         </div>
                     </div>

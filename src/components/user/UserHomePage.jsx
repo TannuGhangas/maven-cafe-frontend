@@ -341,11 +341,11 @@ const primaryMessage = `${greeting} Ready to order?`;
 const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
 useEffect(() => {
-    const fetchMenu = async () => {
+    const fetchMenu = async (silent = false) => {
         try {
-            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
+            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, silent);
             if (menu && menu.categories) {
-                // Filter out 'milk' category to prevent it from showing on home screen
+                // Filter out 'milk' category, but keep all items (available and unavailable)
                 const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
                 const buttons = filteredCategories.map(cat => ({
                     name: cat.name.toLowerCase(),
@@ -355,7 +355,8 @@ useEffect(() => {
                           cat.icon === 'FaTint' ? FaTint :
                           cat.icon === 'FaLemon' ? FaLemon :
                           cat.icon === 'FaCube' ? FaCube :
-                          FaUtensilSpoon
+                          FaUtensilSpoon,
+                    items: cat.items || [] // Include items for availability check
                 }));
                 setItemButtons(buttons);
                 setItemImages(menu.itemImages || {});
@@ -399,8 +400,8 @@ useEffect(() => {
         }
     };
     fetchMenu();
-    // Refetch every 30 seconds to get updates
-    const interval = setInterval(fetchMenu, 30000);
+    // Refetch every 30 seconds to get updates (silently)
+    const interval = setInterval(() => fetchMenu(true), 30000);
     return () => clearInterval(interval);
 }, [user]);
 
@@ -447,25 +448,28 @@ setCurrentOrder(prev => ({ ...prev, slot }));
 
 {/* Item Selection Grid (Rendered only when a slot is selected) */}
 {currentOrder.slot && (
-<>
-<h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
-<div style={STYLES_THEME.itemSelectionGrid}>
-{itemButtons.map(item => (
-<button
-key={item.name}
-style={STYLES_THEME.itemButton}
-onClick={() => setPage(`item-config-${item.name}`)}
->
-<div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
-    &nbsp; {/* Ensure div has content for background to show */}
-</div>
-<p style={STYLES_THEME.itemText}>
-{item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-</p>
-</button>
-))}
-</div>
-</>
+    <>
+        <h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
+        <div style={STYLES_THEME.itemSelectionGrid}>
+            {itemButtons.filter(item => {
+                const hasAvailableItems = (item.items || []).some(it => typeof it === 'string' || it.available !== false);
+                return hasAvailableItems; // Only show categories with available items
+            }).map(item => (
+                <button
+                    key={item.name}
+                    style={STYLES_THEME.itemButton}
+                    onClick={() => setPage(`item-config-${item.name}`)}
+                >
+                    <div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
+                        &nbsp; {/* Ensure div has content for background to show */}
+                    </div>
+                    <p style={STYLES_THEME.itemText}>
+                        {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+                    </p>
+                </button>
+            ))}
+        </div>
+    </>
 )}
 </div>
 

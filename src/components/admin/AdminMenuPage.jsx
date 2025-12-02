@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaChevronLeft, FaUtensilSpoon, FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaSpinner, FaChevronLeft, FaUtensilSpoon, FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaPlus, FaEdit, FaTrash, FaToggleOn, FaToggleOff } from 'react-icons/fa';
 import {
     COFFEE_TYPES, TEA_TYPES, WATER_TYPES,
     TABLE_NUMBERS, ADD_ONS, SUGAR_LEVELS,
@@ -11,6 +11,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
     const [menuCategories, setMenuCategories] = useState([]);
     const [addOns, setAddOns] = useState([]);
     const [sugarLevels, setSugarLevels] = useState([]);
+    const [menuItems, setMenuItems] = useState({}); // category -> items array
     const [itemImages, setItemImages] = useState({});
     const [showModal, setShowModal] = useState(false);
     const [modalData, setModalData] = useState({ type: '', category: '', index: -1, value: '', name: '', icon: '', color: '' });
@@ -37,13 +38,18 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             fontWeight: '600',
         },
         menuCard: {
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            padding: '20px',
-            margin: '15px 0',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-            border: '1px solid #ddd',
+            background: 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)',
+            borderRadius: '15px',
+            padding: '25px',
+            margin: '20px 0',
+            boxShadow: '0 6px 20px rgba(0,0,0,0.1), 0 3px 10px rgba(0,0,0,0.05)',
+            border: '1px solid rgba(255,255,255,0.8)',
             fontFamily: 'Calibri, Arial, sans-serif',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            ':hover': {
+                transform: 'translateY(-2px)',
+                boxShadow: '0 8px 25px rgba(0,0,0,0.15), 0 4px 15px rgba(0,0,0,0.1)'
+            }
         },
         categoryHeader: {
             fontSize: '1.4rem',
@@ -61,14 +67,20 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             marginTop: '10px',
         },
         menuItem: {
-            backgroundColor: '#f8f9fa',
-            padding: '12px',
-            borderRadius: '8px',
-            border: '1px solid #e9ecef',
+            background: 'linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)',
+            padding: '15px',
+            borderRadius: '12px',
+            border: '1px solid rgba(255,255,255,0.8)',
             fontSize: '0.95rem',
             fontWeight: '500',
             color: '#333',
             textAlign: 'center',
+            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.05)',
+            ':hover': {
+                transform: 'translateY(-1px)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+            }
         },
         screenPadding: {
             ...styles.screenPadding,
@@ -111,7 +123,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             const catIndex = menuCategories.findIndex(c => c.name === category);
             if (catIndex >= 0) {
                 const updated = [...menuCategories];
-                updated[catIndex].items.push(value.trim());
+                updated[catIndex].items.push({ name: value.trim(), available: true });
                 setMenuCategories(updated);
             }
         } else if (type === 'editItem') {
@@ -119,21 +131,21 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             const catIndex = menuCategories.findIndex(c => c.name === category);
             if (catIndex >= 0) {
                 const updated = [...menuCategories];
-                updated[catIndex].items[index] = value.trim();
+                updated[catIndex].items[index].name = value.trim();
                 setMenuCategories(updated);
             }
         } else if (type === 'addAddOn') {
             if (!value.trim()) return;
-            setAddOns([...addOns, value.trim()]);
+            setAddOns([...addOns, { name: value.trim(), available: true }]);
         } else if (type === 'editAddOn') {
             if (!value.trim()) return;
             const updated = [...addOns];
-            updated[index] = value.trim();
+            updated[index] = { ...updated[index], name: value.trim() };
             setAddOns(updated);
         } else if (type === 'addSugar') {
             const level = parseInt(value);
-            if (!isNaN(level) && !sugarLevels.includes(level)) {
-                setSugarLevels([...sugarLevels, level].sort((a, b) => a - b));
+            if (!isNaN(level) && !sugarLevels.some(s => s.level === level)) {
+                setSugarLevels([...sugarLevels, { level, available: true }].sort((a, b) => a.level - b.level));
             }
         }
 
@@ -161,7 +173,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
 
     const removeSugarLevel = (level) => {
         if (window.confirm('Are you sure you want to remove this sugar level?')) {
-            setSugarLevels(sugarLevels.filter(l => l !== level));
+            setSugarLevels(sugarLevels.filter(l => l.level !== level));
             saveToStorage();
         }
     };
@@ -213,34 +225,39 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             const updated = parsed.map(cat => {
                 const specificItems = ['Shikanji', 'Maggie', 'Oats', 'Soup', 'Jaljeera'];
                 if (specificItems.includes(cat.name)) {
-                    cat.items = ['normal'];
+                    cat.items = [{ name: 'normal', available: true }];
+                } else {
+                    // Convert string items to objects
+                    cat.items = (cat.items || []).map(item => typeof item === 'string' ? { name: item, available: true } : item);
                 }
                 return cat;
             });
             setMenuCategories(updated);
         } else {
             setMenuCategories([
-                { name: 'Coffee', icon: 'FaCoffee', items: ["Black", "Milk", "Simple", "Cold"], color: '#8B4513' },
-                { name: 'Tea', icon: 'FaMugHot', items: ["Black", "Milk", "Green"], color: '#228B22' },
-                { name: 'Water', icon: 'FaTint', items: ["Warm", "Cold", "Hot", "Lemon"], color: '#87CEEB' },
-                { name: 'Shikanji', icon: 'FaLemon', items: ['normal'], color: '#FFD700' },
-                { name: 'Jaljeera', icon: 'FaCube', items: ['normal'], color: '#8B0000' },
-                { name: 'Soup', icon: 'FaUtensilSpoon', items: ['normal'], color: '#FFA500' },
-                { name: 'Maggie', icon: 'FaUtensilSpoon', items: ['normal'], color: '#FF6347' },
-                { name: 'Oats', icon: 'FaUtensilSpoon', items: ['normal'], color: '#D2691E' },
+                { name: 'Coffee', icon: 'FaCoffee', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }], color: '#8B4513', enabled: true },
+                { name: 'Tea', icon: 'FaMugHot', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }], color: '#228B22', enabled: true },
+                { name: 'Water', icon: 'FaTint', items: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }], color: '#87CEEB', enabled: true },
+                { name: 'Shikanji', icon: 'FaLemon', items: [{ name: 'normal', available: true }], color: '#FFD700', enabled: true },
+                { name: 'Jaljeera', icon: 'FaCube', items: [{ name: 'normal', available: true }], color: '#8B0000', enabled: true },
+                { name: 'Soup', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FFA500', enabled: true },
+                { name: 'Maggie', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FF6347', enabled: true },
+                { name: 'Oats', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#D2691E', enabled: true },
             ]);
         }
 
         if (savedAddOns) {
-            setAddOns(JSON.parse(savedAddOns));
+            const parsed = JSON.parse(savedAddOns);
+            setAddOns(parsed.map(addOn => typeof addOn === 'string' ? { name: addOn, available: true } : addOn));
         } else {
-            setAddOns(["Ginger", "Cloves", "Fennel Seeds", "Cardamom", "Cinnamon"]);
+            setAddOns(["Ginger", "Cloves", "Fennel Seeds", "Cardamom", "Cinnamon"].map(name => ({ name, available: true })));
         }
 
         if (savedSugarLevels) {
-            setSugarLevels(JSON.parse(savedSugarLevels));
+            const parsed = JSON.parse(savedSugarLevels);
+            setSugarLevels(parsed.map(level => typeof level === 'number' ? { level, available: true } : level));
         } else {
-            setSugarLevels([0, 1, 2, 3]);
+            setSugarLevels([0, 1, 2, 3].map(level => ({ level, available: true })));
         }
 
         if (savedItemImages) {
@@ -261,21 +278,73 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         setLoading(false);
     }, []);
 
-    const saveMenu = async () => {
+    const saveMenu = async (showAlert = true) => {
         try {
+            const filteredCategories = menuCategories.filter(cat => cat.enabled).map(cat => ({
+                ...cat,
+                items: cat.items.filter(item => item.available)
+            }));
+            const filteredAddOns = addOns.filter(addOn => addOn.available).map(addOn => addOn.name);
+            const filteredSugarLevels = sugarLevels.filter(s => s.available).map(s => s.level);
             await callApi('/menu', 'PUT', {
                 userId: user.id,
                 userRole: user.role,
-                categories: menuCategories,
-                addOns,
-                sugarLevels,
+                categories: filteredCategories,
+                addOns: filteredAddOns,
+                sugarLevels: filteredSugarLevels,
                 itemImages
             });
             saveToStorage();
-            alert('Menu updated successfully!');
+            if (showAlert) alert('Menu updated successfully!');
         } catch (error) {
             alert('Failed to update menu on server: ' + error.message);
         }
+    };
+
+    const instantSave = async () => {
+        try {
+            const filteredCategories = menuCategories.filter(cat => cat.enabled).map(cat => ({
+                ...cat,
+                items: cat.items.filter(item => item.available)
+            }));
+            const filteredAddOns = addOns.filter(addOn => addOn.available).map(addOn => addOn.name);
+            const filteredSugarLevels = sugarLevels.filter(s => s.available).map(s => s.level);
+            await callApi('/menu', 'PUT', {
+                userId: user.id,
+                userRole: user.role,
+                categories: filteredCategories,
+                addOns: filteredAddOns,
+                sugarLevels: filteredSugarLevels,
+                itemImages
+            });
+            saveToStorage();
+        } catch (error) {
+            console.error('Failed to save menu instantly:', error);
+        }
+    };
+
+    const toggleCategory = async (index) => {
+        const updated = [...menuCategories];
+        updated[index].enabled = !updated[index].enabled;
+        setMenuCategories(updated);
+        saveToStorage();
+        await instantSave();
+    };
+
+    const toggleAddOn = async (index) => {
+        const updated = [...addOns];
+        updated[index].available = !updated[index].available;
+        setAddOns(updated);
+        saveToStorage();
+        await instantSave();
+    };
+
+    const toggleSugar = async (index) => {
+        const updated = [...sugarLevels];
+        updated[index].available = !updated[index].available;
+        setSugarLevels(updated);
+        saveToStorage();
+        await instantSave();
     };
 
     if (loading) return (
@@ -315,41 +384,159 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
             {/* Menu Categories */}
             {menuCategories.map((category, catIndex) => (
                 <div key={category.name} style={enhancedStyles.menuCard}>
-                    <h3 style={enhancedStyles.categoryHeader}>
-                        {getIcon(category.icon)} {category.name}
-                        <div style={{ float: 'right', display: 'flex', gap: '5px' }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        flexWrap: 'wrap',
+                        gap: '10px'
+                    }}>
+                        <h3 style={{
+                            ...enhancedStyles.categoryHeader,
+                            margin: 0,
+                            flex: '1 1 auto',
+                            minWidth: '200px'
+                        }}>
+                            {getIcon(category.icon)} {category.name}
+                        </h3>
+                        <div style={{
+                            display: 'flex',
+                            gap: '8px',
+                            flexWrap: 'wrap',
+                            alignItems: 'center'
+                        }}>
                             <button
-                                style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.9rem' }}
+                                style={{
+                                    backgroundColor: category.enabled ? '#4CAF50' : '#f44336',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '20px',
+                                    padding: '6px 12px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    fontWeight: 'bold',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    whiteSpace: 'nowrap'
+                                }}
+                                onClick={() => toggleCategory(catIndex)}
+                                title={category.enabled ? 'Disable Category' : 'Enable Category'}
+                            >
+                                {category.enabled ? 'ON' : 'OFF'}
+                            </button>
+                            <button
+                                style={{
+                                    background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    padding: '8px 12px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 3px 8px rgba(0,122,255,0.3)',
+                                    transform: 'translateY(0)',
+                                    ':hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 5px 15px rgba(0,122,255,0.4)'
+                                    }
+                                }}
                                 onClick={() => openModal('editCategory', '', catIndex)}
                                 title="Edit Category"
                             >
                                 <FaEdit />
+                                Edit
                             </button>
                             <button
-                                style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.9rem' }}
+                                style={{
+                                    background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '10px',
+                                    padding: '8px 12px',
+                                    cursor: 'pointer',
+                                    fontSize: '0.8rem',
+                                    fontWeight: '600',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    whiteSpace: 'nowrap',
+                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                    boxShadow: '0 3px 8px rgba(255,59,48,0.3)',
+                                    transform: 'translateY(0)',
+                                    ':hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 5px 15px rgba(255,59,48,0.4)'
+                                    }
+                                }}
                                 onClick={() => deleteCategory(catIndex)}
                                 title="Delete Category"
                             >
                                 <FaTrash />
+                                Delete
                             </button>
                             <button
-                                style={{ ...enhancedStyles.primaryButton, fontSize: '0.8rem', padding: '5px 10px' }}
+                                style={{
+                                    ...enhancedStyles.primaryButton,
+                                    fontSize: '0.8rem',
+                                    padding: '8px 12px',
+                                    whiteSpace: 'nowrap',
+                                    background: 'linear-gradient(135deg, #a1db40 0%, #8bc34a 100%)',
+                                    boxShadow: '0 3px 8px rgba(161,219,64,0.3)',
+                                    transform: 'translateY(0)',
+                                    ':hover': {
+                                        transform: 'translateY(-1px)',
+                                        boxShadow: '0 5px 15px rgba(161,219,64,0.4)'
+                                    }
+                                }}
                                 onClick={() => openModal('addItem', category.name)}
                             >
                                 <FaPlus /> Add Item
                             </button>
                         </div>
-                    </h3>
+                    </div>
 
                     {category.items && category.items.length > 0 ? (
                         <div style={enhancedStyles.itemList}>
                             {category.items.map((item, itemIndex) => (
-                                <div key={item} style={{ ...enhancedStyles.menuItem, position: 'relative' }}>
-                                    {item}
-                                    <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px' }}>
+                                <div key={item.name} style={{
+                                    ...enhancedStyles.menuItem,
+                                    position: 'relative',
+                                    opacity: item.available ? 1 : 0.5,
+                                    background: item.available ? enhancedStyles.menuItem.background : 'linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%)'
+                                }}>
+                                    {item.name}
+                                    <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
+                                        <button
+                                            style={{
+                                                backgroundColor: item.available ? '#4CAF50' : '#f44336',
+                                                color: 'white',
+                                                border: 'none',
+                                                borderRadius: '15px',
+                                                padding: '2px 8px',
+                                                cursor: 'pointer',
+                                                fontSize: '0.7rem',
+                                                fontWeight: 'bold'
+                                            }}
+                                            onClick={() => {
+                                                const updated = [...menuCategories];
+                                                updated[catIndex].items[itemIndex].available = !updated[catIndex].items[itemIndex].available;
+                                                setMenuCategories(updated);
+                                                instantSave();
+                                            }}
+                                            title={item.available ? 'Mark Unavailable' : 'Mark Available'}
+                                        >
+                                            {item.available ? 'ON' : 'OFF'}
+                                        </button>
                                         <button
                                             style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
-                                            onClick={() => openModal('editItem', category.name, itemIndex, item)}
+                                            onClick={() => openModal('editItem', category.name, itemIndex, item.name)}
                                             title="Edit Name"
                                         >
                                             <FaEdit />
@@ -357,7 +544,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                                         <button
                                             style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
                                             onClick={() => {
-                                                if (window.confirm(`Remove ${item}?`)) removeItem(catIndex, itemIndex);
+                                                if (window.confirm(`Remove ${item.name}?`)) removeItem(catIndex, itemIndex);
                                             }}
                                             title="Remove"
                                         >
@@ -389,12 +576,28 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                 </h3>
                 <div style={enhancedStyles.itemList}>
                     {addOns.map((addOn, index) => (
-                        <div key={addOn} style={{ ...enhancedStyles.menuItem, position: 'relative' }}>
-                            {addOn}
-                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px' }}>
+                        <div key={addOn.name} style={{ ...enhancedStyles.menuItem, position: 'relative', opacity: addOn.available ? 1 : 0.5 }}>
+                            {addOn.name}
+                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
+                                <button
+                                    style={{
+                                        backgroundColor: addOn.available ? '#4CAF50' : '#f44336',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '15px',
+                                        padding: '2px 8px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 'bold'
+                                    }}
+                                    onClick={() => toggleAddOn(index)}
+                                    title={addOn.available ? 'Disable' : 'Enable'}
+                                >
+                                    {addOn.available ? 'ON' : 'OFF'}
+                                </button>
                                 <button
                                     style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
-                                    onClick={() => openModal('editAddOn', '', index, addOn)}
+                                    onClick={() => openModal('editAddOn', '', index, addOn.name)}
                                     title="Edit"
                                 >
                                     <FaEdit />
@@ -402,7 +605,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                                 <button
                                     style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
                                     onClick={() => {
-                                        if (window.confirm(`Remove ${addOn}?`)) removeAddOn(index);
+                                        if (window.confirm(`Remove ${addOn.name}?`)) removeAddOn(index);
                                     }}
                                     title="Remove"
                                 >
@@ -427,25 +630,44 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     </button>
                 </h3>
                 <div style={enhancedStyles.itemList}>
-                    {sugarLevels.map(level => (
-                        <div key={level} style={{
+                    {sugarLevels.map((level, index) => (
+                        <div key={level.level} style={{
                             ...enhancedStyles.menuItem,
-                            backgroundColor: level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
-                            color: level === 1 ? '#103c7f' : '#333',
-                            position: 'relative'
+                            backgroundColor: level.level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
+                            color: level.level === 1 ? '#103c7f' : '#333',
+                            position: 'relative',
+                            opacity: level.available ? 1 : 0.5
                         }}>
-                            {level} {level === 1 ? 'Spoon (Default)' : 'Spoons'}
-                            {level !== 1 && (
+                            {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
+                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
                                 <button
-                                    style={{ position: 'absolute', top: '5px', right: '5px', background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
-                                    onClick={() => {
-                                        if (window.confirm(`Remove sugar level ${level}?`)) removeSugarLevel(level);
+                                    style={{
+                                        backgroundColor: level.available ? '#4CAF50' : '#f44336',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '15px',
+                                        padding: '2px 8px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.7rem',
+                                        fontWeight: 'bold'
                                     }}
-                                    title="Remove"
+                                    onClick={() => toggleSugar(index)}
+                                    title={level.available ? 'Disable' : 'Enable'}
                                 >
-                                    <FaTrash />
+                                    {level.available ? 'ON' : 'OFF'}
                                 </button>
-                            )}
+                                {level.level !== 1 && (
+                                    <button
+                                        style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
+                                        onClick={() => {
+                                            if (window.confirm(`Remove sugar level ${level.level}?`)) removeSugarLevel(level.level);
+                                        }}
+                                        title="Remove"
+                                    >
+                                        <FaTrash />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     ))}
                 </div>

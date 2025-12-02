@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../config/constants';
 
 // A more robust API call function to handle non-JSON and empty responses.
-export const callApi = async (url, method = 'GET', body = null) => {
+export const callApi = async (url, method = 'GET', body = null, silent = false) => {
     const isBodyMethod = !['GET', 'HEAD'].includes(method.toUpperCase());
 
     const options = {
@@ -74,8 +74,10 @@ export const callApi = async (url, method = 'GET', body = null) => {
 
     } catch (error) {
         console.error("API Call Error:", error);
-        // Use console.error for logging and alert for user notification
-        alert(`❌ Data Error: ${error.message}. Please check network connection and server response.`);
+        // Use console.error for logging and alert for user notification (unless silent)
+        if (!silent) {
+            alert(`❌ Data Error: ${error.message}. Please check network connection and server response.`);
+        }
         return null;
     }
 };

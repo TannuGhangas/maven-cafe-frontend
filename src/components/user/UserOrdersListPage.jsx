@@ -97,7 +97,7 @@ const ListPageBanner = ({ styles, imageUrl }) => {
     return (
         <div style={bannerStyle}>
             <div style={imageStyle}>
-                <h1 style={textStyle}>My Active Orders</h1>
+                <h1 style={textStyle}>My Orders</h1>
             </div>
         </div>
     );
@@ -196,6 +196,18 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                             Cancel
                         </button>
                     )}
+                    {order.status === 'Delivered' && (
+                        <span style={{
+                            backgroundColor: '#4CAF50',
+                            color: 'white',
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '0.8rem',
+                            fontWeight: 'bold'
+                        }}>
+                            ✅ Delivered
+                        </span>
+                    )}
                     <span style={{
                         fontSize: '1.2rem',
                         color: '#666',
@@ -226,7 +238,34 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                     {/* Individual Items */}
                     <div>
                         {order.items.map((item, index) => {
-                            const locationValue = `${item.location} ${item.tableNo ? `(Table ${item.tableNo})` : ''}`;
+                            const renderLocation = () => {
+                                const loc = item.location;
+                                const table = item.tableNo ? `(Table ${item.tableNo})` : '';
+                                if (loc && loc.startsWith('Seat_')) {
+                                    const seatNum = loc.substring(5);
+                                    return (
+                                        <>
+                                            <span style={{
+                                                display: 'inline-block',
+                                                backgroundColor: '#4CAF50',
+                                                color: 'white',
+                                                borderRadius: '50%',
+                                                width: '20px',
+                                                height: '20px',
+                                                textAlign: 'center',
+                                                lineHeight: '20px',
+                                                fontSize: '0.7rem',
+                                                fontWeight: 'bold',
+                                                marginRight: '6px'
+                                            }}>
+                                                {seatNum}
+                                            </span>
+                                            {loc} {table}
+                                        </>
+                                    );
+                                }
+                                return <>{loc} {table}</>;
+                            };
 
                             // Define the data points to be displayed
                             const dataPoints = [
@@ -234,7 +273,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                                 { label: "Type", value: item.type || 'Standard' },
                                 { label: "Sugar", value: item.sugarLevel !== undefined ? item.sugarLevel : 'N/A' },
                                 { label: "Quantity", value: item.quantity },
-                                { label: "Location", value: locationValue },
+                                { label: "Location", value: renderLocation() },
                             ];
 
                             // Define secondary details (Add-Ons/Notes)
@@ -343,7 +382,7 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
                 </h3>
                 <p style={{ color: '#888', fontSize: '0.9em', marginBottom: '20px' }}>
                     <FaExclamationCircle style={{ marginRight: '5px' }} />
-                    Viewing {userOrders.length} active order(s). Tap an order to expand details.
+                    Viewing {userOrders.length} order(s). Tap an order to expand details.
                 </p>
                 
                 {/* 2. Enhanced Order List */}

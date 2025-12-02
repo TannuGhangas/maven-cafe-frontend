@@ -19,6 +19,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     const [notificationAcknowledged, setNotificationAcknowledged] = useState(true);
     const lastOrderCount = useRef(0);
     const notificationTimeoutRef = useRef(null);
+    const hasLoaded = useRef(false);
 
     const view = kitchenView;
     const setView = setKitchenView;
@@ -97,10 +98,13 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     // --------------------------------------------------
     // FETCH ORDERS SAFELY
     // --------------------------------------------------
-    const fetchOrders = async () => {
+    const fetchOrders = async (silent = false) => {
         try {
             const data = await callApi(
-                `/orders?userId=${user.id}&userRole=${user.role}`
+                `/orders?userId=${user.id}&userRole=${user.role}`,
+                'GET',
+                null,
+                silent
             );
 
             const newOrders = Array.isArray(data) ? data : [];
@@ -108,7 +112,10 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             
             const newActiveOrderCount = newOrders.filter(o => String(o?.status || "").toLowerCase() === "placed").length;
 
-            if (newActiveOrderCount > lastOrderCount.current) {
+            const previousCount = lastOrderCount.current;
+            lastOrderCount.current = newActiveOrderCount;
+
+            if (hasLoaded.current && newActiveOrderCount > previousCount) {
                 setNotificationAcknowledged(false); // Reset acknowledgment for new orders
 
                 // Show notification
@@ -120,8 +127,8 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                     audio.play().catch(e => console.log("Audio playback blocked by browser:", e));
                 }
             }
-            
-            lastOrderCount.current = newActiveOrderCount;
+
+            hasLoaded.current = true;
             
         } catch (err) {
             console.error("Kitchen fetch error:", err);
@@ -131,7 +138,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
     useEffect(() => {
         fetchOrders();
-        const interval = setInterval(fetchOrders, 10000);
+        const interval = setInterval(() => fetchOrders(true), 10000);
         return () => {
             clearInterval(interval);
             if (notificationTimeoutRef.current) {
@@ -159,6 +166,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
         const arr = slotOrders(slot);
 
         arr.forEach((order) => {
+            const isNew = order?.tags?.includes('New') && (Date.now() - order.timestamp < 2 * 60 * 1000);
             (order?.items || []).forEach((it) => {
                 const itemKey = String(it?.item || "").toLowerCase();
                 const typeName = it?.type || "normal";
@@ -172,10 +180,14 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                         // Replacement for Line 113 (Conditional Naming)
                         name: (typeName && typeName !== itemKey) ? `${typeName.toUpperCase()} ${itemKey.toUpperCase()}` : itemKey.toUpperCase(),
                         totalQty: 0,
+                        hasNew: false,
                     };
                 }
 
                 totals[combinedKey].totalQty += Number(it?.quantity || 0);
+                if (isNew) {
+                    totals[combinedKey].hasNew = true;
+                }
             });
         });
         return totals;

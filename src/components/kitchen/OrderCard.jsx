@@ -64,6 +64,20 @@ const OrderCard = ({
             <div className="order-card-header">
                 <div className="order-customer-name">
                     {order?.userName || "Customer"}
+                    {order?.tags?.includes('New') && (Date.now() - order.timestamp < 2 * 60 * 1000) && (
+                        <span style={{
+                            backgroundColor: '#ff6b6b',
+                            color: 'white',
+                            padding: '2px 6px',
+                            borderRadius: '10px',
+                            fontSize: '0.7rem',
+                            fontWeight: 'bold',
+                            marginLeft: '8px',
+                            verticalAlign: 'middle'
+                        }}>
+                            NEW
+                        </span>
+                    )}
                 </div>
                 <div className="order-quantity">
                     {qty} Pcs
@@ -81,7 +95,35 @@ const OrderCard = ({
                 <div className="order-summary-row">
                     <span className="order-summary-label">Location:</span>
                     <span className="order-summary-value">
-                        {relevantItems[0]?.location === 'Others' ? defaultLocationName : (ALL_LOCATIONS_MAP[relevantItems[0]?.location] || relevantItems[0]?.location || "N/A")} {relevantItems[0]?.tableNo ? `(Table ${relevantItems[0]?.tableNo})` : ""}
+                        {(() => {
+                            const loc = relevantItems[0]?.location;
+                            const displayLoc = loc === 'Others' ? defaultLocationName : (ALL_LOCATIONS_MAP[loc] || loc || "N/A");
+                            const table = relevantItems[0]?.tableNo ? `(Table ${relevantItems[0]?.tableNo})` : "";
+                            if (loc && loc.startsWith('Seat_')) {
+                                const seatNum = loc.substring(5);
+                                return (
+                                    <>
+                                        <span style={{
+                                            display: 'inline-block',
+                                            backgroundColor: '#4CAF50',
+                                            color: 'white',
+                                            borderRadius: '50%',
+                                            width: '24px',
+                                            height: '24px',
+                                            textAlign: 'center',
+                                            lineHeight: '24px',
+                                            fontSize: '0.8rem',
+                                            fontWeight: 'bold',
+                                            marginRight: '8px'
+                                        }}>
+                                            {seatNum}
+                                        </span>
+                                        {displayLoc} {table}
+                                    </>
+                                );
+                            }
+                            return <>{displayLoc} {table}</>;
+                        })()}
                     </span>
                 </div>
             </div>

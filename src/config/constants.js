@@ -171,9 +171,9 @@ const getMenuCategories = () => {
 
 const categories = getMenuCategories();
 
-export const COFFEE_TYPES = categories ? (categories.find(c => c.name === 'Coffee')?.items || ["Black", "Milk", "Simple", "Cold"]) : ["Black", "Milk", "Simple", "Cold"];
-export const TEA_TYPES = categories ? (categories.find(c => c.name === 'Tea')?.items || ["Black", "Milk", "Green"]) : ["Black", "Milk", "Green"];
-export const WATER_TYPES = categories ? (categories.find(c => c.name === 'Water')?.items || ["Warm", "Cold", "Hot", "Lemon"]) : ["Warm", "Cold", "Hot", "Lemon"];
+export const COFFEE_TYPES = categories ? (categories.find(c => c.name === 'Coffee')?.items?.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false }) || [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }]) : [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }];
+export const TEA_TYPES = categories ? (categories.find(c => c.name === 'Tea')?.items?.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false }) || [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }]) : [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }];
+export const WATER_TYPES = categories ? (categories.find(c => c.name === 'Water')?.items?.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false }) || [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }]) : [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }];
 
 export const SUGAR_LEVELS = (() => {
     try {
@@ -187,22 +187,18 @@ export const SUGAR_LEVELS = (() => {
 export const ADD_ONS = (() => {
     try {
         const saved = localStorage.getItem('adminAddOns');
-        return saved ? JSON.parse(saved) : [
-            "Ginger",
-            "Cloves",
-            "Fennel Seeds",
-            "Cardamom",
-            "Cinnamon",
-        ];
-    } catch {
-        return [
-            "Ginger",
-            "Cloves",
-            "Fennel Seeds",
-            "Cardamom",
-            "Cinnamon",
-        ];
-    }
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            return parsed.map(addOn => typeof addOn === 'string' ? { name: addOn, available: true } : { name: addOn.name || addOn, available: addOn.available !== false });
+        }
+    } catch {}
+    return [
+        { name: "Ginger", available: true },
+        { name: "Cloves", available: true },
+        { name: "Fennel Seeds", available: true },
+        { name: "Cardamom", available: true },
+        { name: "Cinnamon", available: true },
+    ];
 })();
 
 export const TABLE_NUMBERS = Array.from({ length: 25 }, (_, i) => i + 1);

@@ -72,7 +72,23 @@ const SlotSelector = ({ selectedSlot, setSelectedSlot, slotOrders, setSelectedIt
                         }}></div>
                         <div className="slot-total-text">
                             <div className="slot-total-quantity">{t.totalQty}</div>
-                            <div className="slot-total-name">{t.name.toUpperCase()}</div>
+                            <div className="slot-total-name">
+                                {t.name.toUpperCase()}
+                                {t.hasNew && (
+                                    <span style={{
+                                        backgroundColor: '#ff6b6b',
+                                        color: 'white',
+                                        padding: '1px 4px',
+                                        borderRadius: '6px',
+                                        fontSize: '0.6rem',
+                                        fontWeight: 'bold',
+                                        marginLeft: '4px',
+                                        verticalAlign: 'middle'
+                                    }}>
+                                        NEW
+                                    </span>
+                                )}
+                            </div>
                         </div>
                     </button>
                 ))}

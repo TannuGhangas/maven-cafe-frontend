@@ -172,65 +172,35 @@ const ImageBanner = ({ itemType, imageUrl }) => {
     );
 };
 
-// Helper function to get menu types from server
-const getMenuTypes = async (itemType, user) => {
-    try {
-        const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
-        if (menu && menu.categories) {
-            const cat = menu.categories.find(c => c.name.toLowerCase() === itemType);
-            if (cat && cat.items) {
-                // For specific items, only show "normal"
-                const specificItems = ['shikanji', 'maggie', 'oats', 'soup', 'jaljeera'];
-                if (specificItems.includes(itemType.toLowerCase())) {
-                    return ['normal'];
-                }
-                return cat.items;
+// Helper function to get menu types from menu object
+const getMenuTypes = async (itemType, user, menu) => {
+    if (menu && menu.categories) {
+        const cat = menu.categories.find(c => c.name.toLowerCase() === itemType);
+        if (cat && cat.items) {
+            // For specific items, only show "normal"
+            const specificItems = ['shikanji', 'maggie', 'oats', 'soup', 'jaljeera'];
+            if (specificItems.includes(itemType.toLowerCase())) {
+                return [{ name: 'normal', available: true }];
             }
+            // Return all items with availability status
+            return cat.items.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false });
         }
-    } catch {}
+    }
     // Default fallbacks
     const defaults = {
-        coffee: ["Black", "Milk", "Simple", "Cold"],
-        tea: ["Black", "Milk", "Green"],
-        water: ["Warm", "Cold", "Hot", "Lemon"],
-        shikanji: ["normal"],
-        maggie: ["normal"],
-        oats: ["normal"],
-        soup: ["normal"],
-        jaljeera: ["normal"],
+        coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }],
+        tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
+        water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
+        shikanji: [{ name: "normal", available: true }],
+        maggie: [{ name: "normal", available: true }],
+        oats: [{ name: "normal", available: true }],
+        soup: [{ name: "normal", available: true }],
+        jaljeera: [{ name: "normal", available: true }],
     };
     return defaults[itemType] || [];
 };
 
-const getSugarLevels = () => {
-    try {
-        const saved = localStorage.getItem('adminSugarLevels');
-        return saved ? JSON.parse(saved) : [0, 1, 2, 3];
-    } catch {
-        return [0, 1, 2, 3];
-    }
-};
-
-const getAddOns = () => {
-    try {
-        const saved = localStorage.getItem('adminAddOns');
-        return saved ? JSON.parse(saved) : [
-            "Ginger",
-            "Cloves",
-            "Fennel Seeds",
-            "Cardamom",
-            "Cinnamon",
-        ];
-    } catch {
-        return [
-            "Ginger",
-            "Cloves",
-            "Fennel Seeds",
-            "Cardamom",
-            "Cinnamon",
-        ];
-    }
-};
+// Removed localStorage functions, now fetching from server
 
 // Main Component
 const ItemConfigPage = ({
@@ -242,22 +212,38 @@ const styles = ENHANCED_STYLES;
 
 const [userLocations, setUserLocations] = useState([]);
 
- // State for dynamic data
+// State for dynamic data
 const [typeOptions, setTypeOptions] = useState([]);
-const SUGAR_LEVELS = getSugarLevels();
-const ADD_ONS = getAddOns();
+const [sugarLevels, setSugarLevels] = useState([]);
+const [addOns, setAddOns] = useState([]);
 
 useEffect(() => {
     // Locations are now handled statically from constants
     setUserLocations(USER_LOCATIONS_DATA);
 
-    // Fetch type options
-    const fetchTypeOptions = async () => {
-        const options = await getMenuTypes(itemType, user);
-        setTypeOptions(options);
+    // Fetch menu data
+    const fetchMenuData = async () => {
+        try {
+            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
+            const options = await getMenuTypes(itemType, user, menu);
+            setTypeOptions(options);
+            setAddOns(menu.addOns || []);
+            setSugarLevels(menu.sugarLevels || []);
+        } catch (error) {
+            console.error('Failed to fetch menu:', error);
+            // Fallback
+            setAddOns([
+                { name: "Ginger", available: true },
+                { name: "Cloves", available: true },
+                { name: "Fennel Seeds", available: true },
+                { name: "Cardamom", available: true },
+                { name: "Cinnamon", available: true },
+            ]);
+            setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
+        }
     };
-    fetchTypeOptions();
-}, [itemType]);
+    fetchMenuData();
+}, [itemType, user]);
 
 // --- START USER LOCATION LOGIC ---
 // Use the actual logged-in user
@@ -269,8 +255,8 @@ const defaultLocationKey = allowedLocations[0]?.key || user.location || 'Others'
 // --- END USER LOCATION LOGIC ---
 
 
-    // **CORE LOGIC**: Set default type to the item name itself if no sub-types exist.
-    const defaultType = typeOptions.length > 0 ? typeOptions[0] : itemType;
+// **CORE LOGIC**: Set default type to the first available type, or item name if no sub-types exist.
+const defaultType = typeOptions.length > 0 ? (typeOptions.find(t => t.available !== false)?.name || typeOptions[0].name) : itemType;
 
     // State for managing custom sugar input
     const [customSugar, setCustomSugar] = useState(''); 
@@ -292,21 +278,22 @@ const defaultLocationKey = allowedLocations[0]?.key || user.location || 'Others'
         }
     );
 
-    // Effect to handle setting the custom sugar input if the sugar level is not standard
-    useEffect(() => {
-        if (itemConfig.sugarLevel !== null && !SUGAR_LEVELS.includes(itemConfig.sugarLevel)) {
-            setCustomSugar(String(itemConfig.sugarLevel));
-        } else if (itemConfig.sugarLevel !== null && customSugar !== '') {
-            setCustomSugar(''); 
-        }
-    }, [itemConfig.sugarLevel]);
+// Effect to handle setting the custom sugar input if the sugar level is not standard
+useEffect(() => {
+if (itemConfig.sugarLevel !== null && !sugarLevels.some(s => s.level === itemConfig.sugarLevel)) {
+setCustomSugar(String(itemConfig.sugarLevel));
+} else if (itemConfig.sugarLevel !== null && customSugar !== '') {
+setCustomSugar('');
+}
+}, [itemConfig.sugarLevel, sugarLevels]);
 
 useEffect(() => {
     // Ensure the type is set, defaulting to itemType if no options exist.
     if (!isEditMode && typeOptions.length > 0) {
         if (itemConfig.type === itemType || !itemConfig.type) {
-            // Set to first option
-            setItemConfig(prev => ({ ...prev, type: typeOptions[0] }));
+            // Set to first available option name
+            const firstAvailable = typeOptions.find(t => t.available !== false) || typeOptions[0];
+            setItemConfig(prev => ({ ...prev, type: firstAvailable.name }));
         }
     }
 
@@ -361,23 +348,23 @@ const handleQuantityChange = (delta) => {
     });
 };
 
-    const handleSave = () => {
-        // Type validation is only required if type options exist and a selection is expected
-        if (typeOptions.length > 0 && !itemConfig.type) {
-            alert("Please select a type.");
-            return;
-        }
-        
-        if (itemConfig.quantity < 1 || isNaN(itemConfig.quantity)) {
-             alert("Quantity must be at least 1.");
-             return;
-        }
+const handleSave = () => {
+    // Type validation is only required if type options exist and a selection is expected
+    if (typeOptions.length > 0 && !itemConfig.type) {
+        alert("Please select a type.");
+        return;
+    }
 
-        // Validate custom sugar input
-        if (customSugar && isNaN(parseFloat(customSugar))) {
-             alert("Please enter a valid number for custom sugar level.");
-             return;
-        }
+    if (itemConfig.quantity < 1 || isNaN(itemConfig.quantity)) {
+         alert("Quantity must be at least 1.");
+         return;
+    }
+
+    // Validate custom sugar input
+    if (customSugar && isNaN(parseFloat(customSugar))) {
+         alert("Please enter a valid number for custom sugar level.");
+         return;
+    }
 
 
         if (isEditMode) {
@@ -427,7 +414,7 @@ minWidth: '60px', // Smaller minimum width
         textAlign: 'center',
         padding: '10px',
         fontWeight: '600',
-        borderColor: (customSugar && !SUGAR_LEVELS.includes(itemConfig.sugarLevel)) ? styles.COLOR_PRIMARY : styles.BORDER_LIGHT,
+borderColor: (customSugar && !sugarLevels.some(s => s.level === itemConfig.sugarLevel)) ? styles.COLOR_PRIMARY : styles.BORDER_LIGHT,
         marginBottom: 0, // Adjusted for layout in the flex container
         boxShadow: styles.SHADOW_ELEVATION_1,
     };
@@ -497,49 +484,56 @@ return (
 
                 <div style={contentPaddingStyle}>
                     {/* Main Content Area */}
-                    <h3 style={{ ...styles.headerText, color: styles.COLOR_PRIMARY }}>
-                        {isEditMode ? 'Edit' : 'Configure'} Your {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
-                    </h3>
+<h3 style={{ ...styles.headerText, color: styles.COLOR_PRIMARY }}>
+    {isEditMode ? 'Edit' : 'Configure'} Your {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
+</h3>
 
-                    <hr style={{ border: 'none', borderTop: `1px solid ${styles.BORDER_LIGHT}`, marginBottom: '20px' }} />
+<hr style={{ border: 'none', borderTop: `1px solid ${styles.BORDER_LIGHT}`, marginBottom: '20px' }} />
 
-                    {/* SELECT TYPE (BUTTONS) - CONDITIONALLY RENDERED */}
-                    {/* Only show this section if type options exist (e.g., for Coffee, Tea, Milk, Water). Hides completely for Jaljeera, Shikanji, Maggie. */}
-                    {typeOptions.length > 0 && (
-                        <>
-                            <label style={styles.label}>☕ Select Type:</label>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
-                                {typeOptions.map(type => (
-                                    <button
-                                        key={type}
-                                        // Type buttons use Accent (Green)
-                                        style={{ ...buttonStyle(itemConfig.type === type, true), flex: '1 1 auto' }} // Added flex for even spacing/wrapping
-                                        onClick={() => handleToggle('type', type)}
-                                    >
-                                        {type}
-                                    </button>
-                                ))}
-                            </div>
-                        </>
-                    )}
+{/* SELECT TYPE (BUTTONS) - CONDITIONALLY RENDERED */}
+{/* Only show this section if type options exist (e.g., for Coffee, Tea, Milk, Water). Hides completely for Jaljeera, Shikanji, Maggie. */}
+{typeOptions.length > 0 && (
+    <>
+        <label style={styles.label}>☕ Select Type:</label>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+            {typeOptions.map(typeObj => (
+                <button
+                    key={typeObj.name}
+                    // Type buttons use Accent (Green)
+                    style={{
+                        ...buttonStyle(itemConfig.type === typeObj.name, true),
+                        flex: '1 1 auto',
+                        opacity: typeObj.available ? 1 : 0.5,
+                        cursor: typeObj.available ? 'pointer' : 'not-allowed'
+                    }} // Added flex for even spacing/wrapping
+                    onClick={typeObj.available ? () => handleToggle('type', typeObj.name) : undefined}
+                    disabled={!typeObj.available}
+                >
+                    {typeObj.name}
+                    {!typeObj.available && ' (Unavailable)'}
+                </button>
+            ))}
+        </div>
+    </>
+)}
 
-                    {/* SUGAR LEVEL (BUTTONS + CUSTOM INPUT) */}
-                    {(itemType === 'coffee' || itemType === 'tea' || itemType === 'shikanji' || itemType === 'jaljeera') && (
-                        <>
-                            <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
-                            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
-                                {/* Standard Levels (0, 1, 2, 3) */}
-                                {SUGAR_LEVELS.map(level => (
-                                    <button
-                                        key={level}
-                                        // Sugar buttons use Accent (Green)
-                                        style={{ ...buttonStyle(itemConfig.sugarLevel === level), flex: '1 1 auto' }} // Added flex for even spacing/wrapping
-                                        onClick={() => handleSugarSelect(level)}
-                                    >
-                                        {level}
-                                    </button>
-                                ))}
-                            </div>
+{/* SUGAR LEVEL (BUTTONS + CUSTOM INPUT) */}
+{(itemType === 'coffee' || itemType === 'tea' || itemType === 'shikanji' || itemType === 'jaljeera') && (
+    <>
+        <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
+<div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+{/* Standard Levels (0, 1, 2, 3) */}
+{sugarLevels.filter(s => s.available).map(s => (
+<button
+key={s.level}
+// Sugar buttons use Accent (Green)
+style={{ ...buttonStyle(itemConfig.sugarLevel === s.level), flex: '1 1 auto' }} // Added flex for even spacing/wrapping
+onClick={() => handleSugarSelect(s.level)}
+>
+{s.level}
+</button>
+))}
+</div>
                         </>
                     )}
 
@@ -553,29 +547,33 @@ return (
     gap: '12px',
     marginBottom: '20px'
 }}>
-{ADD_ONS.filter(addOn => !(itemType === 'coffee' && addOn === 'Ginger')).map(addOn => (
+{addOns.filter(addOn => addOn.available && !(itemType === 'coffee' && addOn.name === 'Ginger')).map(addOn => (
 <button
-key={addOn}
+key={addOn.name}
 // For Add-Ons, use primary blue color scheme
 style={{
-    ...buttonStyle(itemConfig.selectedAddOns.includes(addOn), false),
+    ...buttonStyle(itemConfig.selectedAddOns.includes(addOn.name), false),
     width: '100%',
     minHeight: '40px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center'
+    justifyContent: 'center',
+    opacity: addOn.available ? 1 : 0.5,
+    cursor: addOn.available ? 'pointer' : 'not-allowed'
 }}
-onClick={() => handleToggle('selectedAddOns', addOn)}
+onClick={addOn.available ? () => handleToggle('selectedAddOns', addOn.name) : undefined}
+disabled={!addOn.available}
 >
-{addOn}
+{addOn.name}
+{!addOn.available && ' (Unavailable)'}
 </button>
 ))}
 </div>
 </>
 )}
 
-                    {/* QUANTITY CONTROL (- 1 +) */}
-                    <label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
+{/* QUANTITY CONTROL (- 1 +) */}
+<label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
                     <div style={quantityControlStyle}>
                         <button 
                             style={quantityButtonStyle} 

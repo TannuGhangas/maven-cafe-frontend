@@ -18,8 +18,8 @@ const AdminUserEditModal = ({ user: initialUser, onClose, onSave, styles }) => {
         if (isNew) {
             onSave(null, 'add', user);
         } else {
-            // Only role can be updated via this modal for existing users
-            onSave(user.id, 'role', user.role); 
+            // Update all fields for existing users
+            onSave(user._id, 'update', user);
         }
     };
 
@@ -28,24 +28,22 @@ const AdminUserEditModal = ({ user: initialUser, onClose, onSave, styles }) => {
             <div style={styles.modalContent}>
                 <h2>{isNew ? 'Create New User' : `Edit User: ${user.name}`}</h2>
 
-                {isNew && (
-                    <>
-                        <label style={styles.label}>Name:</label>
-                        <input style={styles.inputField} type="text" value={user.name} onChange={e => setUser({...user, name: e.target.value})} placeholder="Full Name" />
-                        <label style={styles.label}>Username:</label>
-                        <input style={styles.inputField} type="text" value={user.username} onChange={e => setUser({...user, username: e.target.value})} placeholder="Username" />
-                        <label style={styles.label}>Password:</label>
-                        <input style={styles.inputField} type="password" value={user.password || ''} onChange={e => setUser({...user, password: e.target.value})} placeholder="Password" />
-                    </>
-                )}
+                <label style={styles.label}>Name:</label>
+                <input style={styles.inputField} type="text" value={user.name} onChange={e => setUser({...user, name: e.target.value})} placeholder="Full Name" />
+
+                <label style={styles.label}>Username:</label>
+                <input style={styles.inputField} type="text" value={user.username} onChange={e => setUser({...user, username: e.target.value})} placeholder="Username" />
+
+                <label style={styles.label}>Password:</label>
+                <input style={styles.inputField} type="password" value={user.password || ''} onChange={e => setUser({...user, password: e.target.value})} placeholder="Password (leave blank to keep current)" />
 
                 <label style={styles.label}>Role:</label>
                 <select style={styles.selectField} value={user.role} onChange={e => setUser({...user, role: e.target.value})}>
                     {['user', 'kitchen', 'admin'].map(r => <option key={r} value={r}>{r.toUpperCase()}</option>)}
                 </select>
-                
+
                 <button style={styles.primaryButton} onClick={handleSave}>
-                    {isNew ? 'Create User' : 'Save Role'}
+                    {isNew ? 'Create User' : 'Update User'}
                 </button>
                 <button style={styles.closeButton} onClick={onClose}>Cancel</button>
             </div>

@@ -62,7 +62,9 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
         setLoading(true);
         const data = await callApi(`/locations?userId=${user.id}&userRole=${user.role}`, 'GET');
         if (data) {
-            setLocations(data);
+            // Ensure enabled field exists
+            const updatedData = data.map(loc => ({ ...loc, enabled: loc.enabled !== false }));
+            setLocations(updatedData);
         }
         setLoading(false);
     };
@@ -108,50 +110,192 @@ const AdminLocationsPage = ({ user, callApi, setPage, styles }) => {
             </div>
 
             {/* Location Cards */}
-            {locations.map((location, index) => (
-                <div key={location.id} className="admin-locations-card">
-                    <h3 className="admin-locations-card-header">
-                        {getLocationIcon(location.location)} {location.name}
-                        <div className="admin-locations-card-actions">
-                            <button
-                                className="admin-locations-edit-btn"
-                                onClick={() => openModal('edit', index, location.name, location.location, location.access)}
-                                title="Edit Location"
-                            >
-                                <FaEdit />
-                            </button>
-                            <button
-                                className="admin-locations-delete-btn"
-                                onClick={() => removeLocation(index)}
-                                title="Remove Location"
-                            >
-                                <FaTrash />
-                            </button>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+                gap: '20px',
+                marginTop: '20px'
+            }}>
+                {locations.map((location, index) => (
+                    <div key={location.id} style={{
+                        background: location.enabled ? 'linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)' : 'linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%)',
+                        borderRadius: '20px',
+                        padding: '30px',
+                        boxShadow: location.enabled ? '0 8px 25px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05)' : '0 4px 15px rgba(0,0,0,0.05)',
+                        border: location.enabled ? '1px solid rgba(255,255,255,0.8)' : '1px solid #ddd',
+                        opacity: location.enabled ? 1 : 0.6,
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        transform: location.enabled ? 'translateY(0)' : 'translateY(2px)',
+                        position: 'relative',
+                        overflow: 'hidden'
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            marginBottom: '15px'
+                        }}>
+                            <h3 style={{
+                                margin: '0',
+                                color: '#103c7f',
+                                fontSize: '1.3rem',
+                                fontWeight: '700',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px'
+                            }}>
+                                {getLocationIcon(location.location)} {location.name}
+                            </h3>
+                            <div style={{
+                                display: 'flex',
+                                gap: '10px',
+                                alignItems: 'center'
+                            }}>
+                                <button
+                                    style={{
+                                        background: location.enabled ? 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)' : 'linear-gradient(135deg, #f44336 0%, #d32f2f 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '25px',
+                                        padding: '10px 18px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.85rem',
+                                        fontWeight: 'bold',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 20px rgba(0,0,0,0.2)'
+                                        }
+                                    }}
+                                    onClick={() => {
+                                        const updated = [...locations];
+                                        updated[index].enabled = !updated[index].enabled;
+                                        setLocations(updated);
+                                        saveToStorage();
+                                    }}
+                                    title={location.enabled ? 'Disable Location' : 'Enable Location'}
+                                >
+                                    {location.enabled ? 'ON' : 'OFF'}
+                                </button>
+                                <button
+                                    style={{
+                                        background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '10px 15px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 4px 12px rgba(0,122,255,0.3)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 20px rgba(0,122,255,0.4)'
+                                        }
+                                    }}
+                                    onClick={() => openModal('edit', index, location.name, location.location, location.access)}
+                                    title="Edit Location"
+                                >
+                                    <FaEdit />
+                                    Edit
+                                </button>
+                                <button
+                                    style={{
+                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '10px 15px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.9rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 4px 12px rgba(255,59,48,0.3)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 20px rgba(255,59,48,0.4)'
+                                        }
+                                    }}
+                                    onClick={() => removeLocation(index)}
+                                    title="Remove Location"
+                                >
+                                    <FaTrash />
+                                    Delete
+                                </button>
+                            </div>
                         </div>
-                    </h3>
 
-                    <div className="admin-locations-detail">
-                        <strong>Location:</strong> {location.location}
-                    </div>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: '1fr 1fr',
+                            gap: '15px',
+                            marginBottom: '15px'
+                        }}>
+                            <div style={{
+                                backgroundColor: '#f8f9fa',
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: '1px solid #e9ecef'
+                            }}>
+                                <strong style={{ color: '#103c7f' }}>Location:</strong><br />
+                                <span style={{ color: '#333' }}>{location.location}</span>
+                            </div>
+                            <div style={{
+                                backgroundColor: '#f8f9fa',
+                                padding: '10px',
+                                borderRadius: '8px',
+                                border: '1px solid #e9ecef'
+                            }}>
+                                <strong style={{ color: '#103c7f' }}>Access Level:</strong><br />
+                                <span style={{ color: '#333' }}>{location.access}</span>
+                            </div>
+                        </div>
 
-                    <div className="admin-locations-detail">
-                        <strong>Access Level:</strong> {location.access}
-                    </div>
-
-                    <div>
-                        <strong className="admin-locations-access-title">
-                            Allowed Delivery Locations:
-                        </strong>
-                        <div className="admin-locations-access-list">
-                            {getAllowedLocations(location.location, location.access).map(loc => (
-                                <div key={loc.key} className="admin-locations-access-item">
-                                    {loc.name}
-                                </div>
-                            ))}
+                        <div>
+                            <strong style={{
+                                color: '#103c7f',
+                                fontSize: '1rem',
+                                marginBottom: '10px',
+                                display: 'block'
+                            }}>
+                                Allowed Delivery Locations:
+                            </strong>
+                            <div style={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                gap: '8px'
+                            }}>
+                                {getAllowedLocations(location.location, location.access).map(loc => (
+                                    <span key={loc.key} style={{
+                                        backgroundColor: '#e3f2fd',
+                                        color: '#103c7f',
+                                        padding: '4px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '0.85rem',
+                                        fontWeight: '500'
+                                    }}>
+                                        {loc.name}
+                                    </span>
+                                ))}
+                            </div>
                         </div>
                     </div>
-                </div>
-            ))}
+                ))}
+            </div>
 
             {/* Table Numbers Section */}
             <div className="admin-locations-card">
