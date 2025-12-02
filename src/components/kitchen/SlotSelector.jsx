@@ -57,7 +57,7 @@ const SlotSelector = ({ selectedSlot, setSelectedSlot, slotOrders, setSelectedIt
         return (
             <div className="slot-totals">
                 {totals.map((t) => (
-                    <div
+                    <button
                         key={t.key}
                         onClick={() => {
                             setSelectedItemTypeKey(t.key);
@@ -66,20 +66,15 @@ const SlotSelector = ({ selectedSlot, setSelectedSlot, slotOrders, setSelectedIt
                             setExpandedOrderId(null);
                         }}
                         className="slot-total-card"
-                        style={{
-                            backgroundImage: `linear-gradient(
-                                rgba(0,0,0,0.55),
-                                rgba(0,0,0,0.55)
-                            ), url('${itemImages[t.itemCategory]}')`
-                        }}
                     >
-                        <div className="slot-total-quantity">
-                            {t.totalQty}
+                        <div className="slot-total-image" style={{
+                            backgroundImage: `url('${itemImages[t.itemCategory]}')`
+                        }}></div>
+                        <div className="slot-total-text">
+                            <div className="slot-total-quantity">{t.totalQty}</div>
+                            <div className="slot-total-name">{t.name.toUpperCase()}</div>
                         </div>
-                        <div className="slot-total-name">
-                            {t.name.toUpperCase()}
-                        </div>
-                    </div>
+                    </button>
                 ))}
             </div>
         );

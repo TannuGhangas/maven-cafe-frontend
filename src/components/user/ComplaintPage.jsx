@@ -95,7 +95,7 @@ const ComplaintPage = ({ setPage, user, callApi, styles: _propStyles }) => {
         },
         appContainer: {
             ..._propStyles.appContainer,
-            maxWidth: '450px',
+            maxWidth: '480px',
             margin: '0 auto',
             boxShadow: '0 0 10px rgba(0,0,0,0.1)',
             minHeight: '100vh',

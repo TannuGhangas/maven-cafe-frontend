@@ -553,7 +553,7 @@ return (
     gap: '12px',
     marginBottom: '20px'
 }}>
-{ADD_ONS.map(addOn => (
+{ADD_ONS.filter(addOn => !(itemType === 'coffee' && addOn === 'Ginger')).map(addOn => (
 <button
 key={addOn}
 // For Add-Ons, use primary blue color scheme

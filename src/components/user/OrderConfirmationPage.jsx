@@ -25,13 +25,13 @@ const ENHANCED_STYLES = {
     SECONDARY_COLOR: THEME_COLORS.ACCENT,
     
     // Layout
-    appContainer: {
-        maxWidth: '600px',
-        margin: '0 auto',
-        backgroundColor: THEME_COLORS.BACKGROUND_MAIN, 
-        minHeight: '100vh',
-        padding: '15px 0', 
-    },
+appContainer: {
+    maxWidth: '480px',
+    margin: '0 auto',
+    backgroundColor: THEME_COLORS.BACKGROUND_MAIN,
+    minHeight: '100vh',
+    padding: '15px 0',
+},
 
     // Buttons (Kept for functionality, styles are same)
     primaryButton: {

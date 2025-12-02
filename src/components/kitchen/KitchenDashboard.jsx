@@ -13,14 +13,15 @@ if (audio) {
     audio.volume = 1.0; // Set volume a bit lower
 }
 
-const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
+const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitchenView }) => {
     const [orders, setOrders] = useState([]);
     const [showNotification, setShowNotification] = useState(false);
     const [notificationAcknowledged, setNotificationAcknowledged] = useState(true);
     const lastOrderCount = useRef(0);
     const notificationTimeoutRef = useRef(null);
 
-    const [view, setView] = useState("home");
+    const view = kitchenView;
+    const setView = setKitchenView;
     const [selectedSlot, setSelectedSlot] = useState("morning");
     const [selectedItemTypeKey, setSelectedItemTypeKey] = useState(null);
     const [selectedStatus, setSelectedStatus] = useState(null);
@@ -299,35 +300,6 @@ const KitchenDashboard = ({ user, callApi, setPage, styles }) => {
             {/* ITEM STATUS & INLINE ORDERS */}
             {view === "itemStatus" && selectedItemTypeKey && (
                 <>
-                    <button
-                        style={{
-                            ...styles.secondaryButton,
-                            width: '180px',
-                            padding: '12px 20px',
-                            fontSize: '1.1em',
-                            fontWeight: '600',
-                            backgroundColor: '#103c7f',
-                            color: '#ffffff',
-                            border: 'none',
-                            borderRadius: '25px',
-                            boxShadow: '0 4px 8px rgba(16, 60, 127, 0.3)',
-                            cursor: 'pointer',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            transition: 'all 0.2s ease',
-                            margin: '0 auto'
-                        }}
-                        onClick={() => {
-                            setView("home");
-                            setSelectedItemTypeKey(null);
-                            setSelectedStatus(null);
-                            setExpandedOrderId(null);
-                        }}
-                    >
-                        ← Back to Total
-                    </button>
                     <div style={{ fontSize: isMobile ? 24 : 30, fontWeight: 700, marginBottom: isMobile ? 10 : 15 }}>
                         {Object.values(computeTotalsForSlot(selectedSlot)).find(t => t.key === selectedItemTypeKey)?.name.toUpperCase() || 'Item Type'} Statuses
                     </div>

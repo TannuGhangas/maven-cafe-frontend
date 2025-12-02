@@ -11,7 +11,7 @@ import {
 } from 'react-icons/fa';
 import MavenLogo from '../../assets/maven_logoo.png';
 
-const NavBar = ({ user, setPage, setModal, styles }) => {
+const NavBar = ({ user, setPage, setModal, styles, onLogoClick }) => {
     const isKitchenOrAdmin = user.role === 'kitchen' || user.role === 'admin';
 
     // 🚀 Choose styles based on role
@@ -42,7 +42,7 @@ const NavBar = ({ user, setPage, setModal, styles }) => {
     return (
         <div style={navBarContainerStyle}>
             {/* Logo */}
-            <div style={{logoWrapperStyle, marginLeft: '30px'}}>
+            <div style={{...logoWrapperStyle, marginLeft: '30px', cursor: onLogoClick ? 'pointer' : 'default'}} onClick={onLogoClick}>
                 <img src={MavenLogo} alt="Maven Cafe" style={logoStyle} />
             </div>
 
@@ -58,7 +58,7 @@ const NavBar = ({ user, setPage, setModal, styles }) => {
 
                 {/* Kitchen: Orders Dashboard */}
                 {user.role === 'kitchen' && (
-                    <button style={navButtonStyle} onClick={() => setPage('kitchen-dashboard')}>
+                    <button style={navButtonStyle} onClick={onLogoClick}>
                         <FaListAlt size={isKitchenOrAdmin ? 28 : 22} title="View Orders Dashboard" />
                     </button>
                 )}

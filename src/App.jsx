@@ -30,14 +30,17 @@ import AdminDashboard from './components/admin/AdminDashboard';
 
 function App() {
     const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')) || null);
-    const [page, setPage] = useState(user ? 'home' : 'login'); 
-    const [modal, setModal] = useState(null); 
-    
+    const [page, setPage] = useState(user ? 'home' : 'login');
+    const [modal, setModal] = useState(null);
+
     // Order state
-    const [currentOrder, setCurrentOrder] = useState({ 
-        slot: 'morning (9:00-12:00)', 
-        items: [] 
+    const [currentOrder, setCurrentOrder] = useState({
+        slot: 'morning (9:00-12:00)',
+        items: []
     });
+
+    // Kitchen view state
+    const [kitchenView, setKitchenView] = useState("home");
 
     const isLoggedIn = !!user;
 
@@ -186,6 +189,8 @@ function App() {
                     callApi={callApi}
                     setPage={setPage}
                     styles={styles}
+                    kitchenView={kitchenView}
+                    setKitchenView={setKitchenView}
                 />
             );
         }
@@ -198,6 +203,7 @@ function App() {
                         user={user}
                         setPage={setPage}
                         styles={styles}
+                        callApi={callApi}
                     />
                 );
             } else {
@@ -317,7 +323,7 @@ function App() {
     // ------------------------------
     return (
         <div style={styles.appContainer}>
-            <NavBar user={user} setPage={setPage} setModal={setModal} styles={styles} />
+            <NavBar user={user} setPage={setPage} setModal={setModal} styles={styles} onLogoClick={user?.role === 'kitchen' ? () => setKitchenView("home") : undefined} />
 
             {/* Added content wrapper */}
             <div style={styles.contentArea}>
