@@ -88,12 +88,6 @@ const KitchenMenuPage = ({ user, callApi, setPage, styles }) => {
         await instantSave();
     };
 
-    const toggleAddOnAvailability = async (index) => {
-        const updated = [...addOns];
-        updated[index].enabled = !updated[index].enabled;
-        setAddOns(updated);
-        await instantSave();
-    };
 
     const instantSave = async () => {
         try {
@@ -101,8 +95,8 @@ const KitchenMenuPage = ({ user, callApi, setPage, styles }) => {
                 ...cat,
                 items: cat.items // Save all items with availability flags
             }));
-            const addOnsToSave = addOns; // Save all add-ons with enabled flags
-            const sugarLevelsToSave = sugarLevels; // Save all sugar levels with enabled flags
+            const addOnsToSave = addOns.map(addOn => addOn.name || addOn); // Save all add-ons
+            const sugarLevelsToSave = sugarLevels; // Save all sugar levels
             await callApi('/menu', 'PUT', {
                 userId: user.id,
                 userRole: user.role,
@@ -252,30 +246,8 @@ const KitchenMenuPage = ({ user, callApi, setPage, styles }) => {
                 </h3>
                 <div style={enhancedStyles.itemList}>
                     {addOns.map((addOn, index) => (
-                        <div key={addOn.name || addOn} style={{
-                            ...enhancedStyles.menuItem,
-                            position: 'relative',
-                            opacity: addOn.enabled !== false ? 1 : 0.5
-                        }}>
+                        <div key={addOn.name || addOn} style={enhancedStyles.menuItem}>
                             {addOn.name || addOn}
-                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                <button
-                                    style={{
-                                        backgroundColor: addOn.enabled !== false ? '#4CAF50' : '#f44336',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '15px',
-                                        padding: '2px 8px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 'bold'
-                                    }}
-                                    onClick={() => toggleAddOnAvailability(index)}
-                                    title={addOn.enabled !== false ? 'Disable' : 'Enable'}
-                                >
-                                    {addOn.enabled !== false ? 'ON' : 'OFF'}
-                                </button>
-                            </div>
                         </div>
                     ))}
                 </div>

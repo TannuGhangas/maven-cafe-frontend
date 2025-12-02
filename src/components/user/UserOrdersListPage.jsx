@@ -108,7 +108,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const DetailRow = ({ label, value }) => {
-        if (!value || value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
+        if (value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
             if (['Type', 'Sugar', 'Notes', 'Add-Ons'].includes(label)) return null;
         }
 

@@ -523,7 +523,7 @@ return (
         <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
 {/* Standard Levels (0, 1, 2, 3) */}
-{sugarLevels.filter(s => s.available).map(s => (
+{sugarLevels.filter(s => s.available || s.enabled).map(s => (
 <button
 key={s.level}
 // Sugar buttons use Accent (Green)
@@ -547,7 +547,7 @@ onClick={() => handleSugarSelect(s.level)}
     gap: '12px',
     marginBottom: '20px'
 }}>
-{addOns.filter(addOn => addOn.available && !(itemType === 'coffee' && addOn.name === 'Ginger')).map(addOn => (
+{addOns.filter(addOn => (addOn.available || addOn.enabled) && !(itemType === 'coffee' && addOn.name === 'Ginger')).map(addOn => (
 <button
 key={addOn.name}
 // For Add-Ons, use primary blue color scheme
@@ -558,11 +558,11 @@ style={{
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    opacity: addOn.available ? 1 : 0.5,
+    opacity: (addOn.available || addOn.enabled) ? 1 : 0.5,
     cursor: addOn.available ? 'pointer' : 'not-allowed'
 }}
-onClick={addOn.available ? () => handleToggle('selectedAddOns', addOn.name) : undefined}
-disabled={!addOn.available}
+onClick={(addOn.available || addOn.enabled) ? () => handleToggle('selectedAddOns', addOn.name) : undefined}
+disabled={!(addOn.available || addOn.enabled)}
 >
 {addOn.name}
 {!addOn.available && ' (Unavailable)'}

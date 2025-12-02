@@ -284,8 +284,8 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                 ...cat,
                 items: cat.items.filter(item => item.available)
             }));
-            const filteredAddOns = addOns.filter(addOn => addOn.available).map(addOn => addOn.name);
-            const filteredSugarLevels = sugarLevels.filter(s => s.available).map(s => s.level);
+            const filteredAddOns = addOns.map(addOn => addOn.name);
+            const filteredSugarLevels = sugarLevels.map(s => s.level);
             await callApi('/menu', 'PUT', {
                 userId: user.id,
                 userRole: user.role,
@@ -307,8 +307,8 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                 ...cat,
                 items: cat.items.filter(item => item.available)
             }));
-            const filteredAddOns = addOns.filter(addOn => addOn.available).map(addOn => addOn.name);
-            const filteredSugarLevels = sugarLevels.filter(s => s.available).map(s => s.level);
+            const filteredAddOns = addOns.map(addOn => addOn.name);
+            const filteredSugarLevels = sugarLevels.map(s => s.level);
             await callApi('/menu', 'PUT', {
                 userId: user.id,
                 userRole: user.role,
@@ -331,21 +331,6 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         await instantSave();
     };
 
-    const toggleAddOn = async (index) => {
-        const updated = [...addOns];
-        updated[index].available = !updated[index].available;
-        setAddOns(updated);
-        saveToStorage();
-        await instantSave();
-    };
-
-    const toggleSugar = async (index) => {
-        const updated = [...sugarLevels];
-        updated[index].available = !updated[index].available;
-        setSugarLevels(updated);
-        saveToStorage();
-        await instantSave();
-    };
 
     if (loading) return (
         <div style={enhancedStyles.loadingContainer}>
@@ -576,25 +561,9 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                 </h3>
                 <div style={enhancedStyles.itemList}>
                     {addOns.map((addOn, index) => (
-                        <div key={addOn.name} style={{ ...enhancedStyles.menuItem, position: 'relative', opacity: addOn.available ? 1 : 0.5 }}>
+                        <div key={addOn.name} style={enhancedStyles.menuItem}>
                             {addOn.name}
                             <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                <button
-                                    style={{
-                                        backgroundColor: addOn.available ? '#4CAF50' : '#f44336',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '15px',
-                                        padding: '2px 8px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 'bold'
-                                    }}
-                                    onClick={() => toggleAddOn(index)}
-                                    title={addOn.available ? 'Disable' : 'Enable'}
-                                >
-                                    {addOn.available ? 'ON' : 'OFF'}
-                                </button>
                                 <button
                                     style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
                                     onClick={() => openModal('editAddOn', '', index, addOn.name)}
@@ -634,28 +603,10 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                         <div key={level.level} style={{
                             ...enhancedStyles.menuItem,
                             backgroundColor: level.level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
-                            color: level.level === 1 ? '#103c7f' : '#333',
-                            position: 'relative',
-                            opacity: level.available ? 1 : 0.5
+                            color: level.level === 1 ? '#103c7f' : '#333'
                         }}>
                             {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
                             <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                <button
-                                    style={{
-                                        backgroundColor: level.available ? '#4CAF50' : '#f44336',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '15px',
-                                        padding: '2px 8px',
-                                        cursor: 'pointer',
-                                        fontSize: '0.7rem',
-                                        fontWeight: 'bold'
-                                    }}
-                                    onClick={() => toggleSugar(index)}
-                                    title={level.available ? 'Disable' : 'Enable'}
-                                >
-                                    {level.available ? 'ON' : 'OFF'}
-                                </button>
                                 {level.level !== 1 && (
                                     <button
                                         style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}

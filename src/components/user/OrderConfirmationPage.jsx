@@ -301,8 +301,8 @@ const OrderConfirmedModal = ({ styles, onClose }) => {
 const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete, defaultLocationName }) => {
     
     const DetailRow = ({ label, value }) => {
-        if (!value || value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
-            if (['Type', 'Sugar', 'Notes', 'Add-Ons'].includes(label)) return null; 
+        if (value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
+            if (['Type', 'Sugar', 'Notes', 'Add-Ons'].includes(label)) return null;
         }
 
         return (
