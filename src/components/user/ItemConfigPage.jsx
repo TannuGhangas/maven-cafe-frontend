@@ -178,7 +178,7 @@ const getMenuTypes = async (itemType, user, menu) => {
         const cat = menu.categories.find(c => c.name.toLowerCase() === itemType);
         if (cat && cat.items) {
             // For specific items, only show "normal"
-            const specificItems = ['shikanji', 'maggie', 'oats', 'soup', 'jaljeera'];
+            const specificItems = [];
             if (specificItems.includes(itemType.toLowerCase())) {
                 return [{ name: 'normal', available: true }];
             }
@@ -191,11 +191,6 @@ const getMenuTypes = async (itemType, user, menu) => {
         coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }],
         tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
         water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
-        shikanji: [{ name: "normal", available: true }],
-        maggie: [{ name: "normal", available: true }],
-        oats: [{ name: "normal", available: true }],
-        soup: [{ name: "normal", available: true }],
-        jaljeera: [{ name: "normal", available: true }],
     };
     return defaults[itemType] || [];
 };
@@ -234,10 +229,6 @@ useEffect(() => {
             // Fallback
             setAddOns([
                 { name: "Ginger", available: true },
-                { name: "Cloves", available: true },
-                { name: "Fennel Seeds", available: true },
-                { name: "Cardamom", available: true },
-                { name: "Cinnamon", available: true },
             ]);
             setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
         }
@@ -518,7 +509,7 @@ return (
 )}
 
 {/* SUGAR LEVEL (BUTTONS + CUSTOM INPUT) */}
-{(itemType === 'coffee' || itemType === 'tea' || itemType === 'shikanji' || itemType === 'jaljeera') && (
+{(itemType === 'coffee' || itemType === 'tea') && (
     <>
         <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
 <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>

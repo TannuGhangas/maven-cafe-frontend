@@ -21,7 +21,6 @@ import ComplaintPage from './components/user/ComplaintPage';
 
 // Kitchen/Admin Screens
 import KitchenDashboard from './components/kitchen/KitchenDashboard';
-import KitchenMenuPage from './components/kitchen/KitchenMenuPage';
 import AdminUsersPage from './components/admin/AdminUsersPage';
 import AdminComplaintsPage from './components/admin/AdminComplaintsPage';
 import AdminMembersPage from './components/admin/AdminMembersPage';
@@ -196,16 +195,6 @@ function App() {
             );
         }
 
-        if (page === 'kitchen-menu') {
-            return (
-                <KitchenMenuPage
-                    user={user}
-                    callApi={callApi}
-                    setPage={setPage}
-                    styles={styles}
-                />
-            );
-        }
 
         // ADMIN DASHBOARD
         if (page === 'admin-dashboard') {

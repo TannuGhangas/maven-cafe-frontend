@@ -229,23 +229,13 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     { name: 'Coffee', icon: 'FaCoffee', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }], color: '#8B4513', enabled: true },
                     { name: 'Tea', icon: 'FaMugHot', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }], color: '#228B22', enabled: true },
                     { name: 'Water', icon: 'FaTint', items: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }], color: '#87CEEB', enabled: true },
-                    { name: 'Shikanji', icon: 'FaLemon', items: [{ name: 'normal', available: true }], color: '#FFD700', enabled: true },
-                    { name: 'Jaljeera', icon: 'FaCube', items: [{ name: 'normal', available: true }], color: '#8B0000', enabled: true },
-                    { name: 'Soup', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FFA500', enabled: true },
-                    { name: 'Maggie', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#FF6347', enabled: true },
-                    { name: 'Oats', icon: 'FaUtensilSpoon', items: [{ name: 'normal', available: true }], color: '#D2691E', enabled: true },
                 ]);
-                setAddOns([{ name: "Ginger", available: true }, { name: "Cloves", available: true }, { name: "Fennel Seeds", available: true }, { name: "Cardamom", available: true }, { name: "Cinnamon", available: true }]);
+                setAddOns([{ name: "Ginger", available: true }]);
                 setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
                 setItemImages({
                     tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
                     coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
                     water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-                    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
-                    jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
-                    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
-                    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
-                    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
                 });
             }
             setLoading(false);
@@ -367,26 +357,6 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                         }}>
                             <button
                                 style={{
-                                    backgroundColor: category.enabled ? '#4CAF50' : '#f44336',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '20px',
-                                    padding: '6px 12px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.8rem',
-                                    fontWeight: 'bold',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    whiteSpace: 'nowrap'
-                                }}
-                                onClick={() => toggleCategory(catIndex)}
-                                title={category.enabled ? 'Disable Category' : 'Enable Category'}
-                            >
-                                {category.enabled ? 'ON' : 'OFF'}
-                            </button>
-                            <button
-                                style={{
                                     background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
                                     color: 'white',
                                     border: 'none',
@@ -467,33 +437,10 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                             {category.items.map((item, itemIndex) => (
                                 <div key={item.name} style={{
                                     ...enhancedStyles.menuItem,
-                                    position: 'relative',
-                                    opacity: item.available ? 1 : 0.5,
-                                    background: item.available ? enhancedStyles.menuItem.background : 'linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%)'
+                                    position: 'relative'
                                 }}>
                                     {item.name}
                                     <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                        <button
-                                            style={{
-                                                backgroundColor: item.available ? '#4CAF50' : '#f44336',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '15px',
-                                                padding: '2px 8px',
-                                                cursor: 'pointer',
-                                                fontSize: '0.7rem',
-                                                fontWeight: 'bold'
-                                            }}
-                                            onClick={() => {
-                                                const updated = [...menuCategories];
-                                                updated[catIndex].items[itemIndex].available = !updated[catIndex].items[itemIndex].available;
-                                                setMenuCategories(updated);
-                                                instantSave();
-                                            }}
-                                            title={item.available ? 'Mark Unavailable' : 'Mark Available'}
-                                        >
-                                            {item.available ? 'ON' : 'OFF'}
-                                        </button>
                                         <button
                                             style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
                                             onClick={() => openModal('editItem', category.name, itemIndex, item.name)}

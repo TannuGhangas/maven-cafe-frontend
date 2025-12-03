@@ -194,10 +194,6 @@ export const ADD_ONS = (() => {
     } catch {}
     return [
         { name: "Ginger", available: true },
-        { name: "Cloves", available: true },
-        { name: "Fennel Seeds", available: true },
-        { name: "Cardamom", available: true },
-        { name: "Cinnamon", available: true },
     ];
 })();
 

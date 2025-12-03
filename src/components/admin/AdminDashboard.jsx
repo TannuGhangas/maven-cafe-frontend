@@ -438,11 +438,6 @@ const AdminDashboard = ({ user, setPage, styles, callApi }) => {
                                 <option value="coffee">Coffee</option>
                                 <option value="tea">Tea</option>
                                 <option value="water">Water</option>
-                                <option value="shikanji">Shikanji</option>
-                                <option value="jaljeera">Jaljeera</option>
-                                <option value="soup">Soup</option>
-                                <option value="maggie">Maggie</option>
-                                <option value="oats">Oats</option>
                             </select>
                         </div>
                     </div>

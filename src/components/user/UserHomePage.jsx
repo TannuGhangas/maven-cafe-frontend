@@ -309,11 +309,6 @@ const getItemButtons = () => {
         { name: 'coffee', icon: FaCoffee },
         { name: 'tea', icon: FaMugHot },
         { name: 'water', icon: FaTint },
-        { name: 'shikanji', icon: FaLemon },
-        { name: 'jaljeera', icon: FaCube },
-        { name: 'soup', icon: FaUtensilSpoon },
-        { name: 'maggie', icon: FaUtensilSpoon },
-        { name: 'oats', icon: FaUtensilSpoon },
     ];
 };
 
@@ -366,21 +361,11 @@ useEffect(() => {
                     { name: 'coffee', icon: FaCoffee },
                     { name: 'tea', icon: FaMugHot },
                     { name: 'water', icon: FaTint },
-                    { name: 'shikanji', icon: FaLemon },
-                    { name: 'jaljeera', icon: FaCube },
-                    { name: 'soup', icon: FaUtensilSpoon },
-                    { name: 'maggie', icon: FaUtensilSpoon },
-                    { name: 'oats', icon: FaUtensilSpoon },
                 ]);
                 setItemImages({
                     tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
                     coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
                     water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-                    shikanji: 'https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg',
-                    jaljeera: 'https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg',
-                    soup: 'https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg',
-                    maggie: 'https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg',
-                    oats: 'https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900',
                 });
             }
             setLoading(false);
@@ -391,11 +376,6 @@ useEffect(() => {
                 { name: 'coffee', icon: FaCoffee },
                 { name: 'tea', icon: FaMugHot },
                 { name: 'water', icon: FaTint },
-                { name: 'shikanji', icon: FaLemon },
-                { name: 'jaljeera', icon: FaCube },
-                { name: 'soup', icon: FaUtensilSpoon },
-                { name: 'maggie', icon: FaUtensilSpoon },
-                { name: 'oats', icon: FaUtensilSpoon },
             ]);
         }
     };
