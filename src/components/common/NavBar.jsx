@@ -7,8 +7,7 @@ import {
     FaListAlt,
     FaExclamationTriangle, // Used for User Feedback button and Admin Complaints button
     FaRegSadTear, // NEW: Adding a specific icon for admin complaints
-    FaClipboardList, // For user orders list
-    FaUtensilSpoon // For kitchen menu management
+    FaClipboardList // For user orders list
 } from 'react-icons/fa';
 import MavenLogo from '../../assets/maven_logoo.png';
 
@@ -59,14 +58,9 @@ const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }
 
                 {/* Kitchen: Orders Dashboard */}
                 {user.role === 'kitchen' && (
-                    <>
-                        <button style={navButtonStyle} onClick={() => { setPage('kitchen-dashboard'); setKitchenView("home"); }}>
-                            <FaListAlt size={isKitchenOrAdmin ? 28 : 22} title="View Orders Dashboard" />
-                        </button>
-                        <button style={navButtonStyle} onClick={() => setPage('kitchen-menu')}>
-                            <FaUtensilSpoon size={isKitchenOrAdmin ? 28 : 22} title="Manage Menu Availability" />
-                        </button>
-                    </>
+                    <button style={navButtonStyle} onClick={() => { setPage('kitchen-dashboard'); setKitchenView("home"); }}>
+                        <FaListAlt size={isKitchenOrAdmin ? 28 : 22} title="View Orders Dashboard" />
+                    </button>
                 )}
 
                 {/* Admin: Admin Dashboard */}

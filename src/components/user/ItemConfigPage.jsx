@@ -529,7 +529,9 @@ onClick={() => handleSugarSelect(s.level)}
                     )}
 
 {/* Add-Ons (BUTTONS) - For Coffee and Tea */}
-{(itemType === 'coffee' || itemType === 'tea') && (
+{(() => {
+    const filteredAddOns = addOns.filter(addOn => (addOn.available || addOn.enabled) && !(itemType === 'coffee' && addOn.name === 'Ginger'));
+    return (itemType === 'coffee' || itemType === 'tea') && filteredAddOns.length > 0 && (
 <>
 <label style={styles.label}>🌿 Spice Add-Ons (Select Multiple):</label>
 <div style={{
@@ -538,7 +540,7 @@ onClick={() => handleSugarSelect(s.level)}
     gap: '12px',
     marginBottom: '20px'
 }}>
-{addOns.filter(addOn => (addOn.available || addOn.enabled) && !(itemType === 'coffee' && addOn.name === 'Ginger')).map(addOn => (
+{filteredAddOns.map(addOn => (
 <button
 key={addOn.name}
 // For Add-Ons, use primary blue color scheme
@@ -561,7 +563,8 @@ disabled={!(addOn.available || addOn.enabled)}
 ))}
 </div>
 </>
-)}
+);
+})()}
 
 {/* QUANTITY CONTROL (- 1 +) */}
 <label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
