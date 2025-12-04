@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaUtensilSpoon, FaSpinner } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
+import { FaCoffee, FaMugHot, FaGlassWhiskey, FaTint, FaLemon, FaCube, FaUtensilSpoon } from 'react-icons/fa'; // Added FaLemon and FaCube for new items
 import { callApi } from '../../api/apiService';
 
 /**
@@ -317,14 +317,13 @@ const getItemButtons = () => {
 
 const timeSlots = [
     // Added description for the small text
-    { title: 'Morning', slot: 'morning (9:00-12:00)'},
-    { title: 'Afternoon', slot: 'afternoon (1:00 - 5:30)'},
+{ title: 'Morning', slot: 'morning (9:00-12:00)'},
+{ title: 'Evening', slot: 'evening (1:00 - 5:30)'},
 ];
 
 const UserHomePage = ({ setPage, currentOrder, setCurrentOrder, user, styles: _propStyles }) => {
 const [itemButtons, setItemButtons] = useState([]);
 const [itemImages, setItemImages] = useState({});
-const [loading, setLoading] = useState(true);
 
 // KEPT ORIGINAL USER URL
 const HEADER_IMAGE_URL = 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg';
@@ -335,65 +334,83 @@ const primaryMessage = `${greeting} Ready to order?`;
 
 const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
-useEffect(() => {
-    const fetchMenu = async (silent = false) => {
-        try {
-            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, silent);
-            if (menu && menu.categories) {
-                // Filter out 'milk' category, but keep all items (available and unavailable)
-                const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
-                const buttons = filteredCategories.map(cat => ({
-                    name: cat.name.toLowerCase(),
-                    icon: cat.icon === 'FaCoffee' ? FaCoffee :
-                          cat.icon === 'FaMugHot' ? FaMugHot :
-                          cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
-                          cat.icon === 'FaTint' ? FaTint :
-                          cat.icon === 'FaLemon' ? FaLemon :
-                          cat.icon === 'FaCube' ? FaCube :
-                          FaUtensilSpoon,
-                    items: cat.items || [] // Include items for availability check
-                }));
-                setItemButtons(buttons);
-                setItemImages(menu.itemImages || {});
-            } else {
-                // Fallback
-                setItemButtons([
-                    { name: 'coffee', icon: FaCoffee },
-                    { name: 'tea', icon: FaMugHot },
-                    { name: 'water', icon: FaTint },
-                ]);
-                setItemImages({
-                    tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
-                    coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
-                    water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-                });
+    useEffect(() => {
+        // Helper function to get icon component
+        const getIconForCategory = (iconName) => {
+            const iconMap = {
+                'FaCoffee': FaCoffee,
+                'FaMugHot': FaMugHot,
+                'FaGlassWhiskey': FaGlassWhiskey,
+                'FaTint': FaTint,
+                'FaLemon': FaLemon,
+                'FaCube': FaCube,
+                'FaUtensilSpoon': FaUtensilSpoon
+            };
+            return iconMap[iconName] || FaUtensilSpoon;
+        };
+
+        // Load cached menu immediately for instant display
+        const loadCachedMenu = () => {
+            const cachedMenu = localStorage.getItem('cachedMenu');
+            if (cachedMenu) {
+                try {
+                    const menu = JSON.parse(cachedMenu);
+                    if (menu && menu.categories) {
+                        const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
+                        const buttons = filteredCategories.map(cat => ({
+                            name: cat.name.toLowerCase(),
+                            icon: getIconForCategory(cat.icon),
+                            items: cat.items || []
+                        }));
+                        setItemButtons(buttons);
+                        setItemImages(menu.itemImages || {});
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse cached menu:', e);
+                }
             }
-            setLoading(false);
-        } catch (error) {
-            console.error('Failed to fetch menu:', error);
-            // Fallback
+            return false;
+        };
+
+        // Set default menu immediately
+        if (!loadCachedMenu()) {
             setItemButtons([
                 { name: 'coffee', icon: FaCoffee },
                 { name: 'tea', icon: FaMugHot },
                 { name: 'water', icon: FaTint },
             ]);
+            setItemImages({
+                tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+                coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+                water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+            });
         }
-    };
-    fetchMenu();
-    // Refetch every 30 seconds to get updates (silently)
-    const interval = setInterval(() => fetchMenu(true), 30000);
-    return () => clearInterval(interval);
-}, [user]);
 
-if (loading) {
-return (
-<div style={STYLES_THEME.centeredContainer}>
-<div style={{ ...STYLES_THEME.screenPadding, display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '50vh' }}>
-<FaSpinner className="spinner" size={30} /> Loading menu...
-</div>
-</div>
-);
-}
+        // Fetch fresh menu data in background (no loading state)
+        const fetchMenuInBackground = async () => {
+            try {
+                const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, true);
+                if (menu && menu.categories) {
+                    localStorage.setItem('cachedMenu', JSON.stringify(menu));
+                    const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
+                    const buttons = filteredCategories.map(cat => ({
+                        name: cat.name.toLowerCase(),
+                        icon: getIconForCategory(cat.icon),
+                        items: cat.items || []
+                    }));
+                    setItemButtons(buttons);
+                    setItemImages(menu.itemImages || {});
+                }
+            } catch (error) {
+                console.warn('Background menu fetch failed:', error);
+            }
+        };
+
+        fetchMenuInBackground();
+    }, [user]);
+
+
 
 return (
 <div style={STYLES_THEME.centeredContainer}>

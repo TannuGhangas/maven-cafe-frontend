@@ -109,7 +109,9 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
             const newOrders = Array.isArray(data) ? data : [];
             setOrders(newOrders);
-            
+            // Cache orders for offline
+            localStorage.setItem('cachedOrders', JSON.stringify(newOrders));
+
             const newActiveOrderCount = newOrders.filter(o => String(o?.status || "").toLowerCase() === "placed").length;
 
             const previousCount = lastOrderCount.current;
@@ -129,10 +131,30 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             }
 
             hasLoaded.current = true;
-            
+
         } catch (err) {
             console.error("Kitchen fetch error:", err);
-            setOrders([]);
+            // Load from cache if available
+            const cachedOrders = localStorage.getItem('cachedOrders');
+            if (cachedOrders) {
+                const parsedOrders = JSON.parse(cachedOrders);
+                setOrders(parsedOrders);
+                // Check for notifications from cached data
+                const newActiveOrderCount = parsedOrders.filter(o => String(o?.status || "").toLowerCase() === "placed").length;
+                const previousCount = lastOrderCount.current;
+                lastOrderCount.current = newActiveOrderCount;
+
+                if (hasLoaded.current && newActiveOrderCount > previousCount) {
+                    setNotificationAcknowledged(false);
+                    setShowNotification(true);
+                    if (audio) {
+                        audio.currentTime = 0;
+                        audio.play().catch(e => console.log("Audio playback blocked by browser:", e));
+                    }
+                }
+            } else {
+                setOrders([]);
+            }
         }
     };
 

@@ -173,7 +173,8 @@ const ImageBanner = ({ itemType, imageUrl }) => {
 };
 
 // Helper function to get menu types from menu object
-const getMenuTypes = async (itemType, user, menu) => {
+const getMenuTypes = (itemType, user, menu) => {
+    let items = [];
     if (menu && menu.categories) {
         const cat = menu.categories.find(c => c.name.toLowerCase() === itemType);
         if (cat && cat.items) {
@@ -183,16 +184,24 @@ const getMenuTypes = async (itemType, user, menu) => {
                 return [{ name: 'normal', available: true }];
             }
             // Return all items with availability status
-            return cat.items.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false });
+            items = cat.items.map(item => typeof item === 'string' ? { name: item, available: true } : { name: item.name || item, available: item.available !== false });
         }
+    } else {
+        // Default fallbacks
+        const defaults = {
+            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }],
+            tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
+            water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
+        };
+        items = defaults[itemType] || [];
     }
-    // Default fallbacks
-    const defaults = {
-        coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Simple", available: true }, { name: "Cold", available: true }],
-        tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
-        water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
-    };
-    return defaults[itemType] || [];
+
+    // Filter out "Simple" and "Cold" for coffee
+    if (itemType === 'coffee') {
+        items = items.filter(item => item.name !== 'Simple' && item.name !== 'Cold');
+    }
+
+    return items;
 };
 
 // Removed localStorage functions, now fetching from server
@@ -216,21 +225,50 @@ useEffect(() => {
     // Locations are now handled statically from constants
     setUserLocations(USER_LOCATIONS_DATA);
 
-    // Fetch menu data
+    // Load cached menu data immediately for instant display
+    const loadCachedMenu = () => {
+        const cachedMenu = localStorage.getItem('cachedMenu');
+        if (cachedMenu) {
+            try {
+                const menu = JSON.parse(cachedMenu);
+                const options = getMenuTypes(itemType, user, menu);
+                setTypeOptions(options);
+                setAddOns(menu.addOns || []);
+                setSugarLevels(menu.sugarLevels || []);
+                return true;
+            } catch (e) {
+                console.warn('Failed to parse cached menu:', e);
+            }
+        }
+        return false;
+    };
+
+    // Set default data immediately
+    if (!loadCachedMenu()) {
+        setAddOns([{ name: "Ginger", available: true }]);
+        setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
+        
+        // Set default types
+        const defaults = {
+            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }],
+            tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
+            water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
+        };
+        setTypeOptions(defaults[itemType] || []);
+    }
+
+    // Fetch fresh menu data in background
     const fetchMenuData = async () => {
         try {
-            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`);
-            const options = await getMenuTypes(itemType, user, menu);
-            setTypeOptions(options);
-            setAddOns(menu.addOns || []);
-            setSugarLevels(menu.sugarLevels || []);
+            const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, true);
+            if (menu) {
+                const options = getMenuTypes(itemType, user, menu);
+                setTypeOptions(options);
+                setAddOns(menu.addOns || []);
+                setSugarLevels(menu.sugarLevels || []);
+            }
         } catch (error) {
-            console.error('Failed to fetch menu:', error);
-            // Fallback
-            setAddOns([
-                { name: "Ginger", available: true },
-            ]);
-            setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
+            console.warn('Failed to fetch menu:', error);
         }
     };
     fetchMenuData();
@@ -252,22 +290,22 @@ const defaultType = typeOptions.length > 0 ? (typeOptions.find(t => t.available 
     // State for managing custom sugar input
     const [customSugar, setCustomSugar] = useState(''); 
     
-    const [itemConfig, setItemConfig] = useState(
-        isEditMode ? currentOrder.items[itemIndex] :
-        {
-            item: itemType,
-            // Use the determined default type
-            type: defaultType, 
-            sugarLevel: 1, // Default to 1
-            selectedAddOns: [],
-            quantity: 1,
-            // Uses the filtered default location
-            location: defaultLocationKey, 
-            tableNo: null,
-            customLocation: '',
-            notes: ''
-        }
-    );
+const [itemConfig, setItemConfig] = useState(
+isEditMode ? currentOrder.items[itemIndex] :
+{
+item: itemType,
+// Use the determined default type
+type: defaultType,
+sugarLevel: 1, // Default to 1
+selectedAddOns: [],
+quantity: 1,
+// Uses the filtered default location
+location: defaultLocationKey,
+tableNo: null,
+customLocation: '',
+notes: ''
+}
+);
 
 // Effect to handle setting the custom sugar input if the sugar level is not standard
 useEffect(() => {

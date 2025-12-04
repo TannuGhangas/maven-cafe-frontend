@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { FaSpinner, FaChevronLeft, FaMapMarkerAlt, FaCalendarAlt, FaCoffee, FaExclamationCircle } from 'react-icons/fa';
+import { FaSpinner, FaChevronLeft, FaMapMarkerAlt, FaCoffee, FaClipboardList, FaClock, FaBoxOpen } from 'react-icons/fa';
 import { STYLES_THEME } from './UserHomePage'; // Assuming you expose the theme styles here
 
 // --- ENHANCED STYLES (matching OrderConfirmationPage) ---
 const THEME_COLORS = {
     PRIMARY: '#103c7f', // Dark Blue
-    ACCENT: '#a1db40', // Green
+    ACCENT: '#151615ff', // Green
     TEXT_DARK: '#333333', // Dark text (for labels/values)
     TEXT_MUTED: '#7f8c8d', // Gray for minor details
     DANGER: '#e74c3c', // Red for delete
-    BACKGROUND_MAIN: '#e8f3f4', // Very light teal/blue for page background
-    BACKGROUND_CARD: '#ffffff', // Pure white for cards/elements
+    BACKGROUND_MAIN: 'white', // Light sea green for page background
+    BACKGROUND_CARD: '#e4ebf4ff', // Sea green background for cards
     BORDER_LIGHT: '#dddddd', // Very light border
     SHADOW_ELEVATION_2: '0 4px 10px rgba(0, 0, 0, 0.15)', // Darker shadow for pronounced lift
 };
@@ -24,9 +24,9 @@ const ENHANCED_STYLES = {
     // Card styling specifically matching the image
     simpleCard: {
         backgroundColor: THEME_COLORS.BACKGROUND_CARD,
-        borderRadius: '15px',
-        boxShadow: THEME_COLORS.SHADOW_ELEVATION_2,
-        padding: '20px',
+        borderRadius: '8px',
+        boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+        padding: '5px',
         margin: '0 0 0 0',
     },
 
@@ -56,6 +56,12 @@ const ENHANCED_STYLES = {
         marginTop: '15px',
         paddingTop: '10px',
     },
+};
+
+const itemImages = {
+    'tea': 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+    'coffee': 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+    'water': 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
 };
 // ---------------------------------
 
@@ -97,7 +103,7 @@ const ListPageBanner = ({ styles, imageUrl }) => {
     return (
         <div style={bannerStyle}>
             <div style={imageStyle}>
-                <h1 style={textStyle}>My Orders</h1>
+                <h1 style={textStyle}>We hope it hits the spot!</h1>
             </div>
         </div>
     );
@@ -106,6 +112,9 @@ const ListPageBanner = ({ styles, imageUrl }) => {
 // --- COLLAPSIBLE ORDER LIST CARD ---
 const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const firstItem = order.items[0];
+    const itemImage = itemImages[firstItem.item.toLowerCase()] || itemImages['tea'];
 
     const DetailRow = ({ label, value }) => {
         if (value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
@@ -134,88 +143,87 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
             <div
                 style={{
                     display: 'flex',
-                    justifyContent: 'space-between',
                     alignItems: 'center',
+                    gap: '10px',
                     cursor: 'pointer',
-                    padding: '15px',
-                    borderRadius: isExpanded ? '15px 15px 0 0' : '15px',
+                    padding: '10px',
+                    borderRadius: isExpanded ? '8px 8px 0 0' : '8px',
                     backgroundColor: isExpanded ? '#f8f9fa' : '#ffffff',
                     transition: 'all 0.2s ease'
                 }}
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <div style={{ flexGrow: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                        <h3 style={{
-                            color: styles.SECONDARY_COLOR,
-                            margin: '0',
-                            fontSize: '1.2rem',
-                            fontWeight: '700'
-                        }}>
-                            Order #{orderNumber}
-                        </h3>
-                        <span style={{
-                            color: statusColor,
-                            fontWeight: '700',
-                            fontSize: '0.9rem',
-                            backgroundColor: `${statusColor}20`,
-                            padding: '4px 8px',
-                            borderRadius: '12px'
-                        }}>
-                            {order.status === 'Ready' ? '✅' : (order.status === 'Making' ? '👨‍🍳' : '📋')} {order.status}
-                        </span>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '15px', fontSize: '0.9rem', color: '#666' }}>
-                        <span>📅 {order.slot.split('(')[0].trim()}</span>
-                        <span>🕒 {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                        <span>📦 {order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
+                <img
+                    src={itemImage}
+                    alt={firstItem.item}
+                    style={{
+                        width: '50px',
+                        height: '50px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        border: '2px solid #ddd'
+                    }}
+                />
+                <div style={{ flex: 1 }}>
+                    <h3 style={{
+                        color: styles.SECONDARY_COLOR,
+                        margin: '0 0 5px 0',
+                        fontSize: '1.1rem',
+                        fontWeight: '700'
+                    }}>
+                        {firstItem.item.charAt(0).toUpperCase() + firstItem.item.slice(1)}
+                    </h3>
+                    <div style={{ display: 'flex', gap: '15px', fontSize: '0.8rem', color: '#666' }}>
+                        <span><FaClock style={{ marginRight: '3px' }} /> {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span><FaBoxOpen style={{ marginRight: '3px' }} /> {order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
                     </div>
                 </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '5px' }}>
+                    <span style={{
+                        color: statusColor,
+                        fontWeight: '700',
+                        fontSize: '0.8rem',
+                        backgroundColor: `${statusColor}20`,
+                        padding: '4px 8px',
+                        borderRadius: '12px'
+                    }}>
+                        {order.status === 'Ready' ? '✅' : (order.status === 'Making' ? '👨‍🍳' : '📋')} {order.status}
+                    </span>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+
+                    {/* Cancel Button - Only show for Placed orders */}
                     {order.status === 'Placed' && (
                         <button
-                            style={{
-                                backgroundColor: '#e74c3c',
-                                color: '#ffffff',
-                                border: 'none',
-                                borderRadius: '8px',
-                                padding: '8px 15px',
-                                fontSize: '0.9rem',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                            }}
                             onClick={(e) => {
-                                e.stopPropagation();
+                                e.stopPropagation(); // Prevent card expansion
                                 handleCancelOrder(order._id);
                             }}
-                            title="Cancel Order"
+                            style={{
+                                backgroundColor: '#e74c3c',
+                                color: 'white',
+                                border: 'none',
+                                padding: '4px 12px 4px 12px',
+                                borderRadius: '12px',
+                                fontSize: '0.8rem',
+                                fontWeight: '700',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                minWidth: '70px'
+                            }}
+                            onMouseOver={(e) => {
+                                e.target.style.backgroundColor = '#c0392b';
+                                e.target.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.target.style.backgroundColor = '#e74c3c';
+                                e.target.style.transform = 'translateY(0)';
+                            }}
                         >
                             Cancel
                         </button>
                     )}
-                    {order.status === 'Delivered' && (
-                        <span style={{
-                            backgroundColor: '#4CAF50',
-                            color: 'white',
-                            padding: '4px 8px',
-                            borderRadius: '12px',
-                            fontSize: '0.8rem',
-                            fontWeight: 'bold'
-                        }}>
-                            ✅ Delivered
-                        </span>
-                    )}
-                    <span style={{
-                        fontSize: '1.2rem',
-                        color: '#666',
-                        transition: 'transform 0.2s ease',
-                        transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)'
-                    }}>
-                        ▼
-                    </span>
+
                 </div>
             </div>
 
@@ -286,11 +294,11 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
 
                             return (
                                 <div key={index} style={{
-                                    backgroundColor: '#ffffff',
+                                    backgroundColor: '#f8f9fa',
                                     borderRadius: '10px',
                                     padding: '15px',
                                     marginBottom: index < order.items.length - 1 ? '10px' : '0',
-                                    border: '1px solid #e9ecef',
+                                    border: '1px solid #e0e0e0',
                                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                                 }}>
                                     {/* Primary Details */}
@@ -332,19 +340,33 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
 const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => {
     const styles = { ..._propStyles, ...STYLES_THEME, ...ENHANCED_STYLES }; // Merge or ensure access to all necessary theme styles
     const [userOrders, setUserOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
 
     const fetchOrders = async () => {
-        setLoading(true);
-        // Construct query string for authorization data (required for GET requests)
-        const queryString = `?userId=${user.id}&userRole=${user.role}`;
-        const data = await callApi(`/orders/${user.id}${queryString}`);
-        if (data && Array.isArray(data)) {
-            // Sort by latest order first
-            const sortedData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-            setUserOrders(sortedData);
+        // Fetch fresh data in background
+        try {
+            // Construct query string for authorization data (required for GET requests)
+            const queryString = `?userId=${user.id}&userRole=${user.role}`;
+            const data = await callApi(`/orders/${user.id}${queryString}`, 'GET', null, true);
+            if (data && Array.isArray(data)) {
+                // Sort by latest order first
+                const sortedData = data.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                setUserOrders(sortedData);
+                // Cache the data
+                localStorage.setItem(`cachedOrders_${user.id}`, JSON.stringify(sortedData));
+            }
+        } catch (error) {
+            console.warn('Failed to fetch orders:', error);
+            // Try to load from cache
+            const cachedOrders = localStorage.getItem(`cachedOrders_${user.id}`);
+            if (cachedOrders) {
+                try {
+                    const parsedOrders = JSON.parse(cachedOrders);
+                    setUserOrders(parsedOrders);
+                } catch (e) {
+                    console.warn('Failed to parse cached orders:', e);
+                }
+            }
         }
-        setLoading(false);
     };
     
     const handleCancelOrder = async (orderId) => {
@@ -364,6 +386,30 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
     };
 
     useEffect(() => {
+        // Load cached orders immediately for instant display
+        const loadCachedOrders = () => {
+            const cachedOrders = localStorage.getItem(`cachedOrders_${user.id}`);
+            if (cachedOrders) {
+                try {
+                    const parsedOrders = JSON.parse(cachedOrders);
+                    if (Array.isArray(parsedOrders)) {
+                        const sortedData = parsedOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                        setUserOrders(sortedData);
+                        return true;
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse cached orders:', e);
+                }
+            }
+            return false;
+        };
+
+        // Set empty orders first for immediate display
+        if (!loadCachedOrders()) {
+            setUserOrders([]);
+        }
+
+        // Fetch fresh data in background
         fetchOrders();
     }, []);
 
@@ -371,17 +417,17 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
     // if (loading) return <div style={styles.loadingContainer}><FaSpinner className="spinner" size={30} /> Loading Orders...</div>;
 
     return (
-        <div style={{ ...styles.appContainer, padding: 0 }}>
-            
+        <div style={{ ...styles.appContainer, padding: 0, backgroundColor: '#e4ebf4ff', height: '100vh' }}>
+
             {/* 1. Header Banner */}
             <ListPageBanner styles={styles} imageUrl={HEADER_IMAGE_URL} />
 
-            <div style={styles.screenPadding}>
-                <h3 style={{ ...styles.headerText, color: styles.COLOR_TEXT_DARK, marginTop: 0 }}>
-                    My Orders
+            <div style={{ ...styles.screenPadding, padding: '20px', paddingBottom: '80px' }}>
+                <h3 style={{ ...styles.headerText, color: styles.COLOR_TEXT_DARK, marginTop: 0, textAlign: 'center' }}>
+                    Your Delicious Orders
                 </h3>
-                <p style={{ color: '#888', fontSize: '0.9em', marginBottom: '20px' }}>
-                    <FaExclamationCircle style={{ marginRight: '5px' }} />
+                <p style={{ color: '#555', fontSize: '0.9em', marginBottom: '20px', textAlign: 'center' }}>
+                    <FaClipboardList style={{ marginRight: '5px' }} />
                     Viewing {userOrders.length} order(s). Tap an order to expand details.
                 </p>
                 
@@ -403,8 +449,8 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
                     <div style={{
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '20px',
-                        padding: '20px 0',
+                        gap: '15px',
+                        padding: '10px 0',
                         backgroundColor: THEME_COLORS.BACKGROUND_MAIN
                     }}>
                         {userOrders.map((order, index) => (

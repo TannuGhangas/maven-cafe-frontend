@@ -324,19 +324,21 @@ function App() {
     // ------------------------------
     return (
         <div style={styles.appContainer}>
-            <NavBar user={user} setPage={setPage} setModal={setModal} setKitchenView={setKitchenView} styles={styles} onLogoClick={() => {
-                if (user.role === 'user') {
-                    setPage('home');
-                } else if (user.role === 'admin') {
-                    setPage('admin-dashboard');
-                } else if (user.role === 'kitchen') {
-                    setPage('kitchen-dashboard');
-                    setKitchenView("home");
-                }
-            }} />
+            {isLoggedIn && (
+                <NavBar user={user} setPage={setPage} setModal={setModal} setKitchenView={setKitchenView} styles={styles} onLogoClick={() => {
+                    if (user.role === 'user') {
+                        setPage('home');
+                    } else if (user.role === 'admin') {
+                        setPage('admin-dashboard');
+                    } else if (user.role === 'kitchen') {
+                        setPage('kitchen-dashboard');
+                        setKitchenView("home");
+                    }
+                }} />
+            )}
 
             {/* Added content wrapper */}
-            <div style={styles.contentArea}>
+            <div style={isLoggedIn ? styles.contentArea : {}}>
                 {renderPage()}
             </div>
 

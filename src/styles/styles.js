@@ -61,6 +61,7 @@ export const styles = {
 
     contentArea: {
         flexGrow: 1,
+        paddingTop: '80px', // Account for fixed navbar height (70px for kitchen, 50px for mobile + some buffer)
     },
     screenPadding: {
         padding: '20px',
@@ -82,11 +83,13 @@ export const styles = {
         backgroundColor: 'white', // White
         color: TEXT_COLOR, // Dark Blue
         boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 10,
         height: '50px',
-        maxWidth: '450px', 
+        maxWidth: '450px',
         margin: '0 auto',
     },
     mobileLogoStyle: { 
@@ -118,15 +121,17 @@ export const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '8px 0', 
+        padding: '8px 0',
         backgroundColor: 'white', // White
         color: TEXT_COLOR, // Dark Blue
         boxShadow: '0 1px 6px rgba(0,0,0,0.1)',
-        position: 'sticky',
+        position: 'fixed',
         top: 0,
+        left: 0,
+        right: 0,
         zIndex: 10,
-        height: '70px', 
-        width: '100%', 
+        height: '70px',
+        width: '100%',
     },
     kitchenLogoStyle: { 
         height: '70px', 

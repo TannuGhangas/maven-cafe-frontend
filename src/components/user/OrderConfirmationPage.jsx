@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FaTrash, FaEdit, FaCheckCircle, FaPlus } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaCheckCircle, FaPlus, FaExclamationTriangle } from 'react-icons/fa';
 import { ALL_LOCATIONS_MAP, getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
+import '../../styles/OrderConfirmationPage.css';
 
 // --- Configuration Image URL ---
 const HEADER_IMAGE_URL = 'https://png.pngtree.com/thumb_back/fh260/background/20240614/pngtree-cup-of-tea-and-a-bouquet-of-white-flowering-jasmine-image_15754628.jpg'; 
@@ -288,13 +289,106 @@ const OrderConfirmedModal = ({ styles, onClose }) => {
                         e.target.style.boxShadow = `0 6px 20px ${THEME_COLORS.ACCENT}50`;
                     }}
                 >
-                    Continue Shopping 🍽️
+                    Back to Home 🍽️
                 </button>
             </div>
         </div>
     );
 };
 // --- END Custom Order Confirmed Modal ---
+
+// --- Custom Network Error Modal ---
+const NetworkErrorModal = ({ styles, onClose }) => {
+    const modalOverlayStyle = {
+        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.9)', display: 'flex',
+        justifyContent: 'center', alignItems: 'center', zIndex: 9999,
+    };
+
+    const modalContentStyle = {
+        backgroundColor: THEME_COLORS.BACKGROUND_CARD,
+        borderRadius: '25px',
+        width: '90%',
+        maxWidth: '400px',
+        padding: '40px 30px',
+        textAlign: 'center',
+        boxShadow: '0 20px 40px rgba(231, 76, 60, 0.4)',
+        color: THEME_COLORS.TEXT_DARK,
+        border: `3px solid ${THEME_COLORS.DANGER}`,
+        transition: 'all 0.3s ease',
+    };
+
+    const errorIconStyle = {
+        backgroundColor: THEME_COLORS.DANGER,
+        color: '#ffffff',
+        width: '80px',
+        height: '80px',
+        fontSize: '3em',
+        borderRadius: '50%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        margin: '0 auto 25px auto',
+        boxShadow: '0 4px 15px rgba(231, 76, 60, 0.4)',
+        border: `4px solid #ffffff`,
+    };
+
+    const titleStyle = {
+        fontSize: '2rem',
+        fontWeight: '900',
+        marginBottom: '15px',
+        color: THEME_COLORS.DANGER,
+        textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+    };
+
+    const messageStyle = {
+        fontSize: '1.1rem',
+        fontWeight: '500',
+        color: THEME_COLORS.TEXT_MUTED,
+        marginBottom: '30px',
+        lineHeight: '1.5',
+    };
+
+    return (
+        <div style={modalOverlayStyle} onClick={onClose}>
+            <div style={modalContentStyle} onClick={(e) => e.stopPropagation()}>
+                <div style={errorIconStyle}>
+                    <FaExclamationTriangle />
+                </div>
+                <h2 style={titleStyle}>Network Error</h2>
+                <p style={messageStyle}>Unable to place order due to network connectivity problems. Please check your connection and try again.</p>
+
+                <button
+                    style={{
+                        ...styles.primaryButton,
+                        backgroundColor: THEME_COLORS.PRIMARY,
+                        color: '#ffffff',
+                        border: `2px solid ${THEME_COLORS.PRIMARY}`,
+                        marginTop: '0',
+                        fontSize: '1.1rem',
+                        fontWeight: '700',
+                        padding: '15px 30px',
+                        borderRadius: '15px',
+                        boxShadow: `0 6px 20px ${THEME_COLORS.PRIMARY}50`,
+                        transition: 'all 0.3s ease',
+                    }}
+                    onClick={onClose}
+                    onMouseOver={(e) => {
+                        e.target.style.transform = 'translateY(-2px)';
+                        e.target.style.boxShadow = `0 8px 25px ${THEME_COLORS.PRIMARY}60`;
+                    }}
+                    onMouseOut={(e) => {
+                        e.target.style.transform = 'translateY(0)';
+                        e.target.style.boxShadow = `0 6px 20px ${THEME_COLORS.PRIMARY}50`;
+                    }}
+                >
+                    Retry Order 🔄
+                </button>
+            </div>
+        </div>
+    );
+};
+// --- END Network Error Modal ---
 
 
 // --- Component for individual Item details using image style ---
@@ -394,6 +488,7 @@ const OrderConfirmationPage = ({ setPage, currentOrder, setCurrentOrder, user, c
 const styles = ENHANCED_STYLES;
 
 const [showSuccessModal, setShowSuccessModal] = useState(false);
+const [showNetworkErrorModal, setShowNetworkErrorModal] = useState(false);
 
 // Calculate user's default location
 const userLocations = USER_LOCATIONS_DATA;
@@ -428,38 +523,51 @@ const handleProceed = async () => {
         console.log('Current order:', currentOrder);
 
         // Actually call the API to place the order
-        const data = await callApi('/orders', 'POST', orderData);
+        const data = await callApi('/orders', 'POST', orderData, true);
 
         console.log('Order API response:', data);
 
         if (data && data.success) {
             setShowSuccessModal(true);
         } else {
-            alert(`Failed to place order: ${data?.message || 'Please try again.'}`);
+            console.log('Showing network error modal from else');
+            setShowNetworkErrorModal(true);
         }
     } catch (error) {
         console.error('Order placement error:', error);
-        alert(`Error placing order: ${error.message || 'Please check your connection and try again.'}`);
+        console.log('Showing network error modal');
+        setShowNetworkErrorModal(true);
     }
 };
     
-    const handleModalClose = () => {
-        setShowSuccessModal(false);
-        setCurrentOrder(prev => ({ ...prev, items: [] })); 
-        setPage('home'); 
-    }
+const handleModalClose = () => {
+    setShowSuccessModal(false);
+    setCurrentOrder(prev => ({ ...prev, items: [] }));
+    setPage('home');
+}
+
+const handleNetworkErrorClose = () => {
+    setShowNetworkErrorModal(false);
+}
     
     const slotName = currentOrder.items.length; 
     
     return (
         <div style={{ ...styles.appContainer }}>
             
-            {showSuccessModal && (
-                <OrderConfirmedModal 
-                    styles={styles} 
-                    onClose={handleModalClose} 
-                />
-            )}
+{showSuccessModal && (
+    <OrderConfirmedModal
+        styles={styles}
+        onClose={handleModalClose}
+    />
+)}
+
+{showNetworkErrorModal && (
+    <NetworkErrorModal
+        styles={styles}
+        onClose={handleNetworkErrorClose}
+    />
+)}
             
             <ConfirmationBanner 
                 slot={slotName} 

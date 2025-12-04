@@ -74,8 +74,8 @@ export const callApi = async (url, method = 'GET', body = null, silent = false) 
 
     } catch (error) {
         console.error("API Call Error:", error);
-        // Use console.error for logging and alert for user notification (unless silent)
-        if (!silent) {
+        // Use console.error for logging and alert for user notification (except for network errors)
+        if (error.message !== 'Failed to fetch') {
             alert(`❌ Data Error: ${error.message}. Please check network connection and server response.`);
         }
         return null;
