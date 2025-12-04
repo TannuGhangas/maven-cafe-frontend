@@ -29,9 +29,68 @@
     border-bottom: 1px solid #eee;
 }
 
+.order-customer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.order-customer-profile {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.order-customer-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.order-customer-avatar:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.order-customer-avatar-placeholder {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.order-customer-name-section {
+    flex: 1;
+    min-width: 0;
+}
+
 .order-customer-name {
     font-weight: 800;
     font-size: 18px;
+    line-height: 1.2;
+    margin-bottom: 2px;
+}
+
+.order-customer-role {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+    text-transform: capitalize;
+    opacity: 0.8;
 }
 
 .order-quantity {
@@ -212,8 +271,23 @@
         padding-bottom: 15px;
     }
 
+    .order-customer-info {
+        gap: 15px;
+    }
+
+    .order-customer-avatar,
+    .order-customer-avatar-placeholder {
+        width: 72px;
+        height: 72px;
+        font-size: 28px;
+    }
+
     .order-customer-name {
         font-size: 20px;
+    }
+
+    .order-customer-role {
+        font-size: 14px;
     }
 
     .order-quantity {
@@ -260,5 +334,32 @@
     .order-expanded-content {
         margin-top: 15px;
         padding: 15px;
+    }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+    .order-customer-info {
+        gap: 10px;
+    }
+
+    .order-customer-avatar,
+    .order-customer-avatar-placeholder {
+        width: 56px;
+        height: 56px;
+        font-size: 20px;
+        border-width: 2px;
+    }
+
+    .order-customer-name {
+        font-size: 16px;
+    }
+
+    .order-customer-role {
+        font-size: 12px;
+    }
+
+    .order-quantity {
+        font-size: 20px;
     }
 }

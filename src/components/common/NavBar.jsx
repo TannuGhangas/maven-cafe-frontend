@@ -10,6 +10,7 @@ import {
     FaClipboardList // For user orders list
 } from 'react-icons/fa';
 import MavenLogo from '../../assets/maven_logoo.png';
+import ProfileImage from './ProfileImage';
 
 const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }) => {
     const isKitchenOrAdmin = user.role === 'kitchen' || user.role === 'admin';
@@ -93,8 +94,25 @@ const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }
                 )}
 
                 {/* 4. Profile Button */}
-                <button style={navButtonStyle} onClick={() => setModal('profile')}>
-                    <FaUserCircle size={isKitchenOrAdmin ? 28 : 22} />
+                <button 
+                    style={{
+                        ...navButtonStyle,
+                        padding: '4px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }} 
+                    onClick={() => setModal('profile')}
+                    title="Profile"
+                >
+                    <ProfileImage
+                        userId={user.id}
+                        userName={user.name}
+                        userProfile={user}
+                        size="small"
+                        showPlaceholder={true}
+                        alt={`${user.name}'s profile`}
+                    />
                 </button>
             </div>
         </div>

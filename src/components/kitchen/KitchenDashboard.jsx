@@ -161,11 +161,33 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     useEffect(() => {
         fetchOrders();
         const interval = setInterval(() => fetchOrders(true), 10000);
+        
+        // Add storage event listener to refresh orders when profile images are updated
+        const handleStorageChange = (e) => {
+            if (e.key && e.key.startsWith('profilePic_')) {
+                console.log('KitchenDashboard: Profile image storage updated, refreshing orders...');
+                // Force a refresh of orders to pick up new profile images
+                setTimeout(() => fetchOrders(), 100);
+            }
+        };
+        
+        window.addEventListener('storage', handleStorageChange);
+        
+        // Also listen for custom event triggered by profile modal
+        const handleProfileUpdate = () => {
+            console.log('KitchenDashboard: Profile image updated via custom event, refreshing orders...');
+            // Force a refresh of orders to pick up new profile images
+            setTimeout(() => fetchOrders(), 100);
+        };
+        window.addEventListener('profileImageUpdated', handleProfileUpdate);
+        
         return () => {
             clearInterval(interval);
             if (notificationTimeoutRef.current) {
                 clearTimeout(notificationTimeoutRef.current);
             }
+            window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('profileImageUpdated', handleProfileUpdate);
         };
     }, []);
 

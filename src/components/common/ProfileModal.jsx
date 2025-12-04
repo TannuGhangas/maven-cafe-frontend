@@ -2,10 +2,35 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaSignOutAlt, FaListAlt, FaUsers, FaTimes, FaUserCircle, FaEdit, FaCamera, FaTrash } from 'react-icons/fa';
+import { callApi } from '../../api/apiService';
+import ProfileImage from './ProfileImage';
 
 const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
     const [profilePic, setProfilePic] = useState(localStorage.getItem(`profilePic_${user.id}`) || null);
     const [showImageOptions, setShowImageOptions] = useState(false);
+    const [loading, setLoading] = useState(true);
+
+    // Load profile image from server on component mount (temporarily disabled for testing)
+    useEffect(() => {
+        const loadProfileImage = async () => {
+            try {
+                // Temporarily skip server loading to avoid 404 errors
+                console.log('ProfileModal: Skipping server profile image loading for testing');
+                
+                // Check localStorage first
+                const localImage = localStorage.getItem(`profilePic_${user.id}`);
+                if (localImage) {
+                    setProfilePic(localImage);
+                }
+            } catch (error) {
+                console.log('No server profile image found, using local storage');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadProfileImage();
+    }, [user.id, user.role]);
 
     // --- LOCAL STYLES to achieve the Side Drawer look for mobile ---
     const ACCENT_COLOR = styles.PRIMARY_COLOR || '#FF7A3D';
@@ -122,22 +147,84 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
     };
     // ---------------------------------------------------------------------
 
-    const handleImageUpload = (e) => {
+    const handleImageUpload = async (e) => {
         const file = e.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setProfilePic(reader.result);
-                localStorage.setItem(`profilePic_${user.id}`, reader.result);
+            reader.onloadend = async () => {
+                const imageData = reader.result;
+                
+                // Save to localStorage for immediate UI update (using multiple keys for compatibility)
+                setProfilePic(imageData);
+                
+                // Store using user ID (primary)
+                localStorage.setItem(`profilePic_${user.id}`, imageData);
+                
+                // Store using userName (for chef order cards to access)
+                const userNameKey = user.name.replace(/\s+/g, '_');
+                localStorage.setItem(`profilePic_${userNameKey}`, imageData);
+                
+                console.log(`ProfileModal: Profile image saved locally for user ${user.name} (ID: ${user.id})`);
+                console.log(`ProfileModal: Saved to keys: profilePic_${user.id}, profilePic_${userNameKey}`);
+                console.log(`ProfileModal: Image data length: ${imageData.length} characters`);
+                
+                // Verify localStorage entries
+                console.log(`ProfileModal: Checking saved images...`);
+                console.log(`- profilePic_${user.id}:`, localStorage.getItem(`profilePic_${user.id}`) ? 'FOUND' : 'NOT FOUND');
+                console.log(`- profilePic_${userNameKey}:`, localStorage.getItem(`profilePic_${userNameKey}`) ? 'FOUND' : 'NOT FOUND');
+                
+                // Dispatch custom event to notify KitchenDashboard to refresh
+                window.dispatchEvent(new CustomEvent('profileImageUpdated', {
+                    detail: { userId: user.id, userName: user.name }
+                }));
+                
+                try {
+                    // Temporarily disable server sync to prevent errors
+                    console.log('ProfileModal: Server sync disabled');
+                    
+                    // TODO: Re-enable server sync after database schema update
+                } catch (error) {
+                    console.error('Failed to update profile image on server:', error);
+                }
+                
                 setShowImageOptions(false);
             };
             reader.readAsDataURL(file);
         }
     };
 
-    const handleDeleteImage = () => {
+    const handleDeleteImage = async () => {
+        // Remove from localStorage for immediate UI update
         setProfilePic(null);
         localStorage.removeItem(`profilePic_${user.id}`);
+        
+        // Remove using userName key as well
+        const userNameKey = user.name.replace(/\s+/g, '_');
+        localStorage.removeItem(`profilePic_${userNameKey}`);
+        
+        // Dispatch custom event to notify KitchenDashboard to refresh
+        window.dispatchEvent(new CustomEvent('profileImageUpdated', {
+            detail: { userId: user.id, userName: user.name, action: 'removed' }
+        }));
+        
+        try {
+            // Temporarily disable server sync to prevent errors
+            console.log('ProfileModal: Profile image removed locally (server sync disabled)');
+            
+            // TODO: Re-enable server sync after database schema update
+            // const response = await callApi(`/api/user/${user.id}/profile-image`, 'PUT', {
+            //     userId: user.id,
+            //     userRole: user.role,
+            //     profileImage: null
+            // }, true);
+            
+            // if (response) {
+            //     console.log('Profile image removed successfully from server');
+            // }
+        } catch (error) {
+            console.error('Failed to remove profile image from server:', error);
+        }
+        
         setShowImageOptions(false);
     };
 
@@ -175,24 +262,34 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
                     <div style={{ position: 'relative', textAlign: 'center', width: '100%' }}>
                         <div style={styles.profilePicContainer}>
                             <div style={styles.profileFrame(profilePic)}>
-                                {!profilePic && (
+                                {loading ? (
                                     <div style={{
                                         width: '85px',
                                         height: '85px',
                                         borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%)',
+                                        background: 'linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'center',
-                                        fontSize: '36px',
+                                        fontSize: '16px',
                                         fontWeight: 'bold',
-                                        color: '#1e293b',
+                                        color: '#64748b',
                                         boxShadow: '0 4px 12px rgba(148, 163, 184, 0.3)',
                                         border: '2px solid #cbd5e1',
                                         margin: '0 auto'
                                     }}>
-                                        {user.name.charAt(0).toUpperCase()}
+                                        Loading...
                                     </div>
+                                ) : (
+                                    <ProfileImage
+                                        userId={user.id}
+                                        userName={user.name}
+                                        userProfile={user}
+                                        size="xlarge"
+                                        showPlaceholder={true}
+                                        alt={`${user.name}'s profile`}
+                                        style={{ margin: '0 auto' }}
+                                    />
                                 )}
                             </div>
                         </div>
