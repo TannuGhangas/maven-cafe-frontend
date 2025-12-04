@@ -29,6 +29,8 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
     // Tracks the ID of the order card that is EXPANDED inline for ALL ITEMS.
     const [expandedOrderId, setExpandedOrderId] = useState(null);
+    const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
+    const [isLoading, setIsLoading] = useState(false);
 
 
     // Mobile detection
@@ -160,34 +162,65 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
     useEffect(() => {
         fetchOrders();
-        const interval = setInterval(() => fetchOrders(true), 10000);
+        
+        // More frequent polling for better real-time updates
+        const interval = setInterval(() => fetchOrders(true), 3000); // Reduced to 3 seconds
+        
+        // Additional polling when the window is visible (for better real-time feel)
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                // When user returns to the tab, fetch immediately
+                fetchOrders();
+                // And set a quick interval for a few seconds
+                const quickInterval = setInterval(() => fetchOrders(true), 1000);
+                setTimeout(() => clearInterval(quickInterval), 10000);
+            }
+        };
+        
+        document.addEventListener('visibilitychange', handleVisibilityChange);
         
         // Add storage event listener to refresh orders when profile images are updated
         const handleStorageChange = (e) => {
             if (e.key && e.key.startsWith('profilePic_')) {
                 console.log('KitchenDashboard: Profile image storage updated, refreshing orders...');
-                // Force a refresh of orders to pick up new profile images
                 setTimeout(() => fetchOrders(), 100);
             }
         };
         
         window.addEventListener('storage', handleStorageChange);
         
-        // Also listen for custom event triggered by profile modal
         const handleProfileUpdate = () => {
             console.log('KitchenDashboard: Profile image updated via custom event, refreshing orders...');
-            // Force a refresh of orders to pick up new profile images
             setTimeout(() => fetchOrders(), 100);
         };
         window.addEventListener('profileImageUpdated', handleProfileUpdate);
+        
+        // Manual refresh trigger
+        const handleManualRefresh = () => {
+            console.log('KitchenDashboard: Manual refresh triggered');
+            fetchOrders(false, true); // Force refresh
+        };
+        window.addEventListener('manualRefreshOrders', handleManualRefresh);
+        
+        // Add keyboard shortcut for manual refresh (F5)
+        const handleKeyPress = (e) => {
+            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
+                e.preventDefault();
+                handleManualRefresh();
+            }
+        };
+        document.addEventListener('keydown', handleKeyPress);
         
         return () => {
             clearInterval(interval);
             if (notificationTimeoutRef.current) {
                 clearTimeout(notificationTimeoutRef.current);
             }
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('profileImageUpdated', handleProfileUpdate);
+            window.removeEventListener('manualRefreshOrders', handleManualRefresh);
+            document.removeEventListener('keydown', handleKeyPress);
         };
     }, []);
 
@@ -269,13 +302,18 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     };
 
     const updateOrderStatus = async (id, newStatus) => {
-        await callApi(`/orders/${id}/status`, "PUT", {
-            status: newStatus,
-            userId: user.id,
-            userRole: user.role,
-        });
-        fetchOrders();
-        setExpandedOrderId(null);
+        try {
+            await callApi(`/orders/${id}/status`, "PUT", {
+                status: newStatus,
+                userId: user.id,
+                userRole: user.role,
+            });
+            // Force refresh after status update
+            fetchOrders(false, true);
+            setExpandedOrderId(null);
+        } catch (error) {
+            console.error('Failed to update order status:', error);
+        }
     };
     
     const handleNotificationOk = () => {
@@ -336,7 +374,47 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             ...styles.kitchenAppContainer,
             padding: isMobile ? '15px 15px' : '20px 10px'
         }}>
-            <KitchenHeader styles={styles} />
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <KitchenHeader styles={styles} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ 
+                        fontSize: '0.8rem', 
+                        color: '#666', 
+                        fontFamily: 'Calibri, Arial, sans-serif',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'flex-end'
+                    }}>
+                        <span>Last updated: {new Date(lastUpdateTime).toLocaleTimeString()}</span>
+                        {isLoading && <span style={{ color: '#103c7f' }}>⟳ Loading...</span>}
+                    </div>
+                    <button
+                        onClick={() => fetchOrders(false, true)}
+                        style={{
+                            backgroundColor: '#103c7f',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            padding: '8px 12px',
+                            cursor: 'pointer',
+                            fontSize: '0.9rem',
+                            fontFamily: 'Calibri, Arial, sans-serif',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                            e.target.style.backgroundColor = '#0c3170';
+                        }}
+                        onMouseOut={(e) => {
+                            e.target.style.backgroundColor = '#103c7f';
+                        }}
+                    >
+                        ⟳ Refresh
+                    </button>
+                </div>
+            </div>
 
             {/* HOME (Slot selection and Totals) */}
             {view === "home" && (
