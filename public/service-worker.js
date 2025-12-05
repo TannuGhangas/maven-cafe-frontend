@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maven-cafe-cache-v1';
+const CACHE_NAME = 'maven-cafe-cache-v2';
 
 self.addEventListener("install", event => {
   console.log("Service Worker installed");
@@ -6,12 +6,13 @@ self.addEventListener("install", event => {
 });
 
 self.addEventListener("activate", event => {
-  console.log("Service Worker activated");
+  console.log("Service Worker activated - Cache version:", CACHE_NAME);
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
+            console.log("Deleting old cache:", cacheName);
             return caches.delete(cacheName);
           }
         })
