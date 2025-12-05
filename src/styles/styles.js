@@ -93,7 +93,7 @@ export const styles = {
         margin: '0 auto',
     },
     mobileLogoStyle: { 
-        height: '45px', 
+        height: '70px', 
         width: 'auto',
         objectFit: 'contain',
     },
@@ -130,8 +130,10 @@ export const styles = {
         left: 0,
         right: 0,
         zIndex: 10,
-        height: '70px',
+        height: '50px',
         width: '100%',
+        maxWidth: '450px',
+        margin: '0 auto',
     },
     kitchenLogoStyle: { 
         height: '70px', 
@@ -140,23 +142,21 @@ export const styles = {
     },
     kitchenNavIcons: {
         display: 'flex',
-        gap: '20px', 
+        gap: '12px', 
     },
     kitchenNavButton: {
-        background: BACKGROUND_COLOR, // White
+        background: 'none',
         border: 'none',
-        color: PRIMARY_COLOR, // Dark Blue
+        color: TEXT_COLOR, // Dark Blue
         cursor: 'pointer',
-        padding: '10px', 
+        padding: '5px',
         borderRadius: '50%',
-        width: '50px', 
-        height: '50px',
+        width: '40px',
+        height: '40px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        fontSize: '2em',
-        boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
-        transition: 'background-color 0.2s',
+        fontSize: '1.6em', 
     },
 
     // Bottom Navigation Bar (Mobile-specific)

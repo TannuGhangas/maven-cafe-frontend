@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '../config/constants';
 
 // A more robust API call function to handle non-JSON and empty responses.
-export const callApi = async (url, method = 'GET', body = null, silent = false) => {
+export const callApi = async (url, method = 'GET', body = null, silent = false, queryParams = null) => {
     const isBodyMethod = !['GET', 'HEAD'].includes(method.toUpperCase());
 
     const options = {
@@ -12,6 +12,21 @@ export const callApi = async (url, method = 'GET', body = null, silent = false) 
             ...(isBodyMethod && body && { 'Content-Type': 'application/json' })
         },
     };
+
+    // Build URL with query parameters for GET requests
+    let fullUrl = `${API_BASE_URL}${url}`;
+    if (queryParams && method.toUpperCase() === 'GET') {
+        const searchParams = new URLSearchParams();
+        Object.keys(queryParams).forEach(key => {
+            if (queryParams[key] !== null && queryParams[key] !== undefined) {
+                searchParams.append(key, queryParams[key]);
+            }
+        });
+        const queryString = searchParams.toString();
+        if (queryString) {
+            fullUrl += `?${queryString}`;
+        }
+    }
 
     if (body) { 
         if (isBodyMethod) {
@@ -24,7 +39,6 @@ export const callApi = async (url, method = 'GET', body = null, silent = false) 
     }
 
     try {
-        const fullUrl = `${API_BASE_URL}${url}`;
         const response = await fetch(fullUrl, options);
         
         const contentType = response.headers.get('content-type');

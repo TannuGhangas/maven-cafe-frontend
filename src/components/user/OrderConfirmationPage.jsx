@@ -409,12 +409,37 @@ const OrderSummaryCard = ({ item, styles, index, setPage, handleDelete, defaultL
     
     const locationValue = `${item.location === 'Others' ? defaultLocationName : (ALL_LOCATIONS_MAP[item.location] || item.location)} ${item.tableNo ? `(Table ${item.tableNo})` : ''}`;
     
+    // Helper function to format date and time for order items
+    const formatOrderDateTime = (timestamp) => {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Check if it's today
+        if (date.toDateString() === today.toDateString()) {
+            return `Today, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+        // Check if it's yesterday
+        else if (date.toDateString() === yesterday.toDateString()) {
+            return `Yesterday, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+        // For other days, show full date
+        else {
+            return `${date.toLocaleDateString([], { 
+                month: 'short', 
+                day: 'numeric' 
+            })}, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+    };
+
     // Define the data points to be displayed (Primary details first)
     const dataPoints = [
         { label: "Item", value: `${item.item.charAt(0).toUpperCase() + item.item.slice(1)}` },
         { label: "Type", value: item.type || 'Standard' },
         { label: "Sugar", value: item.sugarLevel !== undefined ? item.sugarLevel : 'N/A' },
         { label: "Quantity", value: item.quantity },
+        { label: "Ordered", value: formatOrderDateTime(item.timestamp || Date.now()) },
         { label: "Location", value: locationValue },
     ];
     

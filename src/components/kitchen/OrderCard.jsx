@@ -136,12 +136,23 @@ const OrderCard = ({
                     gap: '8px'
                 }}>
                     <div style={{
-                        fontSize: '0.95rem',
+                        fontSize: '0.85rem',
                         fontWeight: '600',
                         color: '#666666',
-                        fontFamily: 'Calibri, Arial, sans-serif'
+                        fontFamily: 'Calibri, Arial, sans-serif',
+                        textAlign: 'right',
+                        lineHeight: '1.2'
                     }}>
-                        {order.timestamp ? new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                        {order.timestamp ? (
+                            <>
+                                <div>{new Date(order.timestamp).toLocaleDateString()}</div>
+                                <div style={{ fontSize: '0.9rem', color: '#103c7f', fontWeight: '700' }}>
+                                    {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                            </>
+                        ) : (
+                            'N/A'
+                        )}
                     </div>
                     <div style={{
                         fontSize: '1.2rem',

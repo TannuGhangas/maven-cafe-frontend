@@ -29,8 +29,6 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
     // Tracks the ID of the order card that is EXPANDED inline for ALL ITEMS.
     const [expandedOrderId, setExpandedOrderId] = useState(null);
-    const [lastUpdateTime, setLastUpdateTime] = useState(Date.now());
-    const [isLoading, setIsLoading] = useState(false);
 
 
     // Mobile detection
@@ -195,22 +193,6 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
         };
         window.addEventListener('profileImageUpdated', handleProfileUpdate);
         
-        // Manual refresh trigger
-        const handleManualRefresh = () => {
-            console.log('KitchenDashboard: Manual refresh triggered');
-            fetchOrders(false, true); // Force refresh
-        };
-        window.addEventListener('manualRefreshOrders', handleManualRefresh);
-        
-        // Add keyboard shortcut for manual refresh (F5)
-        const handleKeyPress = (e) => {
-            if (e.key === 'F5' || (e.ctrlKey && e.key === 'r')) {
-                e.preventDefault();
-                handleManualRefresh();
-            }
-        };
-        document.addEventListener('keydown', handleKeyPress);
-        
         return () => {
             clearInterval(interval);
             if (notificationTimeoutRef.current) {
@@ -219,8 +201,6 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('profileImageUpdated', handleProfileUpdate);
-            window.removeEventListener('manualRefreshOrders', handleManualRefresh);
-            document.removeEventListener('keydown', handleKeyPress);
         };
     }, []);
 
@@ -308,8 +288,8 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                 userId: user.id,
                 userRole: user.role,
             });
-            // Force refresh after status update
-            fetchOrders(false, true);
+            // Refresh after status update
+            fetchOrders();
             setExpandedOrderId(null);
         } catch (error) {
             console.error('Failed to update order status:', error);
@@ -374,46 +354,8 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             ...styles.kitchenAppContainer,
             padding: isMobile ? '15px 15px' : '20px 10px'
         }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <div style={{ marginBottom: '15px' }}>
                 <KitchenHeader styles={styles} />
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div style={{ 
-                        fontSize: '0.8rem', 
-                        color: '#666', 
-                        fontFamily: 'Calibri, Arial, sans-serif',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'flex-end'
-                    }}>
-                        <span>Last updated: {new Date(lastUpdateTime).toLocaleTimeString()}</span>
-                        {isLoading && <span style={{ color: '#103c7f' }}>⟳ Loading...</span>}
-                    </div>
-                    <button
-                        onClick={() => fetchOrders(false, true)}
-                        style={{
-                            backgroundColor: '#103c7f',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            padding: '8px 12px',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            fontFamily: 'Calibri, Arial, sans-serif',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px',
-                            transition: 'all 0.2s ease'
-                        }}
-                        onMouseOver={(e) => {
-                            e.target.style.backgroundColor = '#0c3170';
-                        }}
-                        onMouseOut={(e) => {
-                            e.target.style.backgroundColor = '#103c7f';
-                        }}
-                    >
-                        ⟳ Refresh
-                    </button>
-                </div>
             </div>
 
             {/* HOME (Slot selection and Totals) */}

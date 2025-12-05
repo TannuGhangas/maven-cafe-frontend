@@ -215,7 +215,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
     useEffect(() => {
         const fetchMenu = async () => {
             try {
-                const menu = await callApi('/menu', 'GET', {}, { userId: user.id, userRole: user.role });
+                const menu = await callApi('/menu', 'GET', {}, false, { userId: user.id, userRole: user.role });
                 if (menu) {
                     setMenuCategories(menu.categories || []);
                     setAddOns(menu.addOns || []);
@@ -482,29 +482,89 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     </button>
                 </h3>
                 <div style={enhancedStyles.itemList}>
-                    {addOns.map((addOn, index) => (
-                        <div key={addOn.name} style={enhancedStyles.menuItem}>
-                            {addOn.name}
-                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
+                    {addOns.length > 0 ? addOns.map((addOn, index) => (
+                        <div key={addOn.name} style={{
+                            ...enhancedStyles.menuItem,
+                            minHeight: '80px' // Ensure minimum height for button space
+                        }}>
+                            <div style={{ marginBottom: '10px', fontSize: '1rem', fontWeight: '600' }}>
+                                {addOn.name}
+                            </div>
+                            <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
                                 <button
-                                    style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
+                                    style={{ 
+                                        background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)', 
+                                        color: 'white', 
+                                        border: 'none', 
+                                        borderRadius: '10px', 
+                                        padding: '8px 12px', 
+                                        cursor: 'pointer', 
+                                        fontSize: '0.8rem', 
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        boxShadow: '0 3px 6px rgba(0,122,255,0.4)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 12px rgba(0,122,255,0.6)'
+                                        }
+                                    }}
                                     onClick={() => openModal('editAddOn', '', index, addOn.name)}
-                                    title="Edit"
+                                    title={`Edit add-on ${addOn.name}`}
                                 >
-                                    <FaEdit />
+                                    <FaEdit style={{ fontSize: '0.8rem' }} />
+                                    <span>Edit</span>
                                 </button>
                                 <button
-                                    style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
-                                    onClick={() => {
-                                        if (window.confirm(`Remove ${addOn.name}?`)) removeAddOn(index);
+                                    style={{ 
+                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
+                                        color: 'white', 
+                                        border: 'none', 
+                                        borderRadius: '10px', 
+                                        padding: '8px 12px', 
+                                        cursor: 'pointer', 
+                                        fontSize: '0.8rem', 
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
+                                        }
                                     }}
-                                    title="Remove"
+                                    onClick={() => {
+                                        if (window.confirm(`🗑️ Remove add-on "${addOn.name}"?`)) {
+                                            removeAddOn(index);
+                                            // Auto-save after removing add-on
+                                            setTimeout(() => saveMenu(false), 100);
+                                        }
+                                    }}
+                                    title={`Remove add-on ${addOn.name}`}
                                 >
-                                    <FaTrash />
+                                    <FaTrash style={{ fontSize: '0.8rem' }} />
+                                    <span>Remove</span>
                                 </button>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div style={{
+                            ...enhancedStyles.menuItem,
+                            backgroundColor: '#fff3cd',
+                            borderColor: '#ffeaa7',
+                            color: '#856404',
+                            textAlign: 'center',
+                            padding: '20px'
+                        }}>
+                            <p style={{ margin: 0, fontStyle: 'italic' }}>
+                                No add-ons configured. Click "Add" to create spice add-ons.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -521,28 +581,73 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     </button>
                 </h3>
                 <div style={enhancedStyles.itemList}>
-                    {sugarLevels.map((level, index) => (
+                    {sugarLevels.length > 0 ? sugarLevels.map((level, index) => (
                         <div key={level.level} style={{
                             ...enhancedStyles.menuItem,
                             backgroundColor: level.level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
-                            color: level.level === 1 ? '#103c7f' : '#333'
+                            color: level.level === 1 ? '#103c7f' : '#333',
+                            minHeight: '80px' // Ensure minimum height for button space
                         }}>
-                            {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
-                            <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                {level.level !== 1 && (
-                                    <button
-                                        style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
-                                        onClick={() => {
-                                            if (window.confirm(`Remove sugar level ${level.level}?`)) removeSugarLevel(level.level);
-                                        }}
-                                        title="Remove"
-                                    >
-                                        <FaTrash />
-                                    </button>
-                                )}
+                            <div style={{ marginBottom: '10px' }}>
+                                {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
+                            </div>
+                            <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                <button
+                                    style={{ 
+                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
+                                        color: 'white', 
+                                        border: 'none', 
+                                        borderRadius: '10px', 
+                                        padding: '8px 12px', 
+                                        cursor: 'pointer', 
+                                        fontSize: '0.8rem', 
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px',
+                                        boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        ':hover': {
+                                            transform: 'translateY(-2px)',
+                                            boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
+                                        }
+                                    }}
+                                    onClick={() => {
+                                        if (level.level === 1) {
+                                            if (window.confirm(`⚠️ WARNING: This is the default sugar level. Remove it anyway?`)) {
+                                                removeSugarLevel(level.level);
+                                                // Auto-save after removing default level
+                                                setTimeout(() => saveMenu(false), 100);
+                                            }
+                                        } else {
+                                            if (window.confirm(`🗑️ Remove sugar level ${level.level}?`)) {
+                                                removeSugarLevel(level.level);
+                                                // Auto-save after removing level
+                                                setTimeout(() => saveMenu(false), 100);
+                                            }
+                                        }
+                                    }}
+                                    title={`Remove sugar level ${level.level}`}
+                                >
+                                    <FaTrash style={{ fontSize: '0.8rem' }} />
+                                    <span>Remove</span>
+                                </button>
                             </div>
                         </div>
-                    ))}
+                    )) : (
+                        <div style={{
+                            ...enhancedStyles.menuItem,
+                            backgroundColor: '#fff3cd',
+                            borderColor: '#ffeaa7',
+                            color: '#856404',
+                            textAlign: 'center',
+                            padding: '20px'
+                        }}>
+                            <p style={{ margin: 0, fontStyle: 'italic' }}>
+                                No sugar levels configured. Click "Add" to create sugar level options.
+                            </p>
+                        </div>
+                    )}
                 </div>
             </div>
 

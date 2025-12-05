@@ -43,7 +43,7 @@ const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }
     return (
         <div style={navBarContainerStyle}>
             {/* Logo */}
-            <div style={{...logoWrapperStyle, marginLeft: '30px', cursor: onLogoClick ? 'pointer' : 'default'}} onClick={onLogoClick}>
+            <div style={{...logoWrapperStyle, marginLeft: '10px', cursor: onLogoClick ? 'pointer' : 'default'}} onClick={onLogoClick}>
                 <img src={MavenLogo} alt="Maven Cafe" style={logoStyle} />
             </div>
 
@@ -53,35 +53,35 @@ const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }
                 {/* 1. Home / Dashboard Button (Primary Action) */}
                 {user.role === 'user' && (
                     <button style={navButtonStyle} onClick={() => setPage('home')}>
-                        <FaCoffee size={isKitchenOrAdmin ? 28 : 22} />
+                        <FaCoffee size={22} />
                     </button>
                 )}
 
                 {/* Kitchen: Orders Dashboard */}
                 {user.role === 'kitchen' && (
                     <button style={navButtonStyle} onClick={() => { setPage('kitchen-dashboard'); setKitchenView("home"); }}>
-                        <FaListAlt size={isKitchenOrAdmin ? 28 : 22} title="View Orders Dashboard" />
+                        <FaListAlt size={22} title="View Orders Dashboard" />
                     </button>
                 )}
 
                 {/* Admin: Admin Dashboard */}
                 {user.role === 'admin' && (
                     <button style={navButtonStyle} onClick={() => setPage('admin-dashboard')}>
-                        <FaListAlt size={isKitchenOrAdmin ? 28 : 22} title="Admin Dashboard" />
+                        <FaListAlt size={22} title="Admin Dashboard" />
                     </button>
                 )}
 
                 {/* 2. Orders List Button (User Access) */}
                 {user.role === 'user' && (
                     <button style={navButtonStyle} onClick={() => setPage('orders-list')}>
-                        <FaClipboardList size={isKitchenOrAdmin ? 28 : 22} title="View My Orders" />
+                        <FaClipboardList size={22} title="View My Orders" />
                     </button>
                 )}
 
                 {/* 3. Complaints/Feedback Button (User Access) */}
                 {user.role === 'user' && (
                     <button style={navButtonStyle} onClick={() => setPage('complaint')}>
-                        <FaExclamationTriangle size={isKitchenOrAdmin ? 28 : 22} color={complaintColor} title="Submit Feedback/Complaint" />
+                        <FaExclamationTriangle size={22} color={complaintColor} title="Submit Feedback/Complaint" />
                     </button>
                 )}
 
@@ -89,7 +89,7 @@ const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }
                 {isKitchenOrAdmin && (
                     <button style={navButtonStyle} onClick={() => setPage('admin-complaints')}>
                         {/* Using FaRegSadTear or similar for 'issues' */}
-                        <FaRegSadTear size={isKitchenOrAdmin ? 28 : 22} color={complaintColor} title="View Complaints/Feedback" />
+                        <FaRegSadTear size={22} color={complaintColor} title="View Complaints/Feedback" />
                     </button>
                 )}
 

@@ -59,6 +59,53 @@ function App() {
         }
     }, [user]);
 
+    // 🔄 Auto-refresh when new Service Worker activates
+useEffect(() => {
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+            window.location.reload();
+        });
+    }
+}, []);
+
+    // 🧭 Handle browser back/forward navigation
+    useEffect(() => {
+        const handlePopState = (event) => {
+            // Prevent the default back behavior and handle it within the app
+            event.preventDefault();
+            
+            // Navigate to appropriate home screen based on user role
+            if (user) {
+                if (user.role === 'admin') {
+                    setPage('admin-dashboard');
+                } else if (user.role === 'kitchen') {
+                    setPage('kitchen-dashboard');
+                    setKitchenView("home");
+                } else {
+                    setPage('home');
+                }
+            }
+        };
+
+        // Add event listener for browser back/forward
+        window.addEventListener('popstate', handlePopState);
+        
+        // Replace current state to prevent going back to login
+        window.history.replaceState({ page }, '', window.location.href);
+
+        return () => {
+            window.removeEventListener('popstate', handlePopState);
+        };
+    }, [user, page]);
+
+    // Update browser history when page changes
+    useEffect(() => {
+        if (user && page) {
+            window.history.pushState({ page }, '', window.location.href);
+        }
+    }, [page, user]);
+
+
     // --- LOGIN HANDLER ---
     const handleLogin = async (username, password) => {
         const data = await callApi('/login', 'POST', { username, password });

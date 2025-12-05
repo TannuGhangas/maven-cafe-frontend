@@ -116,6 +116,30 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
     const firstItem = order.items[0];
     const itemImage = itemImages[firstItem.item.toLowerCase()] || itemImages['tea'];
 
+    // Helper function to format date and time nicely
+    const formatDateTime = (timestamp) => {
+        const date = new Date(timestamp);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        // Check if it's today
+        if (date.toDateString() === today.toDateString()) {
+            return `Today, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+        // Check if it's yesterday
+        else if (date.toDateString() === yesterday.toDateString()) {
+            return `Yesterday, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+        // For other days, show full date
+        else {
+            return `${date.toLocaleDateString([], { 
+                month: 'short', 
+                day: 'numeric' 
+            })}, ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+        }
+    };
+
     const DetailRow = ({ label, value }) => {
         if (value === 'N/A' || (Array.isArray(value) && value.length === 0)) {
             if (['Type', 'Sugar', 'Notes', 'Add-Ons'].includes(label)) return null;
@@ -174,7 +198,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                         {firstItem.item.charAt(0).toUpperCase() + firstItem.item.slice(1)}
                     </h3>
                     <div style={{ display: 'flex', gap: '15px', fontSize: '0.8rem', color: '#666' }}>
-                        <span><FaClock style={{ marginRight: '3px' }} /> {new Date(order.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        <span><FaClock style={{ marginRight: '3px' }} /> {formatDateTime(order.timestamp)}</span>
                         <span><FaBoxOpen style={{ marginRight: '3px' }} /> {order.items.length} item{order.items.length !== 1 ? 's' : ''}</span>
                     </div>
                 </div>
@@ -281,6 +305,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                                 { label: "Type", value: item.type || 'Standard' },
                                 { label: "Sugar", value: item.sugarLevel !== undefined ? item.sugarLevel : 'N/A' },
                                 { label: "Quantity", value: item.quantity },
+                                { label: "Ordered", value: formatDateTime(order.timestamp) },
                                 { label: "Location", value: renderLocation() },
                             ];
 
