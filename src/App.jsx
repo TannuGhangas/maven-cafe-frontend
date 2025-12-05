@@ -42,15 +42,15 @@ function App() {
     else setPage('home');
   }, [user]);
 
-  // 🔄 Auto-refresh on Service Worker update (production only)
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'production' && "serviceWorker" in navigator) {
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        console.log("Service Worker updated - refreshing page...");
-        window.location.reload();
-      });
-    }
-  }, []);
+  // 🔄 Auto-refresh on Service Worker update (DISABLED - causes auto-updates)
+  // useEffect(() => {
+  //   if (process.env.NODE_ENV === 'production' && "serviceWorker" in navigator) {
+  //     navigator.serviceWorker.addEventListener("controllerchange", () => {
+  //       console.log("Service Worker updated - refreshing page...");
+  //       window.location.reload();
+  //     });
+  //   }
+  // }, []);
 
   // 🧭 Handle browser back/forward navigation
   useEffect(() => {
