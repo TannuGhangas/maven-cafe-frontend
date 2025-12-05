@@ -9,7 +9,7 @@ import {
     FaRegSadTear, // NEW: Adding a specific icon for admin complaints
     FaClipboardList // For user orders list
 } from 'react-icons/fa';
-import MavenLogo from '../../assets/maven_logoo.png';
+import MavenLogo from '../../assets/logo.png';
 import ProfileImage from './ProfileImage';
 
 const NavBar = ({ user, setPage, setModal, setKitchenView, styles, onLogoClick }) => {
