@@ -1,7 +1,7 @@
 // src/main.jsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import App from './App.jsx';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
 
 // Basic global style reset
 const globalStyles = `
@@ -15,18 +15,17 @@ const styleSheet = document.createElement("style");
 styleSheet.innerText = globalStyles;
 document.head.appendChild(styleSheet);
 
-ReactDOM.createRoot(document.getElementById('root')).render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+// ✅ StrictMode removed to prevent auto-refresh & double rendering
+ReactDOM.createRoot(document.getElementById("root")).render(
+    <App />
 );
 
-// ✅ ADD THIS FOR PWA (service worker registration)
+// ✅ Service Worker Registration (safe for Vercel Production)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
       .register("/service-worker.js")
-      .then(() => console.log("Service Worker Registered"))
-      .catch(err => console.log("SW registration failed:", err));
+      .then(() => console.log("✔ Service Worker Registered"))
+      .catch(err => console.log("❌ SW registration failed:", err));
   });
 }
