@@ -10,9 +10,7 @@ export default defineConfig({
 
       includeAssets: [
         "favicon.svg",
-        "robots.txt",
-        "sound/beep.mp3",
-        "sound/beeep.mp3"
+        "robots.txt"
       ],
 
       manifest: {
@@ -61,9 +59,27 @@ export default defineConfig({
     })
   ],
 
+  // Development server configuration for better hot reload
+  server: {
+    port: 5173,
+    host: true,
+    headers: {
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
+  },
+
+  // Build configuration
   build: {
     rollupOptions: {
       output: { manualChunks: undefined }
-    }
+    },
+    sourcemap: true
+  },
+
+  // Development optimization
+  optimizeDeps: {
+    include: ['react', 'react-dom']
   }
 });

@@ -61,7 +61,7 @@ export const styles = {
 
     contentArea: {
         flexGrow: 1,
-        paddingTop: '80px', // Account for fixed navbar height (70px for kitchen, 50px for mobile + some buffer)
+        paddingTop: '50px', // Account for fixed navbar height, headers will attach directly below
     },
     screenPadding: {
         padding: '20px',
@@ -89,7 +89,7 @@ export const styles = {
         right: 0,
         zIndex: 10,
         height: '50px',
-        maxWidth: '450px',
+        maxWidth: '480px',
         margin: '0 auto',
     },
     mobileLogoStyle: { 
@@ -116,7 +116,7 @@ export const styles = {
         fontSize: '1.6em', 
     },
 
-    // KITCHEN/ADMIN NAV BAR (Full Width, Larger Elements)
+    // KITCHEN/ADMIN NAV BAR (Responsive - Full Width on Desktop, Constrained on Mobile)
     kitchenNavBar: {
         display: 'flex',
         justifyContent: 'space-between',
@@ -132,7 +132,7 @@ export const styles = {
         zIndex: 10,
         height: '50px',
         width: '100%',
-        maxWidth: '450px',
+        maxWidth: '100%', // Full width on all screens
         margin: '0 auto',
     },
     kitchenLogoStyle: { 
@@ -172,7 +172,7 @@ export const styles = {
         backgroundColor: 'white', // White
         boxShadow: '0 -4px 15px rgba(0,0,0,0.15)',
         zIndex: 100,
-        maxWidth: '450px',
+        maxWidth: '480px',
         margin: '0 auto',
         paddingBottom: '20px',
     },
@@ -343,7 +343,7 @@ export const styles = {
         borderTopLeftRadius: CARD_RADIUS,
         borderBottomLeftRadius: CARD_RADIUS,
         width: '85%',
-        maxWidth: '450px', 
+        maxWidth: '480px', 
         maxHeight: '100vh',
         overflowY: 'auto',
         transform: 'translateX(0)',

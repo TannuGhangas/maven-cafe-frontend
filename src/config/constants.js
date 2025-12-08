@@ -194,6 +194,7 @@ export const ADD_ONS = (() => {
     } catch {}
     return [
         { name: "Ginger", available: true },
+        { name: "Salt", available: true },
     ];
 })();
 

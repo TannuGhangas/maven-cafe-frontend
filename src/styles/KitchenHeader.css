@@ -2,17 +2,18 @@
 .kitchen-header {
     width: 100%;
     height: 120px;
-    border-radius: 15px;
+    border-radius: 0 0 10px 10px;
     background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://cdn.decoist.com/wp-content/uploads/2021/06/Adding-greenery-to-the-small-farmhouse-kitchen-33093.jpg');
     background-size: cover;
     background-position: center;
-    margin-bottom: 15px;
-    padding: 15px 15px;
+    margin-bottom: 0;
+    padding: 15px 20px;
     color: #fff;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    margin-top: 0; /* Attach directly to navbar */
 }
 
 .kitchen-header-title {
@@ -33,16 +34,17 @@
 /* Mobile responsive */
 @media (min-width: 768px) {
     .kitchen-header {
-        height: 200px;
-        padding: 30px 20px;
-        margin-bottom: 20px;
+        height: 140px;
+        padding: 20px 30px;
+        margin-bottom: 0;
+        margin-top: 0; /* Keep attached directly to navbar */
     }
 
     .kitchen-header-title {
-        font-size: 48px;
+        font-size: 32px;
     }
 
     .kitchen-header-subtitle {
-        font-size: 24px;
+        font-size: 16px;
     }
 }

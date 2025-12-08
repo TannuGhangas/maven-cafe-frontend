@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaCheck, FaChevronDown, FaChevronUp, FaUtensilSpoon, FaStickyNote, FaMapMarkerAlt, FaCoffee, FaClock, FaUser, FaCheckCircle, FaListUl, FaUtensils } from 'react-icons/fa';
 import { ALL_LOCATIONS_MAP, getAllowedLocations, USER_LOCATIONS_DATA } from '../../config/constants';
 import ProfileImage from '../common/ProfileImage';
+import ErrorBoundary from '../common/ErrorBoundary';
 import '../../styles/OrderCard.css';
 
 const OrderCard = ({
@@ -85,15 +86,17 @@ const OrderCard = ({
                     flex: 1
                 }}>
                     <div className="order-customer-profile">
-                        <ProfileImage
-                            userId={order?.userId}
-                            userName={order?.userName}
-                            userProfile={order?.userProfile}
-                            size="large"
-                            className="order-customer-avatar"
-                            showPlaceholder={true}
-                            alt={`${order.userProfile?.name || order?.userName || "Customer"}'s profile`}
-                        />
+                        <ErrorBoundary>
+                            <ProfileImage
+                                userId={order?.userId}
+                                userName={order?.userName}
+                                userProfile={order?.userProfile}
+                                size="large"
+                                className="order-customer-avatar"
+                                showPlaceholder={true}
+                                alt={`${order.userProfile?.name || order?.userName || "Customer"}'s profile`}
+                            />
+                        </ErrorBoundary>
                     </div>
                     <div style={{
                         display: 'flex',
@@ -302,6 +305,33 @@ const OrderCard = ({
                                         <FaUtensilSpoon size={16} color="#a1db40" />
                                         <span style={{ fontWeight: '600', color: '#103c7f' }}>Sugar Level:</span>
                                         <span style={{ fontWeight: '700', color: '#103c7f' }}>{it.sugarLevel ?? 'N/A'} spoons</span>
+                                    </div>
+                                )}
+
+                                {/* Add-Ons */}
+                                {it.selectedAddOns && it.selectedAddOns.length > 0 && (
+                                    <div style={{
+                                        display: 'flex',
+                                        alignItems: 'flex-start',
+                                        gap: '8px',
+                                        fontSize: '0.95rem',
+                                        backgroundColor: '#f0f8e8',
+                                        padding: '6px 10px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #a1db40',
+                                        fontFamily: 'Calibri, Arial, sans-serif'
+                                    }}>
+                                        <FaListUl size={16} color="#a1db40" />
+                                        <div>
+                                            <span style={{ fontWeight: '600', color: '#103c7f' }}>Add-Ons:</span>
+                                            <div style={{ 
+                                                fontWeight: '700', 
+                                                color: '#103c7f',
+                                                marginTop: '2px'
+                                            }}>
+                                                {it.selectedAddOns.join(', ')}
+                                            </div>
+                                        </div>
                                     </div>
                                 )}
 
@@ -560,7 +590,7 @@ const OrderCard = ({
                                                         fontFamily: 'Calibri, Arial, sans-serif'
                                                     }}
                                                 >
-                                                    Sugar: {it.sugarLevel ?? 'N/A'} | Notes: {it.notes || 'None'}
+                                                    Sugar: {it.sugarLevel ?? 'N/A'} | Add-Ons: {it.selectedAddOns && it.selectedAddOns.length > 0 ? it.selectedAddOns.join(', ') : 'None'} | Notes: {it.notes || 'None'}
                                                 </div>
                                             ))}
                                         </div>

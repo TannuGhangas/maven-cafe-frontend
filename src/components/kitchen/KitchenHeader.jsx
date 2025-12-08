@@ -5,10 +5,10 @@ const KitchenHeader = () => {
     return (
         <div className="kitchen-header">
             <div className="kitchen-header-title">
-                KITCHEN DASHBOARD
+                KITCHEN
             </div>
             <div className="kitchen-header-subtitle">
-                Manage & track active orders
+                Active Orders
             </div>
         </div>
     );

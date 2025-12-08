@@ -61,16 +61,40 @@ const ENHANCED_STYLES = {
 const itemImages = {
     'tea': 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
     'coffee': 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+    'coldcoffee': 'https://images.unsplash.com/photo-1517705008128-361805f42e86?w=400&h=300&fit=crop',
     'water': 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+    'saltwater': 'https://images.unsplash.com/photo-1548839140-29a3df4b0d0a?w=400&h=300&fit=crop',
 };
 // ---------------------------------
 
-// --- Configuration Image URL ---
-const HEADER_IMAGE_URL = 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg'; 
+// --- Dynamic Header Image Selector ---
+const getDynamicHeaderImage = (orders, selectedOrder = null) => {
+    // Priority 1: If a specific order is selected/expanded, use its first item
+    if (selectedOrder && selectedOrder.items && selectedOrder.items.length > 0) {
+        const firstItem = selectedOrder.items[0].item?.toLowerCase();
+        if (firstItem && itemImages[firstItem]) {
+            return itemImages[firstItem];
+        }
+    }
+
+    // Priority 2: If orders exist, use the first item of the most recent order
+    if (orders && orders.length > 0) {
+        const mostRecentOrder = orders[0]; // Orders are already sorted by timestamp desc
+        if (mostRecentOrder.items && mostRecentOrder.items.length > 0) {
+            const firstItem = mostRecentOrder.items[0].item?.toLowerCase();
+            if (firstItem && itemImages[firstItem]) {
+                return itemImages[firstItem];
+            }
+        }
+    }
+
+    // Default fallback
+    return itemImages['tea'];
+};
 // ---------------------------------
 
 // Helper component for the Image Banner (Reusable)
-const ListPageBanner = ({ styles, imageUrl }) => {
+const ListPageBanner = ({ styles, imageUrl, orders, selectedOrder }) => {
     const bannerStyle = {
         height: '180px',
         width: '100%',
@@ -100,18 +124,63 @@ const ListPageBanner = ({ styles, imageUrl }) => {
         margin: 0,
     };
 
+    // Dynamic banner text based on current selection
+    const getBannerText = (orders, selectedOrder = null) => {
+        // Priority 1: If a specific order is selected/expanded, use its first item
+        if (selectedOrder && selectedOrder.items && selectedOrder.items.length > 0) {
+            const firstItem = selectedOrder.items[0].item?.toLowerCase();
+            const itemEmojis = {
+                'tea': '🍵',
+                'coffee': '☕', 
+                'water': '💧'
+            };
+            const emoji = itemEmojis[firstItem] || '🍽️';
+            return `Your ${firstItem} ${emoji} is being prepared!`;
+        }
+
+        // Priority 2: If orders exist, use the first item of the most recent order
+        if (orders && orders.length > 0) {
+            const mostRecentOrder = orders[0];
+            if (mostRecentOrder.items && mostRecentOrder.items.length > 0) {
+                const firstItem = mostRecentOrder.items[0].item?.toLowerCase();
+                const itemEmojis = {
+                    'tea': '🍵',
+                    'coffee': '☕',
+                    'water': '💧'
+                };
+                const emoji = itemEmojis[firstItem] || '🍽️';
+                return `Your latest ${firstItem} ${emoji} order!`;
+            }
+        }
+
+        // Default fallback
+        return "Ready to order something delicious?";
+    };
+
     return (
         <div style={bannerStyle}>
             <div style={imageStyle}>
-                <h1 style={textStyle}>We hope it hits the spot!</h1>
+                <h1 style={textStyle}>{getBannerText(orders, selectedOrder)}</h1>
             </div>
         </div>
     );
 };
 
 // --- COLLAPSIBLE ORDER LIST CARD ---
-const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
+const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles, setSelectedOrder, isSelected }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+    const handleCardClick = () => {
+        const newExpandedState = !isExpanded;
+        setIsExpanded(newExpandedState);
+        
+        // Update selected order for header image
+        if (newExpandedState) {
+            setSelectedOrder(order);
+        } else {
+            setSelectedOrder(null);
+        }
+    };
 
     const firstItem = order.items[0];
     const itemImage = itemImages[firstItem.item.toLowerCase()] || itemImages['tea'];
@@ -162,7 +231,12 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
     const statusColor = statusColors[order.status] || '#607D8B';
 
     return (
-        <div style={styles.simpleCard}>
+        <div style={{
+            ...styles.simpleCard,
+            border: isSelected ? `2px solid ${styles.PRIMARY_COLOR}` : 'none',
+            transform: isSelected ? 'scale(1.02)' : 'scale(1)',
+            transition: 'all 0.3s ease'
+        }}>
             {/* Order Header - Clickable to expand/collapse */}
             <div
                 style={{
@@ -175,7 +249,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
                     backgroundColor: isExpanded ? '#f8f9fa' : '#ffffff',
                     transition: 'all 0.2s ease'
                 }}
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={handleCardClick}
             >
                 <img
                     src={itemImage}
@@ -365,6 +439,7 @@ const OrderListCard = ({ order, orderNumber, handleCancelOrder, styles }) => {
 const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => {
     const styles = { ..._propStyles, ...STYLES_THEME, ...ENHANCED_STYLES }; // Merge or ensure access to all necessary theme styles
     const [userOrders, setUserOrders] = useState([]);
+    const [selectedOrder, setSelectedOrder] = useState(null); // Track currently expanded/selected order
 
     const fetchOrders = async () => {
         // Fetch fresh data in background
@@ -442,12 +517,18 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
     // if (loading) return <div style={styles.loadingContainer}><FaSpinner className="spinner" size={30} /> Loading Orders...</div>;
 
     return (
-        <div style={{ ...styles.appContainer, padding: 0, backgroundColor: '#e4ebf4ff', height: '100vh' }}>
+        <div style={styles.centeredContainer}>
+            <div style={styles.screenPadding}>
 
-            {/* 1. Header Banner */}
-            <ListPageBanner styles={styles} imageUrl={HEADER_IMAGE_URL} />
+                {/* 1. Header Banner */}
+                <ListPageBanner 
+                    styles={styles} 
+                    imageUrl={getDynamicHeaderImage(userOrders, selectedOrder)} 
+                    orders={userOrders} 
+                    selectedOrder={selectedOrder}
+                />
 
-            <div style={{ ...styles.screenPadding, padding: '20px', paddingBottom: '80px' }}>
+                <div style={styles.contentArea}>
                 <h3 style={{ ...styles.headerText, color: styles.COLOR_TEXT_DARK, marginTop: 0, textAlign: 'center' }}>
                     Your Delicious Orders
                 </h3>
@@ -485,6 +566,8 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
                                 orderNumber={index + 1}
                                 handleCancelOrder={handleCancelOrder}
                                 styles={styles}
+                                setSelectedOrder={setSelectedOrder}
+                                isSelected={selectedOrder?._id === order._id}
                             />
                         ))}
                     </div>
@@ -497,6 +580,7 @@ const UserOrdersListPage = ({ setPage, user, callApi, styles: _propStyles }) => 
                 >
                     <FaChevronLeft /> Back to Home
                 </button>
+                </div>
             </div>
         </div>
     );

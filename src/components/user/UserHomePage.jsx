@@ -88,235 +88,246 @@ fontFamily: 'Cambria, serif',
         backgroundColor: '#ffffff',
         appearance: 'none',
         backgroundImage: 'url("https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg")',
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'right 15px center',
-        backgroundSize: '12px',
-    },
+backgroundRepeat: 'no-repeat',
+backgroundPosition: 'right 15px center',
+backgroundSize: '12px',
+},
 
-    // --- BUTTONS ---
-    primaryButton: {
-        width: '100%',
-        padding: '18px',
-        borderRadius: VARS.BORDER_RADIUS_SM,
-        backgroundColor: VARS.COLOR_PRIMARY, // Dark Blue PRIMARY
-        color: 'white',
-        border: 'none',
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        boxShadow: `0 6px 15px ${VARS.COLOR_PRIMARY}60`,
-        transition: 'all 0.3s ease',
-        marginTop: '30px',
-    },
-    secondaryButton: {
-        width: '100%',
-        padding: '15px',
-        borderRadius: VARS.BORDER_RADIUS_SM,
-        backgroundColor: VARS.COLOR_ACCENT, // Green ACCENT for secondary
-        color: VARS.COLOR_TEXT_DARK,
-        border: `1px solid ${VARS.COLOR_ACCENT}50`,
-        fontSize: '1rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px',
-        boxShadow: VARS.SHADOW_ELEVATION_1,
-        transition: 'all 0.3s ease',
-    },
-    
-    // --- COMPONENT: HEADER BANNER ---
-    headerBanner: {
-        height: '200px',
-        width: '100%',
-        marginBottom: '30px', // Reduced margin
-        borderRadius: `0 0 ${VARS.BORDER_RADIUS_LG} ${VARS.BORDER_RADIUS_LG}`,
-        overflow: 'hidden',
-        boxShadow: VARS.SHADOW_ELEVATION_3,
-        position: 'relative',
-    },
-    backgroundImage: (url) => ({
-        // Reduced dark overlay (0.4 max) for brighter header image
-        backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%), url(${url || 'https://placehold.co/800x230/4a4a4a/ffffff?text=Add+Image+URL'})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '0 24px',
-        textAlign: 'center',
-    }),
+// --- BUTTONS ---
+primaryButton: {
+width: '100%',
+padding: '18px',
+borderRadius: VARS.BORDER_RADIUS_SM,
+backgroundColor: VARS.COLOR_PRIMARY,
+color: 'white',
+border: 'none',
+fontSize: '1.1rem',
+fontWeight: 'bold',
+cursor: 'pointer',
+boxShadow: `0 6px 15px ${VARS.COLOR_PRIMARY}60`,
+transition: 'all 0.3s ease',
+marginTop: '30px',
+},
+secondaryButton: {
+width: '100%',
+padding: '15px',
+borderRadius: VARS.BORDER_RADIUS_SM,
+backgroundColor: VARS.COLOR_ACCENT,
+color: VARS.COLOR_TEXT_DARK,
+border: `1px solid ${VARS.COLOR_ACCENT}50`,
+fontSize: '1rem',
+fontWeight: '600',
+cursor: 'pointer',
+display: 'flex',
+alignItems: 'center',
+justifyContent: 'center',
+gap: '8px',
+boxShadow: VARS.SHADOW_ELEVATION_1,
+transition: 'all 0.3s ease',
+},
+
+// --- COMPONENT: HEADER BANNER ---
+headerBanner: {
+height: '120px',
+width: '100%',
+marginBottom: '20px',
+borderRadius: `0 0 ${VARS.BORDER_RADIUS_LG} ${VARS.BORDER_RADIUS_LG}`,
+overflow: 'hidden',
+boxShadow: VARS.SHADOW_ELEVATION_3,
+position: 'relative',
+marginTop: '0', // Attach directly to navbar
+},
 bannerTitle: {
-fontSize: '2rem',
+fontSize: '1.5rem',
 fontWeight: '900',
 color: '#ffffff',
-textShadow: '0 3px 8px rgba(0, 0, 0, 0.9)',
+textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
 lineHeight: '1.1',
 margin: '0',
 fontFamily: 'Cambria, serif',
 },
-    bannerSubtitle: {
-        fontSize: '1rem',
-        color: 'rgba(255, 255, 255, 0.95)',
-        fontWeight: '500',
-        marginTop: '8px',
-        textShadow: '0 1px 3px rgba(0, 0, 0, 0.8)',
-        margin: '0',
-    },
+bannerSubtitle: {
+fontSize: '0.9rem',
+color: 'rgba(255, 255, 255, 0.95)',
+fontWeight: '500',
+marginTop: '4px',
+textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)',
+margin: '0',
+},
+backgroundImage: (url) => ({
+backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%), url(${url || 'https://placehold.co/800x230/4a4a4a/ffffff?text=Add+Image+URL'})`,
+backgroundSize: 'cover',
+backgroundPosition: 'center',
+height: '100%',
+display: 'flex',
+flexDirection: 'column',
+justifyContent: 'center',
+alignItems: 'center',
+padding: '0 24px',
+textAlign: 'center',
+}),
 
-    // --- COMPONENT: SLOT SELECTION ---
-    slotContainer: {
-        display: 'flex',
-        gap: '10px', // Reduced gap
-        marginBottom: '30px', // Reduced margin
-        flexWrap: 'wrap',
-        justifyContent: 'space-between', // Use space-between for better small button layout
-    },
-    slotButton: (isSelected) => ({
-        // MADE BUTTONS MUCH SMALLER
-        flex: '1 1 48%',
-        minWidth: '100px',
-        padding: '10px 15px', // Reduced padding significantly
-        borderRadius: VARS.BORDER_RADIUS_SM,
-        border: isSelected ? 'none' : `1px solid #e0e0e0`,
-        cursor: 'pointer',
-        transition: 'all 0.3s ease',
-        textAlign: 'center',
-        backgroundColor: isSelected ? VARS.COLOR_PRIMARY : '#ffffff', // Dark Blue PRIMARY
-        color: isSelected ? '#ffffff' : VARS.COLOR_TEXT_DARK,
-        fontWeight: isSelected ? '700' : '600',
-        fontSize: '0.9rem', // Reduced font size
-        boxShadow: isSelected ? VARS.SHADOW_ELEVATION_2 : VARS.SHADOW_ELEVATION_1,
-        transform: isSelected ? 'scale(1.03)' : 'scale(1)',
-        display: 'flex',
-        flexDirection: 'column',
-    }),
-    smallText: (isSelected) => ({
-        fontSize: '0.75rem', // Reduced font size
-        color: isSelected ? 'rgba(255, 255, 255, 0.9)' : VARS.COLOR_TEXT_MUTED,
-        fontWeight: '500',
-        display: 'block',
-        marginTop: '5px',
-    }),
+// --- COMPONENT: SLOT SELECTION ---
+slotContainer: {
+display: 'flex',
+gap: '10px',
+marginBottom: '30px',
+flexWrap: 'wrap',
+justifyContent: 'space-between',
+},
+slotButton: (isSelected) => ({
+flex: '1 1 48%',
+minWidth: '100px',
+padding: '10px 15px',
+borderRadius: VARS.BORDER_RADIUS_SM,
+border: isSelected ? 'none' : `1px solid #e0e0e0`,
+cursor: 'pointer',
+transition: 'all 0.3s ease',
+textAlign: 'center',
+backgroundColor: isSelected ? VARS.COLOR_PRIMARY : '#ffffff',
+color: isSelected ? '#ffffff' : VARS.COLOR_TEXT_DARK,
+fontWeight: isSelected ? '700' : '600',
+fontSize: '0.9rem',
+boxShadow: isSelected ? VARS.SHADOW_ELEVATION_2 : VARS.SHADOW_ELEVATION_1,
+transform: isSelected ? 'scale(1.03)' : 'scale(1)',
+display: 'flex',
+flexDirection: 'column',
+}),
+smallText: (isSelected) => ({
+fontSize: '0.75rem',
+color: isSelected ? 'rgba(255, 255, 255, 0.9)' : VARS.COLOR_TEXT_MUTED,
+fontWeight: '500',
+display: 'block',
+marginTop: '5px',
+}),
 
-    // --- COMPONENT: ITEM SELECTION ---
-    itemHeader: {
-        fontSize: '1.2rem',
-        fontWeight: '800',
-        color: VARS.COLOR_TEXT_DARK,
-        marginBottom: '20px',
-        textAlign: 'left',
-    },
-    itemSelectionGrid: {
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '15px',
-        marginBottom: '30px', // Reduced margin
-    },
-    itemButton: {
-        // FIX: Removed redundant 'display: 'block'' that caused the warning.
-        width: '100%',
-        height: '150px', // Keep height consistent for now
-        padding: '0',
-        borderRadius: VARS.BORDER_RADIUS_SM,
-        border: 'none',
-        overflow: 'hidden',
-        position: 'relative',
-        cursor: 'pointer',
-        boxShadow: VARS.SHADOW_ELEVATION_1,
-        backgroundColor: '#ffffff', // Card background color
-        textAlign: 'left',
-        transition: 'transform 0.2s, box-shadow 0.2s',
-        display: 'flex', // Make button a flex container (KEEP THIS)
-        flexDirection: 'column', // Stack image and text
-        justifyContent: 'space-between', // Distribute space
-    },
+// --- COMPONENT: ITEM SELECTION ---
+itemHeader: {
+fontSize: '1.2rem',
+fontWeight: '800',
+color: VARS.COLOR_TEXT_DARK,
+marginBottom: '20px',
+textAlign: 'left',
+},
+itemSelectionGrid: {
+display: 'grid',
+gridTemplateColumns: '1fr 1fr',
+gap: '15px',
+marginBottom: '30px',
+},
+itemButton: {
+width: '100%',
+height: '150px',
+padding: '0',
+borderRadius: VARS.BORDER_RADIUS_SM,
+border: 'none',
+overflow: 'hidden',
+position: 'relative',
+cursor: 'pointer',
+boxShadow: VARS.SHADOW_ELEVATION_1,
+backgroundColor: '#ffffff',
+textAlign: 'left',
+transition: 'transform 0.2s, box-shadow 0.2s',
+display: 'flex',
+flexDirection: 'column',
+justifyContent: 'space-between',
+},
 imageContainer: (itemName, itemImages) => ({
 width: '100%',
-height: '100%', // Take up most of the card height
-// Removed linear gradient for a bright image
+height: '100%',
 backgroundImage: itemImages[itemName] ? `url(${itemImages[itemName]})` : 'none',
 backgroundSize: 'cover',
 backgroundPosition: 'center',
 backgroundRepeat: 'no-repeat',
-// Removed flex properties as text will be separate
-// Removed color and text-shadow as text is now outside this container
 }),
-    itemText: {
-        margin: '0',
-        display: 'block', // Ensure text is visible
-        padding: '10px 15px', // Padding for the text at the bottom
-        color: VARS.COLOR_TEXT_DARK, // Dark text color
-        fontWeight: '600', // Semibold
-        fontSize: '1.1rem', // Adjust font size
-    },
-
-    // --- COMPONENT: BREAK CARD ---
-    breakCard: {
-        marginTop: '40px', // Reduced margin
-        backgroundColor: '#FFFFFF',
-        borderRadius: VARS.BORDER_RADIUS_LG,
-        padding: '30px 25px',
-        boxShadow: VARS.SHADOW_ELEVATION_3,
-        textAlign: 'center',
-        margin: '40px 24px 0 24px', // Consolidated margin. Top margin is the one that's reduced
-        width: 'auto',
-        border: `1px solid #f0f0f0`,
-    },
-breakTitle: {
-fontSize: '1.6rem',
-fontWeight: '900',
-color: VARS.COLOR_PRIMARY, // Dark Blue PRIMARY
-marginBottom: '10px',
-fontFamily: 'Cambria, serif',
+itemText: {
+margin: '0',
+display: 'block',
+padding: '10px 15px',
+color: VARS.COLOR_TEXT_DARK,
+fontWeight: '600',
+fontSize: '1.1rem',
 },
-    breakSubtitle: {
-        fontSize: '0.9rem',
-        color: VARS.COLOR_TEXT_MUTED,
-        margin: '0 0 10px 0'
-    },
-    breakInspiration: {
-        fontSize: '1rem',
-        color: VARS.COLOR_TEXT_DARK,
-        fontWeight: '600',
-        marginTop: '10px',
-    },
+
+// --- COMPONENT: FOOTER ---
+footerCard: {
+marginTop: '40px',
+backgroundColor: '#FFFFFF',
+borderRadius: VARS.BORDER_RADIUS_LG,
+padding: '0',
+boxShadow: VARS.SHADOW_ELEVATION_3,
+textAlign: 'center',
+margin: '40px 24px 0 24px',
+width: 'auto',
+height: '120px', // Match header banner height
+border: `1px solid #f0f0f0`,
+display: 'flex',
+flexDirection: 'column',
+justifyContent: 'center',
+alignItems: 'center',
+position: 'relative',
+overflow: 'hidden',
+background: `linear-gradient(135deg, ${VARS.COLOR_PRIMARY}15 0%, ${VARS.COLOR_ACCENT}10 100%)`,
+},
+footerContent: {
+padding: '0 20px',
+zIndex: 1,
+},
+footerTitle: {
+fontSize: '1.4rem',
+fontWeight: '900',
+color: VARS.COLOR_PRIMARY,
+marginBottom: '8px',
+fontFamily: 'Cambria, serif',
+textShadow: '0 1px 2px rgba(0,0,0,0.1)',
+},
+footerSubtitle: {
+fontSize: '0.95rem',
+color: VARS.COLOR_TEXT_MUTED,
+margin: '0',
+fontWeight: '500',
+lineHeight: '1.4',
+},
+footerInspiration: {
+fontSize: '0.85rem',
+color: VARS.COLOR_TEXT_DARK,
+fontWeight: '600',
+marginTop: '6px',
+fontStyle: 'italic',
+},
 };
 
 // --- ITEM DATA ---
 const getItemButtons = () => {
-    try {
-        const saved = localStorage.getItem('adminMenuCategories');
-        if (saved) {
-            const categories = JSON.parse(saved);
-            return categories.map(cat => ({
-                name: cat.name.toLowerCase(),
-                icon: cat.icon === 'FaCoffee' ? FaCoffee :
-                      cat.icon === 'FaMugHot' ? FaMugHot :
-                      cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
-                      cat.icon === 'FaTint' ? FaTint :
-                      cat.icon === 'FaLemon' ? FaLemon :
-                      cat.icon === 'FaCube' ? FaCube :
-                      FaUtensilSpoon
-            }));
-        }
-    } catch {}
-    // Default
-    return [
-        { name: 'coffee', icon: FaCoffee },
-        { name: 'tea', icon: FaMugHot },
-        { name: 'water', icon: FaTint },
-    ];
+try {
+const saved = localStorage.getItem('adminMenuCategories');
+if (saved) {
+const categories = JSON.parse(saved);
+return categories.map(cat => ({
+name: cat.name.toLowerCase(),
+icon: cat.icon === 'FaCoffee' ? FaCoffee :
+cat.icon === 'FaMugHot' ? FaMugHot :
+cat.icon === 'FaGlassWhiskey' ? FaGlassWhiskey :
+cat.icon === 'FaTint' ? FaTint :
+cat.icon === 'FaLemon' ? FaLemon :
+cat.icon === 'FaCube' ? FaCube :
+FaUtensilSpoon
+}));
+}
+} catch {}
+// Default
+return [
+{ name: 'coffee', icon: FaCoffee },
+{ name: 'tea', icon: FaMugHot },
+{ name: 'water', icon: FaTint },
+];
 };
 
 
 // -----------------
 
 const timeSlots = [
-    // Added description for the small text
+// Added description for the small text
 { title: 'Morning', slot: 'morning (9:00-12:00)'},
 { title: 'Evening', slot: 'evening (1:00 - 5:30)'},
 ];
@@ -334,81 +345,81 @@ const primaryMessage = `${greeting} Ready to order?`;
 
 const currentSlotTitle = timeSlots.find(s => s.slot === currentOrder.slot)?.title || 'Your Slot';
 
-    useEffect(() => {
-        // Helper function to get icon component
-        const getIconForCategory = (iconName) => {
-            const iconMap = {
-                'FaCoffee': FaCoffee,
-                'FaMugHot': FaMugHot,
-                'FaGlassWhiskey': FaGlassWhiskey,
-                'FaTint': FaTint,
-                'FaLemon': FaLemon,
-                'FaCube': FaCube,
-                'FaUtensilSpoon': FaUtensilSpoon
-            };
-            return iconMap[iconName] || FaUtensilSpoon;
-        };
+useEffect(() => {
+// Helper function to get icon component
+const getIconForCategory = (iconName) => {
+const iconMap = {
+'FaCoffee': FaCoffee,
+'FaMugHot': FaMugHot,
+'FaGlassWhiskey': FaGlassWhiskey,
+'FaTint': FaTint,
+'FaLemon': FaLemon,
+'FaCube': FaCube,
+'FaUtensilSpoon': FaUtensilSpoon
+};
+return iconMap[iconName] || FaUtensilSpoon;
+};
 
-        // Load cached menu immediately for instant display
-        const loadCachedMenu = () => {
-            const cachedMenu = localStorage.getItem('cachedMenu');
-            if (cachedMenu) {
-                try {
-                    const menu = JSON.parse(cachedMenu);
-                    if (menu && menu.categories) {
-                        const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
-                        const buttons = filteredCategories.map(cat => ({
-                            name: cat.name.toLowerCase(),
-                            icon: getIconForCategory(cat.icon),
-                            items: cat.items || []
-                        }));
-                        setItemButtons(buttons);
-                        setItemImages(menu.itemImages || {});
-                        return true;
-                    }
-                } catch (e) {
-                    console.warn('Failed to parse cached menu:', e);
-                }
-            }
-            return false;
-        };
+// Load cached menu immediately for instant display
+const loadCachedMenu = () => {
+const cachedMenu = localStorage.getItem('cachedMenu');
+if (cachedMenu) {
+try {
+const menu = JSON.parse(cachedMenu);
+if (menu && menu.categories) {
+const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
+const buttons = filteredCategories.map(cat => ({
+name: cat.name.toLowerCase(),
+icon: getIconForCategory(cat.icon),
+items: cat.items || []
+}));
+setItemButtons(buttons);
+setItemImages(menu.itemImages || {});
+return true;
+}
+} catch (e) {
+console.warn('Failed to parse cached menu:', e);
+}
+}
+return false;
+};
 
-        // Set default menu immediately
-        if (!loadCachedMenu()) {
-            setItemButtons([
-                { name: 'coffee', icon: FaCoffee },
-                { name: 'tea', icon: FaMugHot },
-                { name: 'water', icon: FaTint },
-            ]);
-            setItemImages({
-                tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
-                coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
-                water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
-            });
-        }
+// Set default menu immediately
+if (!loadCachedMenu()) {
+setItemButtons([
+{ name: 'coffee', icon: FaCoffee },
+{ name: 'tea', icon: FaMugHot },
+{ name: 'water', icon: FaTint },
+]);
+setItemImages({
+tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',
+coffee: 'https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg',
+water: 'https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg',
+});
+}
 
-        // Fetch fresh menu data in background (no loading state)
-        const fetchMenuInBackground = async () => {
-            try {
-                const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, true);
-                if (menu && menu.categories) {
-                    localStorage.setItem('cachedMenu', JSON.stringify(menu));
-                    const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
-                    const buttons = filteredCategories.map(cat => ({
-                        name: cat.name.toLowerCase(),
-                        icon: getIconForCategory(cat.icon),
-                        items: cat.items || []
-                    }));
-                    setItemButtons(buttons);
-                    setItemImages(menu.itemImages || {});
-                }
-            } catch (error) {
-                console.warn('Background menu fetch failed:', error);
-            }
-        };
+// Fetch fresh menu data in background (no loading state)
+const fetchMenuInBackground = async () => {
+try {
+const menu = await callApi(`/menu?userId=${user.id}&userRole=${user.role}`, 'GET', null, true);
+if (menu && menu.categories) {
+localStorage.setItem('cachedMenu', JSON.stringify(menu));
+const filteredCategories = menu.categories.filter(cat => cat.name.toLowerCase() !== 'milk');
+const buttons = filteredCategories.map(cat => ({
+name: cat.name.toLowerCase(),
+icon: getIconForCategory(cat.icon),
+items: cat.items || []
+}));
+setItemButtons(buttons);
+setItemImages(menu.itemImages || {});
+}
+} catch (error) {
+console.warn('Background menu fetch failed:', error);
+}
+};
 
-        fetchMenuInBackground();
-    }, [user]);
+fetchMenuInBackground();
+}, [user]);
 
 
 
@@ -445,40 +456,42 @@ setCurrentOrder(prev => ({ ...prev, slot }));
 
 {/* Item Selection Grid (Rendered only when a slot is selected) */}
 {currentOrder.slot && (
-    <>
-        <h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
-        <div style={STYLES_THEME.itemSelectionGrid}>
-            {itemButtons.filter(item => {
-                const hasAvailableItems = (item.items || []).some(it => typeof it === 'string' || it.available !== false);
-                return hasAvailableItems; // Only show categories with available items
-            }).map(item => (
-                <button
-                    key={item.name}
-                    style={STYLES_THEME.itemButton}
-                    onClick={() => setPage(`item-config-${item.name}`)}
-                >
-                    <div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
-                        &nbsp; {/* Ensure div has content for background to show */}
-                    </div>
-                    <p style={STYLES_THEME.itemText}>
-                        {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
-                    </p>
-                </button>
-            ))}
-        </div>
-    </>
+<>
+<h3 style={STYLES_THEME.itemHeader}>Select Items for {currentSlotTitle} 🍲</h3>
+<div style={STYLES_THEME.itemSelectionGrid}>
+{itemButtons.filter(item => {
+const hasAvailableItems = (item.items || []).some(it => typeof it === 'string' || it.available !== false);
+return hasAvailableItems; // Only show categories with available items
+}).map(item => (
+<button
+key={item.name}
+style={STYLES_THEME.itemButton}
+onClick={() => setPage(`item-config-${item.name}`)}
+>
+<div style={STYLES_THEME.imageContainer(item.name, itemImages)}>
+&nbsp; {/* Ensure div has content for background to show */}
+</div>
+<p style={STYLES_THEME.itemText}>
+{item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+</p>
+</button>
+))}
+</div>
+</>
 )}
 </div>
 
-{/* Break Card */}
-<div style={STYLES_THEME.breakCard}>
-<h3 style={STYLES_THEME.breakTitle}>☕ Time for a break ☕</h3>
-<p style={STYLES_THEME.breakSubtitle}>
--Crafted with 💖 in Maven jobs, Panipat-
+{/* Footer */}
+<div style={STYLES_THEME.footerCard}>
+<div style={STYLES_THEME.footerContent}>
+<h3 style={STYLES_THEME.footerTitle}>☕ Take a Moment ☕</h3>
+<p style={STYLES_THEME.footerSubtitle}>
+Crafted with 💖 at Maven Jobs, Panipat
 </p>
-<p style={STYLES_THEME.breakInspiration}>
-The next slot is available for you to plan your perfect pause.
+<p style={STYLES_THEME.footerInspiration}>
+Perfect moments deserve perfect pauses
 </p>
+</div>
 </div>
 </div>
 </div>

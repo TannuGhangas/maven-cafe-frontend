@@ -8,6 +8,9 @@ import { USER_LOCATIONS_DATA } from './config/constants';
 import NavBar from './components/common/NavBar';
 import ProfileModal from './components/common/ProfileModal';
 import LoginPage from './components/common/AuthPage';
+import CallChefButton from './components/common/CallChefButton';
+import ErrorBoundary from './components/common/ErrorBoundary';
+import ReactCompatibilityCheck from './components/common/ReactCompatibilityCheck';
 
 // User Screens
 import UserHomePage from './components/user/UserHomePage';
@@ -120,7 +123,11 @@ function App() {
     if (page === 'orders-list') return <UserOrdersListPage setPage={setPage} user={user} callApi={callApi} styles={styles} />;
 
     // KITCHEN
-    if (page === 'kitchen-dashboard') return <KitchenDashboard user={user} callApi={callApi} setPage={setPage} styles={styles} kitchenView={kitchenView} setKitchenView={setKitchenView} />;
+    if (page === 'kitchen-dashboard') return (
+      <ErrorBoundary kitchenMode={true}>
+        <KitchenDashboard user={user} callApi={callApi} setPage={setPage} styles={styles} kitchenView={kitchenView} setKitchenView={setKitchenView} />
+      </ErrorBoundary>
+    );
 
     // ADMIN DASHBOARD
     if (page === 'admin-dashboard') return user.role === 'admin' ? <AdminDashboard user={user} setPage={setPage} styles={styles} callApi={callApi} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
@@ -138,6 +145,9 @@ function App() {
   // ------------------------------
   return (
     <div style={styles.appContainer}>
+      {/* React compatibility check for debugging hook issues */}
+      <ReactCompatibilityCheck />
+      
       {isLoggedIn && (
         <NavBar
           user={user}
@@ -167,6 +177,11 @@ function App() {
           callApi={callApi}
           styles={styles}
         />
+      )}
+
+      {/* Call Chef Button - Only for users */}
+      {user.role === 'user' && (
+        <CallChefButton user={user} />
       )}
     </div>
   );

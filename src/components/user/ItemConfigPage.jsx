@@ -4,9 +4,9 @@ import { callApi } from '../../api/apiService';
 // Import the centralized theme styles and external constants
 import { STYLES_THEME } from './UserHomePage';
 import {
-TABLE_NUMBERS,
-// 🔑 UPDATED IMPORTS: Removed LOCATIONS and added necessary location logic
-getAllowedLocations, USER_LOCATIONS_DATA
+    TABLE_NUMBERS,
+    // 🔑 UPDATED IMPORTS: Removed LOCATIONS and added necessary location logic
+    getAllowedLocations, USER_LOCATIONS_DATA
 } from '../../config/constants';
 
 // --- Configuration Image URL ---
@@ -16,58 +16,58 @@ const HEADER_IMAGE_URL = 'https://png.pngtree.com/thumb_back/fh260/background/20
 // --- NEW/OVERRIDDEN STYLES FOR THEME ENHANCEMENT ---
 // NOTE: Assuming STYLES_THEME imports base styles. We override/add necessary custom styles here.
 const THEME_COLORS = {
-    PRIMARY: '#103c7f', // Dark Blue
-    ACCENT: '#a1db40', // Green
-    TEXT_DARK: '#2c3e50', // Darker text for readability
-    TEXT_MUTED: '#7f8c8d', // Muted text
-    BACKGROUND_LIGHT: '#f9f9f9', // Light background for contrast
-    BORDER_LIGHT: '#e0e0e0', // Light border
+    PRIMARY: '#103c7f', // Dark Blue
+    ACCENT: '#a1db40', // Green
+    TEXT_DARK: '#2c3e50', // Darker text for readability
+    TEXT_MUTED: '#7f8c8d', // Muted text
+    BACKGROUND_LIGHT: '#f9f9f9', // Light background for contrast
+    BORDER_LIGHT: '#e0e0e0', // Light border
 };
 
 const ENHANCED_STYLES = {
-    ...STYLES_THEME, // Keep original base styles (e.g., BORDER_RADIUS_LG)
+    ...STYLES_THEME, // Keep original base styles (e.g., BORDER_RADIUS_LG)
     // ADDED PILL-LIKE BORDER RADIUS FOR BUTTONS
     BORDER_RADIUS_PILL: '25px',
 
-    // Override or add key visual styles
-    COLOR_PRIMARY: THEME_COLORS.PRIMARY,
-    COLOR_ACCENT: THEME_COLORS.ACCENT,
-    COLOR_TEXT_DARK: THEME_COLORS.TEXT_DARK,
-    COLOR_TEXT_MUTED: THEME_COLORS.TEXT_MUTED,
-    
-    // Consistent Box Shadow
-    SHADOW_ELEVATION_1: '0 1px 3px rgba(0, 0, 0, 0.1)',
-    SHADOW_ELEVATION_2: '0 4px 8px rgba(0, 0, 0, 0.15)',
-    SHADOW_ELEVATION_3: '0 8px 16px rgba(0, 0, 0, 0.2)',
+    // Override or add key visual styles
+    COLOR_PRIMARY: THEME_COLORS.PRIMARY,
+    COLOR_ACCENT: THEME_COLORS.ACCENT,
+    COLOR_TEXT_DARK: THEME_COLORS.TEXT_DARK,
+    COLOR_TEXT_MUTED: THEME_COLORS.TEXT_MUTED,
+    
+    // Consistent Box Shadow
+    SHADOW_ELEVATION_1: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    SHADOW_ELEVATION_2: '0 4px 8px rgba(0, 0, 0, 0.15)',
+    SHADOW_ELEVATION_3: '0 8px 16px rgba(0, 0, 0, 0.2)',
 
-    // Enhanced Header/Label
-    headerText: {
-        fontSize: '1.6rem',
-        fontWeight: '700',
-        color: THEME_COLORS.PRIMARY,
-        margin: '0 0 10px 0',
-    },
-    label: {
-        fontSize: '1rem',
-        fontWeight: '600',
-        color: THEME_COLORS.TEXT_DARK,
-        display: 'block',
-        marginBottom: '8px',
-        marginTop: '20px',
-    },
+    // Enhanced Header/Label
+    headerText: {
+        fontSize: '1.6rem',
+        fontWeight: '700',
+        color: THEME_COLORS.PRIMARY,
+        margin: '0 0 10px 0',
+    },
+    label: {
+        fontSize: '1rem',
+        fontWeight: '600',
+        color: THEME_COLORS.TEXT_DARK,
+        display: 'block',
+        marginBottom: '8px',
+        marginTop: '20px',
+    },
 
-    // Enhanced Input/Select
-    inputField: {
-        padding: '12px 15px',
-        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
-        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
-        width: '100%',
-        boxSizing: 'border-box',
-        fontSize: '1rem',
-        color: THEME_COLORS.TEXT_DARK,
-        transition: 'border-color 0.2s',
-        marginBottom: '15px',
-    },
+    // Enhanced Input/Select
+    inputField: {
+        padding: '12px 15px',
+        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        width: '100%',
+        boxSizing: 'border-box',
+        fontSize: '1rem',
+        color: THEME_COLORS.TEXT_DARK,
+        transition: 'border-color 0.2s',
+        marginBottom: '15px',
+    },
 selectField: {
 padding: '12px 15px',
 border: `2px solid ${THEME_COLORS.BORDER_LIGHT}`,
@@ -89,87 +89,88 @@ backgroundSize: '16px',
 paddingRight: '45px', // Make room for the custom arrow
 },
 
-    // Enhanced Primary Button (Save/Update)
-    primaryButton: {
-        padding: '15px 25px',
-        backgroundColor: THEME_COLORS.PRIMARY,
-        color: '#ffffff',
-        border: 'none',
-        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
-        fontSize: '1.1rem',
-        fontWeight: '700',
-        cursor: 'pointer',
-        width: '100%',
-        boxShadow: THEME_COLORS.SHADOW_ELEVATION_2,
-        transition: 'background-color 0.2s ease, transform 0.1s ease',
-        marginTop: '20px',
-    },
+    // Enhanced Primary Button (Save/Update)
+    primaryButton: {
+        padding: '15px 25px',
+        backgroundColor: THEME_COLORS.PRIMARY,
+        color: '#ffffff',
+        border: 'none',
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        fontSize: '1.1rem',
+        fontWeight: '700',
+        cursor: 'pointer',
+        width: '100%',
+        boxShadow: THEME_COLORS.SHADOW_ELEVATION_2,
+        transition: 'background-color 0.2s ease, transform 0.1s ease',
+        marginTop: '20px',
+    },
 
-    // Enhanced Secondary Button (Back)
-    secondaryButton: {
-        padding: '12px 25px',
-        backgroundColor: 'transparent',
-        color: THEME_COLORS.TEXT_MUTED,
-        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
-        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
-        fontSize: '1rem',
-        fontWeight: '600',
-        cursor: 'pointer',
-        width: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: '8px', // Added gap for spacing between icon and text
-        transition: 'color 0.2s, border-color 0.2s',
-        whiteSpace: 'nowrap', // Prevents wrapping the text/icon if possible
-    },
+    // Enhanced Secondary Button (Back)
+    secondaryButton: {
+        padding: '12px 25px',
+        backgroundColor: 'transparent',
+        color: THEME_COLORS.TEXT_MUTED,
+        border: `1px solid ${THEME_COLORS.BORDER_LIGHT}`,
+        borderRadius: STYLES_THEME.BORDER_RADIUS_SM,
+        fontSize: '1rem',
+        fontWeight: '600',
+        cursor: 'pointer',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '8px', // Added gap for spacing between icon and text
+        transition: 'color 0.2s, border-color 0.2s',
+        whiteSpace: 'nowrap', // Prevents wrapping the text/icon if possible
+    },
 };
 // ---------------------------------
 
 // Helper component for the image banner
 const ImageBanner = ({ itemType, imageUrl }) => {
-    const title = `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Configuration`;
-    // Use the enhanced styles
-    const styles = ENHANCED_STYLES;
-    
-    const bannerStyle = {
-        height: '200px',
-        width: '100%',
-        marginBottom: '30px',
-        borderRadius: `0 0 ${styles.BORDER_RADIUS_LG} ${styles.BORDER_RADIUS_LG}`,
-        overflow: 'hidden',
-        boxShadow: styles.SHADOW_ELEVATION_3,
-        position: 'relative',
-    };
+    const title = `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} Configuration`;
+    // Use the enhanced styles
+    const styles = ENHANCED_STYLES;
+    
+    const bannerStyle = {
+        height: '120px',
+        width: '100%',
+        marginBottom: '20px',
+        borderRadius: `0 0 ${styles.BORDER_RADIUS_LG} ${styles.BORDER_RADIUS_LG}`,
+        overflow: 'hidden',
+        boxShadow: styles.SHADOW_ELEVATION_3,
+        position: 'relative',
+        marginTop: '0', // Attach directly to navbar
+    };
 
-    const imageStyle = {
-        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url(${imageUrl})`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        height: '100%',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        padding: '0 24px',
-        textAlign: 'center',
+    const imageStyle = {
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url(${imageUrl})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '100%',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '0 24px',
+        textAlign: 'center',
         display: 'flex', // Ensure display is set
-    };
+    };
 
-    const textStyle = {
-        fontSize: '2rem',
-        fontWeight: '900',
-        color: '#ffffff',
-        textShadow: '0 3px 8px rgba(0, 0, 0, 0.9)',
-        margin: 0,
-    };
+    const textStyle = {
+        fontSize: '1.5rem',
+        fontWeight: '900',
+        color: '#ffffff',
+        textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
+        margin: 0,
+    };
 
-    return (
-        <div style={bannerStyle}>
-            <div style={imageStyle}>
-                <h1 style={textStyle}>{title}</h1>
-            </div>
-        </div>
-    );
+    return (
+        <div style={bannerStyle}>
+            <div style={imageStyle}>
+                <h1 style={textStyle}>{title}</h1>
+            </div>
+        </div>
+    );
 };
 
 // Helper function to get menu types from menu object
@@ -189,16 +190,16 @@ const getMenuTypes = (itemType, user, menu) => {
     } else {
         // Default fallbacks
         const defaults = {
-            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }],
+            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Cold", available: true }],
             tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
             water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
         };
         items = defaults[itemType] || [];
     }
 
-    // Filter out "Simple" and "Cold" for coffee
+    // Filter out "Simple" for coffee only
     if (itemType === 'coffee') {
-        items = items.filter(item => item.name !== 'Simple' && item.name !== 'Cold');
+        items = items.filter(item => item.name !== 'Simple');
     }
 
     return items;
@@ -233,7 +234,20 @@ useEffect(() => {
                 const menu = JSON.parse(cachedMenu);
                 const options = getMenuTypes(itemType, user, menu);
                 setTypeOptions(options);
-                setAddOns(menu.addOns || []);
+                
+                // Ensure Salt is always included in add-ons for water
+                const cachedAddOns = menu.addOns || [];
+                const saltAddOn = { name: "Salt", available: true };
+                const gingerAddOn = { name: "Ginger", available: true };
+                
+                // Merge add-ons, ensuring Salt is present
+                const mergedAddOns = [
+                    ...cachedAddOns,
+                    ...(cachedAddOns.find(a => a.name === 'Salt') ? [] : [saltAddOn]),
+                    ...(cachedAddOns.find(a => a.name === 'Ginger') ? [] : [gingerAddOn])
+                ];
+                
+                setAddOns(mergedAddOns);
                 setSugarLevels(menu.sugarLevels || []);
                 return true;
             } catch (e) {
@@ -245,12 +259,12 @@ useEffect(() => {
 
     // Set default data immediately
     if (!loadCachedMenu()) {
-        setAddOns([{ name: "Ginger", available: true }]);
+        setAddOns([{ name: "Ginger", available: true }, { name: "Salt", available: true }]);
         setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
         
         // Set default types
         const defaults = {
-            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }],
+            coffee: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Cold", available: true }],
             tea: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }],
             water: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }],
         };
@@ -264,7 +278,20 @@ useEffect(() => {
             if (menu) {
                 const options = getMenuTypes(itemType, user, menu);
                 setTypeOptions(options);
-                setAddOns(menu.addOns || []);
+                
+                // Ensure Salt is always included in add-ons for water
+                const serverAddOns = menu.addOns || [];
+                const saltAddOn = { name: "Salt", available: true };
+                const gingerAddOn = { name: "Ginger", available: true };
+                
+                // Merge add-ons, ensuring Salt is present
+                const mergedAddOns = [
+                    ...serverAddOns,
+                    ...(serverAddOns.find(a => a.name === 'Salt') ? [] : [saltAddOn]),
+                    ...(serverAddOns.find(a => a.name === 'Ginger') ? [] : [gingerAddOn])
+                ];
+                
+                setAddOns(mergedAddOns);
                 setSugarLevels(menu.sugarLevels || []);
             }
         } catch (error) {
@@ -287,9 +314,9 @@ const defaultLocationKey = allowedLocations[0]?.key || user.location || 'Others'
 // **CORE LOGIC**: Set default type to the first available type, or item name if no sub-types exist.
 const defaultType = typeOptions.length > 0 ? (typeOptions.find(t => t.available !== false)?.name || typeOptions[0].name) : itemType;
 
-    // State for managing custom sugar input
-    const [customSugar, setCustomSugar] = useState(''); 
-    
+    // State for managing custom sugar input
+    const [customSugar, setCustomSugar] = useState(''); 
+    
 const [itemConfig, setItemConfig] = useState(
 isEditMode ? currentOrder.items[itemIndex] :
 {
@@ -331,42 +358,42 @@ useEffect(() => {
         setItemConfig(prev => ({ ...prev, location: defaultLocationKey }));
     }
 }, [isEditMode, itemType, typeOptions, defaultLocationKey]);
-    
-    // Handler for toggling Type/Add-Ons/Sugar Level
-    const handleToggle = (key, value) => {
-        if (key === 'selectedAddOns') {
-            setItemConfig(prev => {
-                const isSelected = prev.selectedAddOns.includes(value);
-                return {
-                    ...prev,
-                    selectedAddOns: isSelected
-                        ? prev.selectedAddOns.filter(a => a !== value)
-                        : [...prev.selectedAddOns, value]
-                };
-            });
-        } else {
-            setItemConfig(prev => ({ ...prev, [key]: value }));
-        }
-    };
+    
+    // Handler for toggling Type/Add-Ons/Sugar Level
+    const handleToggle = (key, value) => {
+        if (key === 'selectedAddOns') {
+            setItemConfig(prev => {
+                const isSelected = prev.selectedAddOns.includes(value);
+                return {
+                    ...prev,
+                    selectedAddOns: isSelected
+                        ? prev.selectedAddOns.filter(a => a !== value)
+                        : [...prev.selectedAddOns, value]
+                };
+            });
+        } else {
+            setItemConfig(prev => ({ ...prev, [key]: value }));
+        }
+    };
 
-    // Handler for selecting standard sugar level
-    const handleSugarSelect = (level) => {
-        setItemConfig(prev => ({ ...prev, sugarLevel: level }));
-        setCustomSugar('');
-    };
+    // Handler for selecting standard sugar level
+    const handleSugarSelect = (level) => {
+        setItemConfig(prev => ({ ...prev, sugarLevel: level }));
+        setCustomSugar('');
+    };
 
-    // Handler for custom sugar input change
-    const handleCustomSugarChange = (value) => {
-        setCustomSugar(value);
-        const parsedValue = parseFloat(value);
-        if (!isNaN(parsedValue)) {
-            setItemConfig(prev => ({ ...prev, sugarLevel: parsedValue }));
-        } else {
-            if (value === '') {
-                 setItemConfig(prev => ({ ...prev, sugarLevel: 0 }));
-            }
-        }
-    };
+    // Handler for custom sugar input change
+    const handleCustomSugarChange = (value) => {
+        setCustomSugar(value);
+        const parsedValue = parseFloat(value);
+        if (!isNaN(parsedValue)) {
+            setItemConfig(prev => ({ ...prev, sugarLevel: parsedValue }));
+        } else {
+            if (value === '') {
+                 setItemConfig(prev => ({ ...prev, sugarLevel: 0 }));
+            }
+        }
+    };
 
 // Handler for quantity change
 const handleQuantityChange = (delta) => {
@@ -396,21 +423,21 @@ const handleSave = () => {
     }
 
 
-        if (isEditMode) {
-            const newItems = [...currentOrder.items];
-            newItems[itemIndex] = itemConfig;
-            setCurrentOrder(prev => ({ ...prev, items: newItems }));
-        } else {
-            setCurrentOrder(prev => ({ ...prev, items: [...prev.items, itemConfig] }));
-        }
+        if (isEditMode) {
+            const newItems = [...currentOrder.items];
+            newItems[itemIndex] = itemConfig;
+            setCurrentOrder(prev => ({ ...prev, items: newItems }));
+        } else {
+            setCurrentOrder(prev => ({ ...prev, items: [...prev.items, itemConfig] }));
+        }
 
-        // Go directly to the Order Confirmation Page
-        setPage('order-confirmation');
-    };
+        // Go directly to the Order Confirmation Page
+        setPage('order-confirmation');
+    };
 
-    const contentPaddingStyle = {
-        padding: '0 24px',
-    };
+    const contentPaddingStyle = {
+        padding: '0 24px',
+    };
 
 // Style for all button options (Type, Sugar, Add-ons)
 const buttonStyle = (isSelected, isAccent = true) => ({
@@ -434,29 +461,29 @@ textAlign: 'center',
 whiteSpace: 'nowrap',
 minWidth: '60px', // Smaller minimum width
 });
-    
-    // Style for sugar custom input
-    const customSugarInputStyle = {
-        ...styles.inputField,
-        flexGrow: 1,
-        width: 'auto',
-        textAlign: 'center',
-        padding: '10px',
-        fontWeight: '600',
+    
+    // Style for sugar custom input
+    const customSugarInputStyle = {
+        ...styles.inputField,
+        flexGrow: 1,
+        width: 'auto',
+        textAlign: 'center',
+        padding: '10px',
+        fontWeight: '600',
 borderColor: (customSugar && !sugarLevels.some(s => s.level === itemConfig.sugarLevel)) ? styles.COLOR_PRIMARY : styles.BORDER_LIGHT,
-        marginBottom: 0, // Adjusted for layout in the flex container
-        boxShadow: styles.SHADOW_ELEVATION_1,
-    };
+        marginBottom: 0, // Adjusted for layout in the flex container
+        boxShadow: styles.SHADOW_ELEVATION_1,
+    };
 
-    // Style for Quantity control
-    const quantityControlStyle = {
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-start', // Align to left for better flow
-        marginBottom: '30px',
-        width: '100%',
-        maxWidth: '250px', 
-    };
+    // Style for Quantity control
+    const quantityControlStyle = {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start', // Align to left for better flow
+        marginBottom: '30px',
+        width: '100%',
+        maxWidth: '250px', 
+    };
 
 const quantityButtonStyle = {
 // Smaller buttons for quantity control
@@ -505,14 +532,14 @@ return (
 <div style={styles.centeredContainer}>
 <div style={{ ...styles.screenPadding, padding: '0' }}>
 
-                {/* --- HEADER IMAGE BANNER --- */}
-                <ImageBanner
-                    itemType={itemType}
-                    imageUrl={HEADER_IMAGE_URL}
-                />
+                {/* --- HEADER IMAGE BANNER --- */}
+                <ImageBanner
+                    itemType={itemType}
+                    imageUrl={HEADER_IMAGE_URL}
+                />
 
-                <div style={contentPaddingStyle}>
-                    {/* Main Content Area */}
+                <div style={contentPaddingStyle}>
+                    {/* Main Content Area */}
 <h3 style={{ ...styles.headerText, color: styles.COLOR_PRIMARY }}>
     {isEditMode ? 'Edit' : 'Configure'} Your {itemType.charAt(0).toUpperCase() + itemType.slice(1)}
 </h3>
@@ -546,7 +573,7 @@ return (
     </>
 )}
 
-{/* SUGAR LEVEL (BUTTONS + CUSTOM INPUT) */}
+
 {(itemType === 'coffee' || itemType === 'tea') && (
     <>
         <label style={styles.label}>🍬 Sugar Level (Spoons):</label>
@@ -563,13 +590,23 @@ onClick={() => handleSugarSelect(s.level)}
 </button>
 ))}
 </div>
-                        </>
-                    )}
+                        </>
+                    )}
 
-{/* Add-Ons (BUTTONS) - For Coffee and Tea */}
+
 {(() => {
-    const filteredAddOns = addOns.filter(addOn => (addOn.available || addOn.enabled) && !(itemType === 'coffee' && addOn.name === 'Ginger'));
-    return (itemType === 'coffee' || itemType === 'tea') && filteredAddOns.length > 0 && (
+    const filteredAddOns = addOns.filter(addOn => {
+        if (!addOn.available && !addOn.enabled) return false;
+        
+        // Ginger only for coffee and tea (not water)
+        if (addOn.name === 'Ginger' && itemType === 'water') return false;
+        
+        // Salt only for water (not tea)
+        if (addOn.name === 'Salt' && itemType === 'tea') return false;
+        
+        return true;
+    });
+    return (itemType === 'tea' || itemType === 'water') && filteredAddOns.length > 0 && (
 <>
 <label style={styles.label}>🌿 Spice Add-Ons (Select Multiple):</label>
 <div style={{
@@ -604,28 +641,28 @@ disabled={!(addOn.available || addOn.enabled)}
 );
 })()}
 
-{/* QUANTITY CONTROL (- 1 +) */}
-<label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
-                    <div style={quantityControlStyle}>
-                        <button 
-                            style={quantityButtonStyle} 
-                            onClick={() => handleQuantityChange(-1)} 
-                            disabled={itemConfig.quantity <= 1} 
-                        >
-                            <FaMinus />
-                        </button>
-                        <div style={quantityDisplay}>
-                            {itemConfig.quantity}
-                        </div>
-                        <button 
-                            style={quantityButtonStyle} 
-                            onClick={() => handleQuantityChange(1)}
-                        >
-                            <FaPlus />
-                        </button>
-                    </div>
 
-{/* LOCATION SELECTION */}
+<label style={styles.label}>🔢 Quantity (Cups/Glasses):</label>
+                    <div style={quantityControlStyle}>
+                        <button 
+                            style={quantityButtonStyle} 
+                            onClick={() => handleQuantityChange(-1)} 
+                            disabled={itemConfig.quantity <= 1} 
+                        >
+                            <FaMinus />
+                        </button>
+                        <div style={quantityDisplay}>
+                            {itemConfig.quantity}
+                        </div>
+                        <button 
+                            style={quantityButtonStyle} 
+                            onClick={() => handleQuantityChange(1)}
+                        >
+                            <FaPlus />
+                        </button>
+                    </div>
+
+
 <label style={styles.label}>📍 Delivery Location:</label>
 {allowedLocations.length > 1 ? (
     <select
@@ -650,29 +687,29 @@ disabled={!(addOn.available || addOn.enabled)}
     </div>
 )}
 
-                    {/* Notes */}
-                    <label style={styles.label}>📝 Notes / Preferences:</label>
-                    <textarea
-                        style={{ ...styles.inputField, height: '80px', marginBottom: '30px' }}
-                        value={itemConfig.notes}
-                        onChange={e => setItemConfig({...itemConfig, notes: e.target.value})}
-                        placeholder="E.g., Extra hot, light milk"
-                    />
+                    {/* Notes */}
+                    <label style={styles.label}>📝 Notes / Preferences:</label>
+                    <textarea
+                        style={{ ...styles.inputField, height: '80px', marginBottom: '30px' }}
+                        value={itemConfig.notes}
+                        onChange={e => setItemConfig({...itemConfig, notes: e.target.value})}
+                        placeholder="E.g., Extra hot, light milk"
+                    />
 
-                    <button style={styles.primaryButton} onClick={handleSave}>
-                        {isEditMode ? 'Update Item' : 'Add Item'}
-                    </button>
+                    <button style={styles.primaryButton} onClick={handleSave}>
+                        {isEditMode ? 'Update Item' : 'Add Item'}
+                    </button>
 
-                    <button
-                        style={{ ...styles.secondaryButton, marginTop: '15px', marginBottom: '30px' }} 
-                        onClick={() => setPage('home')}
-                    >
-                        <FaChevronLeft /> Back to Slot Selection
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
+                    <button
+                        style={{ ...styles.secondaryButton, marginTop: '15px', marginBottom: '30px' }} 
+                        onClick={() => setPage('home')}
+                    >
+                        <FaChevronLeft /> Back to Slot Selection
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default ItemConfigPage;

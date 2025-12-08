@@ -230,7 +230,7 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
                     { name: 'Tea', icon: 'FaMugHot', items: [{ name: "Black", available: true }, { name: "Milk", available: true }, { name: "Green", available: true }], color: '#228B22', enabled: true },
                     { name: 'Water', icon: 'FaTint', items: [{ name: "Warm", available: true }, { name: "Cold", available: true }, { name: "Hot", available: true }, { name: "Lemon", available: true }], color: '#87CEEB', enabled: true },
                 ]);
-                setAddOns([{ name: "Ginger", available: true }]);
+                setAddOns([{ name: "Ginger", available: true }, { name: "Salt", available: true }]);
                 setSugarLevels([{ level: 0, available: true }, { level: 1, available: true }, { level: 2, available: true }, { level: 3, available: true }]);
                 setItemImages({
                     tea: 'https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg',

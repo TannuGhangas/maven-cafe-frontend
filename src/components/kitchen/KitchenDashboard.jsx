@@ -1,25 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import KitchenHeader from './KitchenHeader';
 import SlotSelector from './SlotSelector';
 import StatusSelector from './StatusSelector';
 import OrderCard from './OrderCard';
 import Notification from './Notification';
+import ChefCallNotification from './ChefCallNotification';
+import { initSocket, getSocket } from '../../api/socketService';
 import { FaCheckCircle, FaChevronDown, FaChevronUp, FaMapMarkerAlt, FaClock, FaStickyNote, FaUtensilSpoon } from "react-icons/fa";
-
-// 🔥 UPDATED PATH: Use the public folder path for the audio file
-const NOTIFICATION_SOUND_URL = "/sound/beeep.mp3";
-const audio = typeof Audio !== 'undefined' ? new Audio(NOTIFICATION_SOUND_URL) : null;
-if (audio) {
-    audio.volume = 1.0; // Set volume a bit lower
-}
 
 const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitchenView }) => {
     const [orders, setOrders] = useState([]);
     const [showNotification, setShowNotification] = useState(false);
     const [notificationAcknowledged, setNotificationAcknowledged] = useState(true);
+    const [chefCall, setChefCall] = useState(null);
+    const [notificationOrderData, setNotificationOrderData] = useState(null);
     const lastOrderCount = useRef(0);
     const notificationTimeoutRef = useRef(null);
     const hasLoaded = useRef(false);
+    const socketRef = useRef(null);
 
     const view = kitchenView;
     const setView = setKitchenView;
@@ -92,8 +89,78 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
         },
     };
 
-    const headerImageUrl = "https://cdn.decoist.com/wp-content/uploads/2021/06/Adding-greenery-to-the-small-farmhouse-kitchen-33093.jpg";
+    // Dynamic header image based on selected item type
+    const getHeaderImageUrl = () => {
+        if (view === "itemStatus" && selectedItemTypeKey) {
+            const itemImages = {
+                'coffee': "https://i.pinimg.com/474x/7a/29/df/7a29dfc903d98c6ba13b687ef1fa1d1a.jpg",
+                'coldcoffee': "https://images.unsplash.com/photo-1517705008128-361805f42e86?w=400&h=300&fit=crop",
+                'tea': "https://tmdone-cdn.s3.me-south-1.amazonaws.com/store-covers/133003776906429295.jpg",
+                'water': "https://images.stockcake.com/public/d/f/f/dffca756-1b7f-4366-8b89-4ad6f9bbf88a_large/chilled-water-glass-stockcake.jpg",
+                'saltwater': "https://images.unsplash.com/photo-1548839140-29a3df4b0d0a?w=400&h=300&fit=crop",
+                'milk': "https://www.shutterstock.com/image-photo/almond-milk-cup-glass-on-600nw-2571172141.jpg",
+                'shikanji': "https://i.pinimg.com/736x/1f/fd/08/1ffd086ffef72a98f234162a312cfe39.jpg",
+                'jaljeera': "https://i.ndtvimg.com/i/2018-02/jaljeera_620x330_81517570928.jpg",
+                'soup': "https://www.inspiredtaste.net/wp-content/uploads/2018/10/Homemade-Vegetable-Soup-Recipe-2-1200.jpg",
+                'maggie': "https://i.pinimg.com/736x/5c/6d/9f/5c6d9fe78de73a7698948e011d6745f1.jpg",
+                'oats': "https://images.moneycontrol.com/static-mcnews/2024/08/20240827041559_oats.jpg?impolicy=website&width=1600&height=900",
+            };
+            
+            const itemKey = selectedItemTypeKey.split('_')[0];
+            return itemImages[itemKey] || itemImages['coffee'];
+        }
+        
+        // Default kitchen image
+        return "https://cdn.decoist.com/wp-content/uploads/2021/06/Adding-greenery-to-the-small-farmhouse-kitchen-33093.jpg";
+    };
 
+
+    // --------------------------------------------------
+    // ENSURE KITCHEN FCM TOKEN IS REGISTERED
+    // --------------------------------------------------
+    const registerKitchenFCMToken = async () => {
+        try {
+            // Request notification permission and get token
+            if ('Notification' in window && 'serviceWorker' in navigator) {
+                const permission = await window.Notification.requestPermission();
+                if (permission === 'granted') {
+                    // Import Firebase functions dynamically
+                    const { requestNotificationPermissionAndGetToken } = await import('../../firebase');
+                    const token = await requestNotificationPermissionAndGetToken();
+                    
+                    if (token) {
+                        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                        // Remove trailing /api if present to avoid double /api/api/ issue
+                        const cleanApiUrl = apiUrl.replace(/\/api\/?$/, '');
+                        const response = await fetch(`${cleanApiUrl}/api/save-fcm-token`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                token, 
+                                userId: user.id, 
+                                userRole: user.role 
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            console.log('✅ Kitchen FCM token registered successfully');
+                        } else {
+                            console.error('❌ Failed to register kitchen FCM token:', response.status);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('❌ Kitchen FCM registration error:', error);
+        }
+    };
+
+    // Register FCM token when component mounts
+    useEffect(() => {
+        if (user?.role === 'kitchen') {
+            registerKitchenFCMToken();
+        }
+    }, [user]);
 
     // --------------------------------------------------
     // FETCH ORDERS SAFELY
@@ -117,17 +184,43 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             const previousCount = lastOrderCount.current;
             lastOrderCount.current = newActiveOrderCount;
 
+            console.log('🔍 Order count check:', {
+                newActiveOrderCount,
+                previousCount,
+                hasLoaded: hasLoaded.current,
+                shouldTriggerNotification: hasLoaded.current && newActiveOrderCount > previousCount,
+                chefCallActive: !!chefCall,
+                socketConnected: socketRef.current?.connected
+            });
+
             if (hasLoaded.current && newActiveOrderCount > previousCount) {
+                console.log(`🔔 New orders arrived: ${newActiveOrderCount - previousCount} (Total: ${newActiveOrderCount}) - Chef call active: ${!!chefCall}`);
                 setNotificationAcknowledged(false); // Reset acknowledgment for new orders
 
-                // Show notification
-                setShowNotification(true);
-
-                // Play the beep sound
-                if (audio) {
-                    audio.currentTime = 0;
-                    audio.play().catch(e => console.log("Audio playback blocked by browser:", e));
+                // COMPLETELY suppress order notifications when chef call is active
+                // Chef calls have exclusive priority - no order notifications allowed
+                if (!chefCall) {
+                    console.log('✅ New order notification - TRIGGERING NOW!');
+                    
+                    // Find the MOST RECENT placed order (highest timestamp)
+                    const placedOrders = newOrders.filter(o => String(o?.status || "").toLowerCase() === "placed");
+                    const latestOrder = placedOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                    
+                    if (latestOrder) {
+                        console.log('📋 Using latest order for notification:', latestOrder);
+                        setNotificationOrderData({
+                            userName: latestOrder.userName || 'Customer',
+                            items: latestOrder.items || [],
+                            orderId: latestOrder._id,
+                            timestamp: latestOrder.timestamp
+                        });
+                        setShowNotification(true);
+                    }
+                } else {
+                    console.log('🚫 Suppressing order notification - chef call is active');
                 }
+                // When chef call is active: completely ignore order notifications
+                // Chef call takes full priority
             }
 
             hasLoaded.current = true;
@@ -146,11 +239,31 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
 
                 if (hasLoaded.current && newActiveOrderCount > previousCount) {
                     setNotificationAcknowledged(false);
-                    setShowNotification(true);
-                    if (audio) {
-                        audio.currentTime = 0;
-                        audio.play().catch(e => console.log("Audio playback blocked by browser:", e));
+                    
+                    // COMPLETELY suppress order notifications when chef call is active
+                    // Chef calls have exclusive priority - no order notifications allowed
+                    if (!chefCall) {
+                        console.log('✅ New order notification from cached data - TRIGGERING NOW!');
+                        
+                        // Find the MOST RECENT placed order from cached data (highest timestamp)
+                        const placedOrders = parsedOrders.filter(o => String(o?.status || "").toLowerCase() === "placed");
+                        const latestOrder = placedOrders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+                        
+                        if (latestOrder) {
+                            console.log('📋 Using latest cached order for notification:', latestOrder);
+                            setNotificationOrderData({
+                                userName: latestOrder.userName || 'Customer',
+                                items: latestOrder.items || [],
+                                orderId: latestOrder._id,
+                                timestamp: latestOrder.timestamp
+                            });
+                            setShowNotification(true);
+                        }
+                    } else {
+                        console.log('🚫 Suppressing order notification - chef call is active');
                     }
+                    // When chef call is active: completely ignore order notifications
+                    // Chef call takes full priority
                 }
             } else {
                 setOrders([]);
@@ -161,17 +274,104 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     useEffect(() => {
         fetchOrders();
         
-        // More frequent polling for better real-time updates
-        const interval = setInterval(() => fetchOrders(true), 3000); // Reduced to 3 seconds
+        // Setup Socket.IO for real-time order updates
+        const setupOrderSocket = async () => {
+            try {
+                const socket = await initSocket(user);
+                socketRef.current = socket;
+                if (socket) {
+                    console.log('🔌 Kitchen socket initialized, setting up event listeners...');
+                    
+                    // Listen for new orders via socket - INSTANT
+                    socket.on('new-order', (order) => {
+                        console.log('📦 📦 📦 NEW ORDER RECEIVED VIA SOCKET:', order);
+                        console.log('👨‍🍳 Kitchen should show notification now!');
+                        console.log('🔍 Socket notification state:', {
+                            chefCallActive: !!chefCall,
+                            shouldShowNotification: !chefCall
+                        });
+                        
+                        // Show notification immediately when new order arrives via socket
+                        if (!chefCall) {
+                            console.log('🚀 Showing notification immediately via socket!');
+                            setNotificationAcknowledged(false);
+                            
+                            // Use the actual new order data for the notification
+                            setNotificationOrderData({
+                                userName: order.userName || 'Customer',
+                                items: order.items || [],
+                                orderId: order._id,
+                                timestamp: order.timestamp
+                            });
+                            setShowNotification(true);
+                        } else {
+                            console.log('🚫 Suppressing order notification - chef call is active');
+                        }
+                        
+                        fetchOrders(); // Refresh orders list
+                    });
+                    
+                    // Listen for order status updates
+                    socket.on('order-updated', (order) => {
+                        console.log('📝 Order updated via socket:', order);
+                        fetchOrders(); // Refresh orders list
+                    });
+                    
+                    // Listen for order deletions
+                    socket.on('order-deleted', (orderData) => {
+                        console.log('🗑️ Order deleted via socket:', orderData.orderId);
+                        // Remove the deleted order from local state immediately for instant feedback
+                        setOrders(prevOrders => prevOrders.filter(order => order._id !== orderData.orderId));
+                        console.log('✅ Order removed from kitchen dashboard:', orderData.orderId);
+                        // Also refresh from server to ensure consistency
+                        fetchOrders(); 
+                    });
+
+                    // Listen for chef calls via socket - INSTANT notification
+                    socket.on('chef-call', (call) => {
+                        console.log('📞 Chef call received via socket:', call);
+                        console.log('🔍 Socket connection status:', socket.connected);
+                        console.log('👨‍🍳 Kitchen user info:', { id: user.id, role: user.role });
+                        setChefCall(call);
+                    });
+
+                    // Log successful connection
+                    socket.on('connect', () => {
+                        console.log('✅ Kitchen socket connected successfully');
+                        console.log('🔌 Socket ID:', socket.id);
+                        console.log('🏠 Joined rooms:', socket.rooms ? Array.from(socket.rooms) : 'No rooms joined');
+                    });
+
+                    // Log disconnection
+                    socket.on('disconnect', (reason) => {
+                        console.log('⚠️ Kitchen socket disconnected:', reason);
+                    });
+
+                    // Handle connection errors
+                    socket.on('connect_error', (error) => {
+                        console.error('❌ Kitchen socket connection error:', error.message);
+                    });
+                } else {
+                    console.error('❌ Kitchen socket initialization failed');
+                }
+            } catch (error) {
+                console.error('❌ Failed to setup kitchen socket:', error);
+            }
+        };
+        setupOrderSocket();
         
-        // Additional polling when the window is visible (for better real-time feel)
+        // Emergency backup polling - 60 seconds (only if socket fails)
+        const interval = setInterval(() => {
+            if (!socketRef.current?.connected) {
+                console.log('⚠️ Socket not connected, using backup polling');
+                fetchOrders(true);
+            }
+        }, 60000);
+        
+        // Fetch when window becomes visible
         const handleVisibilityChange = () => {
             if (!document.hidden) {
-                // When user returns to the tab, fetch immediately
                 fetchOrders();
-                // And set a quick interval for a few seconds
-                const quickInterval = setInterval(() => fetchOrders(true), 1000);
-                setTimeout(() => clearInterval(quickInterval), 10000);
             }
         };
         
@@ -198,11 +398,34 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             if (notificationTimeoutRef.current) {
                 clearTimeout(notificationTimeoutRef.current);
             }
+            if (socketRef.current) {
+                socketRef.current.off('new-order');
+                socketRef.current.off('order-updated');
+                socketRef.current.off('order-deleted');
+                socketRef.current.off('chef-call');
+            }
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('storage', handleStorageChange);
             window.removeEventListener('profileImageUpdated', handleProfileUpdate);
+            
+            // Reset global audio flag on unmount
+            if (typeof window !== 'undefined') {
+                window.kitchenDashboardAudioMuted = false;
+            }
         };
     }, []);
+
+    // --------------------------------------------------
+    // CHEF CALL PRIORITY HANDLING
+    // --------------------------------------------------
+    useEffect(() => {
+        // When chef call becomes active, suppress order notifications
+        if (chefCall) {
+            console.log('🔇 KitchenDashboard: Chef call active - order notifications suppressed');
+        } else {
+            console.log('🔊 KitchenDashboard: Chef call ended - order notifications resumed');
+        }
+    }, [chefCall]);
 
     // --------------------------------------------------
     // HELPERS (Unchanged logic)
@@ -299,13 +522,151 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     const handleNotificationOk = () => {
         setShowNotification(false);
         setNotificationAcknowledged(true); // Mark as acknowledged
+        setNotificationOrderData(null); // Clear order data
         if (notificationTimeoutRef.current) {
             clearTimeout(notificationTimeoutRef.current);
             notificationTimeoutRef.current = null;
         }
-        if (audio) {
-            audio.pause();
-            audio.currentTime = 0;
+    };
+
+    // Add manual notification test for debugging
+    const testNotification = () => {
+        console.log('🧪 Manual test notification triggered');
+        console.log('📊 Current state:', {
+            showNotification,
+            notificationAcknowledged,
+            chefCall,
+            hasLoaded: hasLoaded.current,
+            lastOrderCount: lastOrderCount.current
+        });
+        setNotificationAcknowledged(false);
+        setShowNotification(true);
+        setNotificationOrderData({
+            userName: 'Test User',
+            items: [
+                { quantity: 2, item: 'coffee', type: 'Regular' },
+                { quantity: 1, item: 'sandwich', type: 'Cheese' }
+            ]
+        });
+    };
+
+    // Add test functions to window for debugging
+    useEffect(() => {
+        window.testKitchenNotification = testNotification;
+        
+        // Manual chef call test
+        window.testChefCall = () => {
+            console.log('🧪 Manual test chef call triggered');
+            setChefCall({
+                id: 'test-call-' + Date.now(),
+                userName: 'Test Customer',
+                seatNumber: 'Table 5',
+                timestamp: Date.now(),
+                message: 'Customer needs assistance'
+            });
+        };
+        
+        return () => {
+            delete window.testKitchenNotification;
+            delete window.testChefCall;
+        };
+    }, []);
+
+    // --------------------------------------------------
+    // CHEF CALL - ENHANCED POLLING (Primary detection method)
+    // --------------------------------------------------
+    useEffect(() => {
+        // Initial fetch when component mounts
+        const fetchChefCalls = async () => {
+            try {
+                const data = await callApi(
+                    `/chef-calls?userId=${user.id}&userRole=${user.role}`,
+                    'GET',
+                    null,
+                    true // silent mode
+                );
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    console.log('📞 Initial chef call fetch found:', data[0]);
+                    setChefCall(data[0]);
+                }
+            } catch (err) {
+                console.error("Initial chef calls fetch error:", err);
+            }
+        };
+        
+        fetchChefCalls();
+        
+        // Aggressive polling for chef calls - check every 5 seconds for immediate detection
+        const pollChefCalls = async () => {
+            try {
+                const data = await callApi(
+                    `/chef-calls?userId=${user.id}&userRole=${user.role}`,
+                    'GET',
+                    null,
+                    true // silent mode
+                );
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    // Only set if we don't already have this chef call
+                    if (!chefCall || chefCall.id !== data[0].id) {
+                        console.log('📞 New chef call detected via polling:', data[0]);
+                        setChefCall(data[0]);
+                    }
+                } else {
+                    // Clear chef call if none found
+                    if (chefCall) {
+                        console.log('📞 No active chef calls found, clearing');
+                        setChefCall(null);
+                    }
+                }
+            } catch (err) {
+                console.error("Chef calls polling error:", err);
+            }
+        };
+        
+        // Poll every 5 seconds for immediate chef call detection
+        const pollInterval = setInterval(pollChefCalls, 5000);
+        
+        return () => {
+            clearInterval(pollInterval);
+        };
+    }, [user, chefCall]); // Include chefCall in dependencies to avoid stale closures
+
+    const handleChefCallRespond = async (callId, response) => {
+        console.log('📞 Chef responding to call:', { callId, response });
+        
+        try {
+            // Try socket first for instant delivery
+            if (socketRef.current?.connected) {
+                console.log('📡 Sending chef response via Socket.IO');
+                socketRef.current.emit('chef-response', {
+                    callId: callId,
+                    response: response,
+                    chefId: user.id,
+                    chefName: user.name,
+                    timestamp: Date.now()
+                });
+            } else {
+                console.log('📡 Socket not connected, using HTTP fallback');
+            }
+            
+            // Always use HTTP as backup to ensure delivery
+            console.log('📡 Sending chef response via HTTP API');
+            const responseData = await callApi(`/chef-calls/${callId}`, 'PUT', {
+                action: response,
+                userId: user.id,
+                userRole: user.role
+            });
+            
+            console.log('✅ Chef response sent successfully:', responseData);
+            
+        } catch (err) {
+            console.error("❌ Error responding to chef call:", err);
+        } finally {
+            // Always clear the chef call after attempting to respond
+            console.log('🧹 Clearing chef call from kitchen dashboard');
+            setChefCall(null);
         }
     };
     
@@ -354,9 +715,54 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             ...styles.kitchenAppContainer,
             padding: isMobile ? '15px 15px' : '20px 10px'
         }}>
-            <div style={{ marginBottom: '15px' }}>
-                <KitchenHeader styles={styles} />
+            {/* Dynamic Header Banner - Shows for all views */}
+            <div style={{
+                height: '120px',
+                width: '100%',
+                marginBottom: '20px',
+                borderRadius: '0 0 18px 18px',
+                overflow: 'hidden',
+                boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
+                position: 'relative',
+                backgroundImage: `linear-gradient(to top, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.1) 100%), url(${getHeaderImageUrl()})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+                padding: '0 24px',
+                textAlign: 'center',
+            }}>
+                <h1 style={{
+                    fontSize: '1.5rem',
+                    fontWeight: '900',
+                    color: '#ffffff',
+                    textShadow: '0 2px 4px rgba(0, 0, 0, 0.9)',
+                    lineHeight: '1.1',
+                    margin: '0',
+                    fontFamily: 'Cambria, serif',
+                }}>
+                    {view === "itemStatus" && selectedItemTypeKey 
+                        ? `${Object.values(computeTotalsForSlot(selectedSlot)).find(t => t.key === selectedItemTypeKey)?.name.toUpperCase() || 'ITEM'} Preparation Station`
+                        : 'Kitchen Dashboard'
+                    }
+                </h1>
+                <p style={{
+                    fontSize: '0.9rem',
+                    color: 'rgba(255, 255, 255, 0.95)',
+                    fontWeight: '500',
+                    marginTop: '4px',
+                    textShadow: '0 1px 2px rgba(0, 0, 0, 0.8)',
+                    margin: '0',
+                }}>
+                    {view === "itemStatus" && selectedItemTypeKey 
+                        ? 'Ready to prepare delicious orders!'
+                        : 'Manage your kitchen orders efficiently'
+                    }
+                </p>
             </div>
+
 
             {/* HOME (Slot selection and Totals) */}
             {view === "home" && (
@@ -425,8 +831,17 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
             <Notification
                 showNotification={showNotification}
                 handleNotificationOk={handleNotificationOk}
+                orderData={notificationOrderData}
                 styles={styles}
             />
+
+            {/* Chef Call Full-Page Notification */}
+            {chefCall && (
+                <ChefCallNotification
+                    call={chefCall}
+                    onRespond={handleChefCallRespond}
+                />
+            )}
             
             
             {renderFooterCard()}
