@@ -16,45 +16,98 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize messaging only if supported (prevents crash on iOS Safari, etc.)
 let messaging = null;
-isSupported().then(supported => {
-  if (supported) {
-    messaging = getMessaging(app);
-  } else {
-    console.log('Firebase Messaging not supported on this browser');
+let messagingInitialized = false;
+
+const initializeMessaging = async () => {
+  try {
+    const supported = await isSupported();
+    if (supported) {
+      messaging = getMessaging(app);
+      messagingInitialized = true;
+      console.log('✅ Firebase Messaging initialized successfully');
+    } else {
+      console.log('❌ Firebase Messaging not supported on this browser/device');
+    }
+  } catch (err) {
+    console.warn('⚠️ Firebase Messaging initialization failed:', err);
   }
-}).catch(err => {
-  console.warn('Firebase Messaging support check failed:', err);
-});
+};
+
+// Initialize messaging immediately
+initializeMessaging();
 
 export { messaging };
 
 // request FCM token (vapidKey from Console)
 export async function requestNotificationPermissionAndGetToken() {
   try {
-    // Check if messaging is supported
-    const supported = await isSupported();
-    if (!supported) {
-      console.log('Firebase Messaging not supported on this device');
-      return null;
+    // Ensure messaging is initialized
+    if (!messagingInitialized) {
+      await initializeMessaging();
     }
     
     if (!messaging) {
-      messaging = getMessaging(app);
+      console.log('❌ Firebase Messaging not available');
+      return null;
     }
     
+    // Check if service worker is registered
+    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+    console.log('✅ Service Worker registered:', registration);
+    
     const permission = await Notification.requestPermission();
-    if (permission !== "granted") return null;
-    const token = await getToken(messaging, { vapidKey: "BLPpu8OZN-PgmVq4-D1SjVHBI5fa0T-VPAsLMD-p-WKB35YGWSkr1QYXoYFt-cX8KUasd1isRG4UnZRHWOSFmdU" });
-    return token; // send this token to your backend and save it
+    console.log('📱 Notification permission status:', permission);
+    
+    if (permission !== "granted") {
+      console.log('❌ Notification permission denied');
+      return null;
+    }
+    
+    const token = await getToken(messaging, { 
+      vapidKey: "BLPpu8OZN-PgmVq4-D1SjVHBI5fa0T-VPAsLMD-p-WKB35YGWSkr1QYXoYFt-cX8KUasd1isRG4UnZRHWOSFmdU",
+      serviceWorkerRegistration: registration 
+    });
+    
+    if (token) {
+      console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
+    } else {
+      console.log('⚠️ No FCM token received');
+    }
+    
+    return token;
   } catch (err) {
-    console.error("FCM token error:", err);
+    console.error("❌ FCM token error:", err);
     return null;
   }
 }
 
 // optional: receive foreground messages
 export function onForegroundMessage(callback) {
-  if (messaging) {
-    onMessage(messaging, (payload) => callback(payload));
+  if (messaging && messagingInitialized) {
+    onMessage(messaging, (payload) => {
+      console.log('📱 Foreground message received:', payload);
+      callback(payload);
+    });
+  } else {
+    console.log('⚠️ Cannot setup foreground message listener - messaging not initialized');
   }
+}
+
+// Check if notifications are properly configured
+export async function checkNotificationSetup() {
+  const checks = {
+    https: window.location.protocol === 'https:' || window.location.hostname === 'localhost',
+    serviceWorker: 'serviceWorker' in navigator,
+    notification: 'Notification' in window,
+    messaging: false
+  };
+  
+  try {
+    checks.messaging = await isSupported();
+  } catch (err) {
+    console.warn('Messaging support check failed:', err);
+  }
+  
+  console.log('🔍 Notification Setup Checks:', checks);
+  return checks;
 }
