@@ -179,8 +179,8 @@ function App() {
         />
       )}
 
-      {/* Call Chef Button - Only for users */}
-      {user.role === 'user' && (
+      {/* Call Chef Button - Only for Sharma Sir */}
+      {user.role === 'user' && user.name === 'Sharma Sir' && (
         <CallChefButton user={user} />
       )}
     </div>
