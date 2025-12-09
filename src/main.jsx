@@ -1,9 +1,9 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
-import { requestNotificationPermissionAndGetToken, onForegroundMessage } from "./firebase";
+import { requestNotificationPermissionAndGetToken } from "./firebase";
 
-// Basic global style reset
+// Global styles
 const globalStyles = `
     body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #f7f7f7; }
     h1, h2, h3 { color: #333; }
@@ -14,71 +14,72 @@ const styleSheet = document.createElement("style");
 styleSheet.innerText = globalStyles;
 document.head.appendChild(styleSheet);
 
-// Render app
+// Render App
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
-// ✅ Existing PWA Service Worker
+/* ======================================================================
+   🔥 FIXED: ONLY ONE SERVICE WORKER SHOULD EXIST
+   - Remove service-worker.js registration
+   - Do NOT register any default SW with Vite
+   - Only register firebase-messaging-sw.js
+====================================================================== */
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    // Existing PWA SW
-    navigator.serviceWorker
-      .register("/service-worker.js")
-      .then(() => console.log("✔ Service Worker Registered"))
-      .catch(err => console.log("❌ SW registration failed:", err));
-
-    // Firebase Messaging SW
     navigator.serviceWorker
       .register("/firebase-messaging-sw.js")
-      .then(() => console.log("✔ Firebase Messaging SW Registered"))
-      .catch(err => console.log("❌ Firebase SW registration failed:", err));
+      .then(() => console.log("✔ Firebase Messaging SW registered"))
+      .catch((err) =>
+        console.error("❌ Firebase Messaging SW registration failed:", err)
+      );
   });
 }
 
-// ✅ Request FCM token and send to backend (with error handling for mobile)
+/* ======================================================================
+   🔥 Request FCM Token + Send Token To Backend
+====================================================================== */
 (async () => {
   try {
-    // Check if Firebase messaging is supported
-    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
-      console.log('⚠️ Push notifications not supported on this device');
+    // Browser capability check
+    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
+      console.log("⚠️ Push notifications not supported on this device");
       return;
     }
-    
+
+    // Ask permission + get token
     const token = await requestNotificationPermissionAndGetToken();
-    if (token) {
-      // Get current user from localStorage (this should be set after login)
-      const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-      const userId = currentUser.id;
-      const userRole = currentUser.role;
-      
-      if (userId && userRole) {
-        // send token to your backend: POST /save-fcm-token { userId, token, userRole }
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-        
-        // Remove trailing /api if present to avoid double /api/api/ issue
-        const cleanApiUrl = apiUrl.replace(/\/api\/?$/, '');
-        
-        try {
-          const response = await fetch(`${cleanApiUrl}/api/save-fcm-token`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ token, userId, userRole })
-          });
-          
-          if (response.ok) {
-            console.log('✅ FCM token sent to backend for', userRole, 'UserID:', userId);
-          } else {
-            console.error('❌ Failed to send FCM token to backend:', response.status);
-          }
-        } catch (fetchError) {
-          console.error('❌ Network error sending FCM token:', fetchError.message);
-        }
-      } else {
-        console.log('⚠️ No user logged in, skipping FCM token registration');
-      }
+    if (!token) {
+      console.log("⚠️ No FCM token received");
+      return;
+    }
+
+    console.log("🔑 FCM Token:", token);
+
+    // Get user from localStorage
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const { id: userId, role: userRole } = currentUser;
+
+    if (!userId || !userRole) {
+      console.log("⚠️ No logged-in user → Skipping FCM token send");
+      return;
+    }
+
+    // Build clean backend URL
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    const cleanApiUrl = apiUrl.replace(/\/api\/?$/, "");
+
+    // Send token → backend
+    const response = await fetch(`${cleanApiUrl}/api/save-fcm-token`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token, userId, userRole }),
+    });
+
+    if (response.ok) {
+      console.log(`✅ Token saved for ${userRole}, UserID: ${userId}`);
     } else {
-      console.log('⚠️ No FCM token received');
+      console.error("❌ Failed to save token:", response.status);
     }
   } catch (err) {
-    console.warn('⚠️ FCM initialization failed (may not be supported on this device):', err.message);
+    console.warn("⚠️ FCM initialization failed:", err.message);
   }
 })();

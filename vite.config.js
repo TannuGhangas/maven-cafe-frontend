@@ -6,40 +6,42 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: "prompt",
+  registerType: "autoUpdate",
+  includeAssets: ["favicon.svg", "robots.txt"],
 
-      includeAssets: [
-        "favicon.svg",
-        "robots.txt"
-      ],
+  devOptions: {
+    enabled: false   // disable PWA during localhost
+  },
 
-      manifest: {
-        name: "Maven Cafe",
-        short_name: "Cafe",
-        start_url: "/",
-        display: "standalone",
-        background_color: "#ffffff",
-        theme_color: "#ff7f41",
-
-        icons: [
-          {
-            src: "/icons/icon-192-v2.png",
-            sizes: "192x192",
-            type: "image/png"
-          },
-          {
-            src: "/icons/icon-512-v2.png",
-            sizes: "512x512",
-            type: "image/png"
-          }
-        ]
+  manifest: {
+    name: "Maven Cafe",
+    short_name: "Cafe",
+    start_url: "/",
+    display: "standalone",
+    background_color: "#ffffff",
+    theme_color: "#ff7f41",
+    icons: [
+      {
+        src: "/icons/icon-192-v2.png",
+        sizes: "192x192",
+        type: "image/png"
       },
+      {
+        src: "/icons/icon-512-v2.png",
+        sizes: "512x512",
+        type: "image/png"
+      }
+    ]
+  },
+
+
+      // Rename PWA SW to avoid conflict with FCM SW
+      filename: "pwa-sw.js",
 
       workbox: {
-        cleanupOutdatedCaches: false,
-        skipWaiting: false,
-        clientsClaim: false,
-
+        cleanupOutdatedCaches: true,
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: ({ request }) => request.destination === "document",
@@ -59,14 +61,14 @@ export default defineConfig({
     })
   ],
 
-  // Development server configuration for better hot reload
+  // Development server configuration
   server: {
     port: 5173,
     host: true,
     headers: {
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      Pragma: "no-cache",
+      Expires: "0"
     }
   },
 
@@ -80,6 +82,6 @@ export default defineConfig({
 
   // Development optimization
   optimizeDeps: {
-    include: ['react', 'react-dom']
+    include: ["react", "react-dom"]
   }
 });
