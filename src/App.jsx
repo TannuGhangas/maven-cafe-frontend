@@ -34,6 +34,7 @@ function App() {
   const [modal, setModal] = useState(null);
   const [currentOrder, setCurrentOrder] = useState({ slot: 'morning (9:00-12:00)', items: [] });
   const [kitchenView, setKitchenView] = useState("home");
+  const [activeSection, setActiveSection] = useState('dashboard'); // For admin sidebar navigation
 
   const isLoggedIn = !!user;
 
@@ -49,7 +50,7 @@ function App() {
   // useEffect(() => {
   //   if (process.env.NODE_ENV === 'production' && "serviceWorker" in navigator) {
   //     navigator.serviceWorker.addEventListener("controllerchange", () => {
-  //       console.log("Service Worker updated - refreshing page...");
+  //       console.log('Service Worker updated - refreshing page...');
   //       window.location.reload();
   //     });
   //   }
@@ -130,12 +131,12 @@ function App() {
     );
 
     // ADMIN DASHBOARD
-    if (page === 'admin-dashboard') return user.role === 'admin' ? <AdminDashboard user={user} setPage={setPage} styles={styles} callApi={callApi} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
-    if (page === 'admin-users') return user.role === 'admin' ? <AdminUsersPage user={user} callApi={callApi} setPage={setPage} styles={styles} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
-    if (page === 'admin-complaints') return (user.role === 'admin' || user.role === 'kitchen') ? <AdminComplaintsPage user={user} callApi={callApi} setPage={setPage} styles={styles} /> : <div style={styles.loadingContainer}>Access Denied.</div>;
-    if (page === 'admin-members') return user.role === 'admin' ? <AdminMembersPage user={user} callApi={callApi} setPage={setPage} styles={styles} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
-    if (page === 'admin-menu') return user.role === 'admin' ? <AdminMenuPage user={user} callApi={callApi} setPage={setPage} styles={styles} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
-    if (page === 'admin-locations') return user.role === 'admin' ? <AdminLocationsPage user={user} callApi={callApi} setPage={setPage} styles={styles} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
+    if (page === 'admin-dashboard') return user.role === 'admin' ? <AdminDashboard user={user} setPage={setPage} styles={styles} callApi={callApi} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
+    if (page === 'admin-users') return user.role === 'admin' ? <AdminUsersPage user={user} callApi={callApi} setPage={setPage} styles={styles} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
+    if (page === 'admin-complaints') return (user.role === 'admin' || user.role === 'kitchen') ? <AdminComplaintsPage user={user} callApi={callApi} setPage={setPage} styles={styles} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied.</div>;
+    if (page === 'admin-members') return user.role === 'admin' ? <AdminMembersPage user={user} callApi={callApi} setPage={setPage} styles={styles} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
+    if (page === 'admin-menu') return user.role === 'admin' ? <AdminMenuPage user={user} callApi={callApi} setPage={setPage} styles={styles} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
+    if (page === 'admin-locations') return user.role === 'admin' ? <AdminLocationsPage user={user} callApi={callApi} setPage={setPage} styles={styles} activeSection={activeSection} setActiveSection={setActiveSection} /> : <div style={styles.loadingContainer}>Access Denied. Only Admins can view this page.</div>;
 
     return <div style={styles.screenPadding}>Page Not Found!</div>;
   };

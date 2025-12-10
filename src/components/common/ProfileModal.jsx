@@ -10,27 +10,52 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
     const [showImageOptions, setShowImageOptions] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    // Load profile image from server on component mount (temporarily disabled for testing)
+    // Load profile image from server and localStorage
     useEffect(() => {
         const loadProfileImage = async () => {
             try {
-                // Temporarily skip server loading to avoid 404 errors
-                console.log('ProfileModal: Skipping server profile image loading for testing');
+                console.log('ProfileModal: Loading profile image from server...');
                 
-                // Check localStorage first
-                const localImage = localStorage.getItem(`profilePic_${user.id}`);
-                if (localImage) {
-                    setProfilePic(localImage);
+                // Fetch user profile from server to get the latest profile image
+                // Include authentication parameters as query params for GET request
+                const userProfile = await callApi(`/user/${user.id}`, 'GET', null, false, {
+                    userId: user.id,
+                    userRole: user.role
+                });
+                
+                if (userProfile && userProfile.success && userProfile.profileImage) {
+                    console.log('ProfileModal: Found server profile image');
+                    setProfilePic(userProfile.profileImage);
+                    // Also update localStorage with server data
+                    localStorage.setItem(`profilePic_${user.id}`, userProfile.profileImage);
+                    const userNameKey = user.name.replace(/\s+/g, '_');
+                    localStorage.setItem(`profilePic_${userNameKey}`, userProfile.profileImage);
+                } else {
+                    // Fallback to localStorage if no server image
+                    console.log('ProfileModal: No server image, checking localStorage');
+                    const localImage = localStorage.getItem(`profilePic_${user.id}`);
+                    if (localImage) {
+                        setProfilePic(localImage);
+                    }
                 }
             } catch (error) {
-                console.log('No server profile image found, using local storage');
+                console.log('ProfileModal: Error loading from server, using local storage:', error.message);
+                // Fallback to localStorage on error
+                try {
+                    const localImage = localStorage.getItem(`profilePic_${user.id}`);
+                    if (localImage) {
+                        setProfilePic(localImage);
+                    }
+                } catch (localError) {
+                    console.warn('ProfileModal: Could not load from localStorage either:', localError);
+                }
             } finally {
                 setLoading(false);
             }
         };
 
         loadProfileImage();
-    }, [user.id, user.role]);
+    }, [user.id, user.role, user.name]);
 
     // --- LOCAL STYLES to achieve the Side Drawer look for mobile ---
     const ACCENT_COLOR = styles.PRIMARY_COLOR || '#FF7A3D';
@@ -173,18 +198,68 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
                 console.log(`- profilePic_${user.id}:`, localStorage.getItem(`profilePic_${user.id}`) ? 'FOUND' : 'NOT FOUND');
                 console.log(`- profilePic_${userNameKey}:`, localStorage.getItem(`profilePic_${userNameKey}`) ? 'FOUND' : 'NOT FOUND');
                 
-                // Dispatch custom event to notify KitchenDashboard to refresh
+                // Enhanced: Dispatch multiple events for maximum compatibility
+                const profileUpdateDetail = { userId: user.id, userName: user.name, action: 'updated', timestamp: Date.now() };
+                
+                // Custom event for same-tab updates
                 window.dispatchEvent(new CustomEvent('profileImageUpdated', {
-                    detail: { userId: user.id, userName: user.name }
+                    detail: profileUpdateDetail
                 }));
                 
+                // Global broadcast event for all kitchen tabs
+                window.dispatchEvent(new CustomEvent('refreshAllProfileImages', {
+                    detail: profileUpdateDetail
+                }));
+                
+                // Cross-tab storage event for maximum coverage
                 try {
-                    // Temporarily disable server sync to prevent errors
-                    console.log('ProfileModal: Server sync disabled');
+                    localStorage.setItem('globalProfileImageUpdate', JSON.stringify(profileUpdateDetail));
+                    setTimeout(() => {
+                        localStorage.removeItem('globalProfileImageUpdate');
+                    }, 100);
+                } catch (error) {
+                    console.warn('ProfileModal: Could not broadcast to other tabs:', error);
+                }
+                
+                console.log('ProfileModal: Profile image updated with enhanced sync - all kitchen dashboards should refresh immediately');
+                
+                try {
+                    // Re-enable server sync for profile images
+                    console.log('ProfileModal: Syncing profile image to server...');
                     
-                    // TODO: Re-enable server sync after database schema update
+                    const response = await callApi(`/user/${user.id}/profile-image`, 'PUT', {
+                        userId: user.id,
+                        userRole: user.role,
+                        profileImage: imageData
+                    });
+                    
+                    if (response && response.success) {
+                        console.log('Profile image updated successfully on server');
+                        
+                        // Broadcast to kitchen clients for real-time updates
+                        try {
+                            await callApi('/profile-image-update', 'POST', {
+                                userId: user.id,
+                                userName: user.name,
+                                profileImage: imageData,
+                                action: 'updated'
+                            });
+                            console.log('Profile image update broadcasted to kitchen clients');
+                        } catch (broadcastError) {
+                            console.warn('Failed to broadcast to kitchen clients:', broadcastError);
+                        }
+                        
+                        // Update the user object with the new profile image
+                        if (response.user) {
+                            console.log('Server response:', response);
+                        }
+                    } else {
+                        console.warn('Server returned unexpected response for profile image:', response);
+                    }
                 } catch (error) {
                     console.error('Failed to update profile image on server:', error);
+                    // Don't fail the entire operation if server sync fails
+                    // The local storage update was successful
                 }
                 
                 setShowImageOptions(false);
@@ -202,27 +277,63 @@ const ProfileModal = ({ user, onClose, handleLogout, setPage, styles }) => {
         const userNameKey = user.name.replace(/\s+/g, '_');
         localStorage.removeItem(`profilePic_${userNameKey}`);
         
-        // Dispatch custom event to notify KitchenDashboard to refresh
+        // Enhanced: Dispatch multiple events for maximum compatibility on image removal
+        const profileRemoveDetail = { userId: user.id, userName: user.name, action: 'removed', timestamp: Date.now() };
+        
+        // Custom event for same-tab updates
         window.dispatchEvent(new CustomEvent('profileImageUpdated', {
-            detail: { userId: user.id, userName: user.name, action: 'removed' }
+            detail: profileRemoveDetail
         }));
         
+        // Global broadcast event for all kitchen tabs
+        window.dispatchEvent(new CustomEvent('refreshAllProfileImages', {
+            detail: profileRemoveDetail
+        }));
+        
+        // Cross-tab storage event for maximum coverage
         try {
-            // Temporarily disable server sync to prevent errors
-            console.log('ProfileModal: Profile image removed locally (server sync disabled)');
+            localStorage.setItem('globalProfileImageUpdate', JSON.stringify(profileRemoveDetail));
+            setTimeout(() => {
+                localStorage.removeItem('globalProfileImageUpdate');
+            }, 100);
+        } catch (error) {
+            console.warn('ProfileModal: Could not broadcast removal to other tabs:', error);
+        }
+        
+        console.log('ProfileModal: Profile image removed with enhanced sync - all kitchen dashboards should refresh immediately');
+        
+        try {
+            // Re-enable server sync for profile image removal
+            console.log('ProfileModal: Removing profile image from server...');
             
-            // TODO: Re-enable server sync after database schema update
-            // const response = await callApi(`/api/user/${user.id}/profile-image`, 'PUT', {
-            //     userId: user.id,
-            //     userRole: user.role,
-            //     profileImage: null
-            // }, true);
+            const response = await callApi(`/user/${user.id}/profile-image`, 'PUT', {
+                userId: user.id,
+                userRole: user.role,
+                profileImage: null
+            }, true);
             
-            // if (response) {
-            //     console.log('Profile image removed successfully from server');
-            // }
+            if (response && response.success) {
+                console.log('Profile image removed successfully from server');
+                
+                // Broadcast removal to kitchen clients for real-time updates
+                try {
+                    await callApi('/profile-image-update', 'POST', {
+                        userId: user.id,
+                        userName: user.name,
+                        profileImage: null,
+                        action: 'removed'
+                    });
+                    console.log('Profile image removal broadcasted to kitchen clients');
+                } catch (broadcastError) {
+                    console.warn('Failed to broadcast removal to kitchen clients:', broadcastError);
+                }
+            } else {
+                console.warn('Server returned unexpected response for profile image removal:', response);
+            }
         } catch (error) {
             console.error('Failed to remove profile image from server:', error);
+            // Don't fail the entire operation if server sync fails
+            // The local storage removal was successful
         }
         
         setShowImageOptions(false);

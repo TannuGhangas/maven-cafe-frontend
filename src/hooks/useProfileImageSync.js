@@ -143,4 +143,27 @@ export const useProfileImageSync = (userId, userName, onImageUpdate) => {
     };
 };
 
+/**
+ * Global function to force refresh all profile images across the application
+ * This can be called to update all ProfileImage components immediately
+ */
+export const refreshAllProfileImages = () => {
+    console.log('Global: Refreshing all profile images across the application');
+    
+    // Dispatch global refresh event
+    window.dispatchEvent(new CustomEvent('refreshAllProfileImages', {
+        detail: { action: 'global-refresh', timestamp: Date.now() }
+    }));
+    
+    // Use localStorage for cross-tab communication
+    try {
+        localStorage.setItem('globalProfileImageRefresh', Date.now().toString());
+        setTimeout(() => {
+            localStorage.removeItem('globalProfileImageRefresh');
+        }, 100);
+    } catch (error) {
+        console.warn('Global profile refresh: Could not use localStorage:', error);
+    }
+};
+
 export default useProfileImageSync;

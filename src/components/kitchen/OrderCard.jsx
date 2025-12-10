@@ -14,7 +14,8 @@ const OrderCard = ({
     updateOrderStatus,
     styles,
     enhancedStyles,
-    user
+    user,
+    profileImageRefreshKey
 }) => {
     const isMobile = window.innerWidth < 768;
     const orderId = order?._id;
@@ -88,6 +89,7 @@ const OrderCard = ({
                     <div className="order-customer-profile">
                         <ErrorBoundary>
                             <ProfileImage
+                                key={`profile-${order?.userId || order?.userName}-${profileImageRefreshKey}`}
                                 userId={order?.userId}
                                 userName={order?.userName}
                                 userProfile={order?.userProfile}
@@ -95,6 +97,7 @@ const OrderCard = ({
                                 className="order-customer-avatar"
                                 showPlaceholder={true}
                                 alt={`${order.userProfile?.name || order?.userName || "Customer"}'s profile`}
+                                refreshKey={profileImageRefreshKey}
                             />
                         </ErrorBoundary>
                     </div>

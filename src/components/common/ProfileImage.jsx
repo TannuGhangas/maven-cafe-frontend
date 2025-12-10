@@ -39,6 +39,7 @@ class ProfileImageErrorBoundary extends React.Component {
  * @param {Object} props.style - Additional styles
  * @param {boolean} props.showPlaceholder - Whether to show placeholder when no image
  * @param {string} props.alt - Alt text for the image
+ * @param {number|string} props.refreshKey - Optional refresh key to force re-render
  */
 const ProfileImage = (props) => {
     // Use SafeProfileImage by default to avoid hook errors

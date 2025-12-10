@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FaSpinner, FaPlus, FaChevronLeft, FaTrash, FaEdit, FaUnlockAlt, FaBan } from 'react-icons/fa';
 import AdminUserEditModal from './AdminUserEditModal';
+import AdminLayout from './AdminLayout';
 
-const AdminMembersPage = ({ user, callApi, setPage, styles }) => {
+const AdminMembersPage = ({ user, callApi, setPage, styles, activeSection, setActiveSection }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingUser, setEditingUser] = useState(null);
@@ -59,78 +60,90 @@ const AdminMembersPage = ({ user, callApi, setPage, styles }) => {
     }, []); // Only fetch when component mounts
 
 
-    if (loading) return <div style={styles.loadingContainer}><FaSpinner className="spinner" size={30} /> Loading Users...</div>;
+    if (loading) return (
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div style={styles.loadingContainer}><FaSpinner className="spinner" size={30} /> Loading Users...</div>
+        </AdminLayout>
+    );
 
     return (
-        <div style={styles.screenPadding}>
-            <h2>Member Management</h2>
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div style={styles.screenPadding}>
+                <h2>Member Management</h2>
 
-            <button
-                style={styles.primaryButton}
-                onClick={() => setEditingUser({ id: 'new', role: 'user', enabled: true, name: '', username: '', password: '' })}
-            >
-                <FaPlus /> Create New Member
-            </button>
-            <button
-                style={styles.secondaryButton}
-                onClick={() => setPage('admin-dashboard')}
-            >
-                <FaChevronLeft /> Back to Admin Dashboard
-            </button>
+                <button
+                    style={styles.primaryButton}
+                    onClick={() => setEditingUser({ id: 'new', role: 'user', enabled: true, name: '', username: '', password: '' })}
+                >
+                    <FaPlus /> Create New Member
+                </button>
 
-            {editingUser && (
-                <AdminUserEditModal
-                    user={editingUser}
-                    onClose={() => setEditingUser(null)}
-                    onSave={handleAction}
-                    styles={styles}
-                />
-            )}
+                {editingUser && (
+                    <AdminUserEditModal
+                        user={editingUser}
+                        onClose={() => setEditingUser(null)}
+                        onSave={handleAction}
+                        styles={styles}
+                    />
+                )}
 
-            <div style={styles.listContainer}>
-                {users.map(u => (
-                    // Styles.userCard is a getter function defined in styles.js
-                    <div key={u._id} style={styles.userCard}>
-                        <div style={{ flexGrow: 1 }}>
-                            <strong>{u.name} (ID: {u.id})</strong>
-                            <small style={{ display: 'block', color: '#666' }}>
-                                Role: {u.role.toUpperCase()} | Username: {u.username}
-                            </small>
-                            <small style={{ display: 'block', color: u.enabled ? 'green' : 'red' }}>
-                                Access: {u.enabled ? 'Enabled' : 'Disabled'}
-                            </small>
+                <div style={styles.listContainer}>
+                    {users.map(u => (
+                        // Styles.userCard is a getter function defined in styles.js
+                        <div key={u._id} style={styles.userCard}>
+                            <div style={{ flexGrow: 1 }}>
+                                <strong>{u.name} (ID: {u.id})</strong>
+                                <small style={{ display: 'block', color: '#666' }}>
+                                    Role: {u.role.toUpperCase()} | Username: {u.username}
+                                </small>
+                                <small style={{ display: 'block', color: u.enabled ? 'green' : 'red' }}>
+                                    Access: {u.enabled ? 'Enabled' : 'Disabled'}
+                                </small>
+                            </div>
+
+                            {/* Control Buttons */}
+                            <div style={styles.adminControlGroup}>
+                                {/* Toggle Access */}
+                                <button
+                                    style={styles.controlButton(u.enabled ? '#ffcc00' : '#4cd964')}
+                                    onClick={() => handleAction(u.id, 'access', !u.enabled)}
+                                    title={u.enabled ? 'Disable Access' : 'Enable Access'}
+                                >
+                                    {u.enabled ? <FaBan /> : <FaUnlockAlt />}
+                                </button>
+                                {/* Change Role */}
+                                <button
+                                    style={styles.controlButton('#007aff')}
+                                    onClick={() => setEditingUser(u)}
+                                >
+                                    <FaEdit />
+                                </button>
+                                {/* Delete */}
+                                <button
+                                    style={styles.controlButton('#ff3b30')}
+                                    onClick={() => handleAction(u.id, 'delete')}
+                                    disabled={u.id === user.id} // Prevent admin from deleting self
+                                >
+                                    <FaTrash />
+                                </button>
+                            </div>
                         </div>
-
-                        {/* Control Buttons */}
-                        <div style={styles.adminControlGroup}>
-                            {/* Toggle Access */}
-                            <button
-                                style={styles.controlButton(u.enabled ? '#ffcc00' : '#4cd964')}
-                                onClick={() => handleAction(u.id, 'access', !u.enabled)}
-                                title={u.enabled ? 'Disable Access' : 'Enable Access'}
-                            >
-                                {u.enabled ? <FaBan /> : <FaUnlockAlt />}
-                            </button>
-                            {/* Change Role */}
-                            <button
-                                style={styles.controlButton('#007aff')}
-                                onClick={() => setEditingUser(u)}
-                            >
-                                <FaEdit />
-                            </button>
-                            {/* Delete */}
-                            <button
-                                style={styles.controlButton('#ff3b30')}
-                                onClick={() => handleAction(u.id, 'delete')}
-                                disabled={u.id === user.id} // Prevent admin from deleting self
-                            >
-                                <FaTrash />
-                            </button>
-                        </div>
-                    </div>
-                ))}
+                    ))}
+                </div>
             </div>
-        </div>
+        </AdminLayout>
     );
 };
 

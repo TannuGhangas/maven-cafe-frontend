@@ -27,6 +27,25 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
     // Tracks the ID of the order card that is EXPANDED inline for ALL ITEMS.
     const [expandedOrderId, setExpandedOrderId] = useState(null);
 
+    // Profile image refresh trigger for instant updates
+    const [profileImageRefreshKey, setProfileImageRefreshKey] = useState(0);
+    
+    // Function to trigger profile image refresh across all OrderCard components
+    const triggerProfileImageRefresh = () => {
+        console.log('KitchenDashboard: Triggering profile image refresh across all components');
+        setProfileImageRefreshKey(prev => prev + 1);
+        
+        // Also broadcast to other kitchen tabs/windows
+        try {
+            localStorage.setItem('kitchenProfileRefresh', Date.now().toString());
+            // Remove the key immediately to avoid cluttering localStorage
+            setTimeout(() => {
+                localStorage.removeItem('kitchenProfileRefresh');
+            }, 100);
+        } catch (error) {
+            console.warn('KitchenDashboard: Could not broadcast profile refresh:', error);
+        }
+    };
 
     // Mobile detection
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -335,6 +354,20 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                         setChefCall(call);
                     });
 
+                    // Listen for profile image updates via socket - INSTANT updates
+                    socket.on('profile-image-updated', (updateData) => {
+                        console.log('🖼️ Profile image updated via socket:', updateData);
+                        console.log('🔍 Update details:', {
+                            userId: updateData.userId,
+                            userName: updateData.userName,
+                            action: updateData.action,
+                            hasImage: !!updateData.profileImage
+                        });
+                        
+                        // Trigger immediate profile image refresh
+                        triggerProfileImageRefresh();
+                    });
+
                     // Log successful connection
                     socket.on('connect', () => {
                         console.log('✅ Kitchen socket connected successfully');
@@ -377,21 +410,47 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
         
         document.addEventListener('visibilitychange', handleVisibilityChange);
         
-        // Add storage event listener to refresh orders when profile images are updated
+        // Enhanced profile image sync listeners - more aggressive updates
         const handleStorageChange = (e) => {
             if (e.key && e.key.startsWith('profilePic_')) {
-                console.log('KitchenDashboard: Profile image storage updated, refreshing orders...');
-                setTimeout(() => fetchOrders(), 100);
+                console.log('KitchenDashboard: Profile image storage updated, triggering immediate profile refresh...');
+                // Force immediate profile image re-render by updating a state that affects OrderCard
+                triggerProfileImageRefresh();
             }
         };
         
-        window.addEventListener('storage', handleStorageChange);
-        
-        const handleProfileUpdate = () => {
-            console.log('KitchenDashboard: Profile image updated via custom event, refreshing orders...');
-            setTimeout(() => fetchOrders(), 100);
+        const handleProfileUpdate = (event) => {
+            const { userId, userName, action } = event.detail;
+            console.log(`KitchenDashboard: Profile image ${action || 'updated'} for user ${userName || userId}, triggering immediate refresh...`);
+            // Force immediate profile image re-render
+            triggerProfileImageRefresh();
         };
+        
+        window.addEventListener('storage', handleStorageChange);
         window.addEventListener('profileImageUpdated', handleProfileUpdate);
+        
+        // Add global profile image refresh trigger
+        const handleGlobalProfileRefresh = () => {
+            console.log('KitchenDashboard: Global profile image refresh triggered');
+            triggerProfileImageRefresh();
+        };
+        
+        window.addEventListener('refreshAllProfileImages', handleGlobalProfileRefresh);
+        
+        // Additional listener for global profile image updates via storage
+        const handleGlobalStorageProfileUpdate = (e) => {
+            if (e.key === 'globalProfileImageUpdate' && e.newValue) {
+                try {
+                    const updateData = JSON.parse(e.newValue);
+                    console.log('KitchenDashboard: Global profile image update detected via storage:', updateData);
+                    triggerProfileImageRefresh();
+                } catch (error) {
+                    console.warn('KitchenDashboard: Error parsing global profile update:', error);
+                }
+            }
+        };
+        
+        window.addEventListener('storage', handleGlobalStorageProfileUpdate);
         
         return () => {
             clearInterval(interval);
@@ -403,10 +462,13 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                 socketRef.current.off('order-updated');
                 socketRef.current.off('order-deleted');
                 socketRef.current.off('chef-call');
+                socketRef.current.off('profile-image-updated');
             }
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             window.removeEventListener('storage', handleStorageChange);
+            window.removeEventListener('storage', handleGlobalStorageProfileUpdate);
             window.removeEventListener('profileImageUpdated', handleProfileUpdate);
+            window.removeEventListener('refreshAllProfileImages', handleGlobalProfileRefresh);
             
             // Reset global audio flag on unmount
             if (typeof window !== 'undefined') {
@@ -807,7 +869,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: isMobile ? 10 : 20 }}>
                                         {list.map((order) => (
                                             <OrderCard
-                                                key={order._id}
+                                                key={`${order._id}-${profileImageRefreshKey}`}
                                                 order={order}
                                                 selectedStatus={selectedStatus}
                                                 selectedItemTypeKey={selectedItemTypeKey}
@@ -817,6 +879,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                                                 styles={styles}
                                                 enhancedStyles={enhancedStyles}
                                                 user={user}
+                                                profileImageRefreshKey={profileImageRefreshKey}
                                             />
                                         ))}
                                     </div>

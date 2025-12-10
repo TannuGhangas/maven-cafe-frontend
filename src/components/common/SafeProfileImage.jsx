@@ -14,7 +14,8 @@ const SafeProfileImage = ({
     className = '',
     style = {},
     showPlaceholder = true,
-    alt = 'Profile Image'
+    alt = 'Profile Image',
+    refreshKey = null
 }) => {
     // Simple size configurations without using complex hooks
     const sizeConfig = {
@@ -26,7 +27,7 @@ const SafeProfileImage = ({
 
     const { width, height, fontSize } = sizeConfig[size] || sizeConfig.medium;
 
-    // Simple function to get profile image with error handling
+    // Simple function to get profile image with error handling and cache busting
     const getProfileImage = () => {
         try {
             // 1. Try server profile image first
@@ -39,7 +40,8 @@ const SafeProfileImage = ({
                 const userNameKey = userName.replace(/\s+/g, '_');
                 const localImage = localStorage.getItem(`profilePic_${userNameKey}`);
                 if (localImage) {
-                    return localImage;
+                    // Add cache busting parameter if refreshKey is provided
+                    return refreshKey ? `${localImage}?refresh=${refreshKey}` : localImage;
                 }
             }
 
@@ -47,7 +49,8 @@ const SafeProfileImage = ({
             if (userId) {
                 const localImage = localStorage.getItem(`profilePic_${userId}`);
                 if (localImage) {
-                    return localImage;
+                    // Add cache busting parameter if refreshKey is provided
+                    return refreshKey ? `${localImage}?refresh=${refreshKey}` : localImage;
                 }
             }
         } catch (error) {

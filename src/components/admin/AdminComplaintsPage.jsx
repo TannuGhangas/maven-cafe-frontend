@@ -13,6 +13,7 @@ import {
     FaChevronLeft
 } from 'react-icons/fa';
 import '../../styles/AdminComplaintsPage.css';
+import AdminLayout from './AdminLayout';
 
 // --- HELPER COMPONENT: Single Complaint Card ---
 const ComplaintCard = ({ complaint, styles, statusMap, handleUpdateStatus, user }) => {
@@ -133,7 +134,7 @@ const ComplaintCard = ({ complaint, styles, statusMap, handleUpdateStatus, user 
 // =======================================================
 // MAIN COMPONENT: AdminComplaintsPage
 // =======================================================
-const AdminComplaintsPage = ({ setPage, user, callApi, styles }) => {
+const AdminComplaintsPage = ({ setPage, user, callApi, styles, activeSection, setActiveSection }) => {
     const [complaints, setComplaints] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState('New'); 
@@ -201,53 +202,66 @@ const AdminComplaintsPage = ({ setPage, user, callApi, styles }) => {
         return acc;
     }, {});
     
-    if (loading) return <div className="loading-container"><FaSpinner className="spinner" size={30} /> Loading Complaints...</div>;
+    if (loading) return (
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div className="loading-container"><FaSpinner className="spinner" size={30} /> Loading Complaints...</div>
+        </AdminLayout>
+    );
 
     return (
-        <div className="admin-complaints-container">
-            <h2 className="admin-complaints-header">Feedback Triage Center 🚨</h2>
-            <p className="admin-complaints-subtitle">Total feedback items: {complaints.length}</p>
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div className="admin-complaints-container">
+                <h2 className="admin-complaints-header">Feedback Triage Center 🚨</h2>
+                <p className="admin-complaints-subtitle">Total feedback items: {complaints.length}</p>
 
-            {/* 1. Tabbed Filter Controls */}
-            <div className="admin-complaints-filter-tabs">
-                {Object.keys(statusMap).map(status => (
-                    <button
-                        key={status}
-                        onClick={() => setFilterStatus(status)}
-                        className={`admin-complaints-filter-tab ${status.toLowerCase().replace(' ', '-')} ${filterStatus === status ? 'active' : ''}`}
-                    >
-                        {statusMap[status].icon} {status} ({statusCounts[status] || 0})
-                    </button>
-                ))}
+                {/* 1. Tabbed Filter Controls */}
+                <div className="admin-complaints-filter-tabs">
+                    {Object.keys(statusMap).map(status => (
+                        <button
+                            key={status}
+                            onClick={() => setFilterStatus(status)}
+                            className={`admin-complaints-filter-tab ${status.toLowerCase().replace(' ', '-')} ${filterStatus === status ? 'active' : ''}`}
+                        >
+                            {statusMap[status].icon} {status} ({statusCounts[status] || 0})
+                        </button>
+                    ))}
+                </div>
+
+                {/* 2. Complaints List */}
+                <div className="admin-complaints-list">
+                    {filteredComplaints.length === 0 ? (
+                        <p className="admin-complaints-empty">
+                            No **{filterStatus}** complaints. Great job!
+                        </p>
+                    ) : (
+                        filteredComplaints.map(c => (
+                            <ComplaintCard
+                                key={c._id}
+                                complaint={c}
+                                styles={styles}
+                                statusMap={statusMap}
+                                handleUpdateStatus={handleUpdateStatus}
+                                user={user}
+                            />
+                        ))
+                    )}
+                </div>
+
+
             </div>
-
-            {/* 2. Complaints List */}
-            <div className="admin-complaints-list">
-                {filteredComplaints.length === 0 ? (
-                    <p className="admin-complaints-empty">
-                        No **{filterStatus}** complaints. Great job!
-                    </p>
-                ) : (
-                    filteredComplaints.map(c => (
-                        <ComplaintCard
-                            key={c._id}
-                            complaint={c}
-                            styles={styles}
-                            statusMap={statusMap}
-                            handleUpdateStatus={handleUpdateStatus}
-                            user={user}
-                        />
-                    ))
-                )}
-            </div>
-
-            <button
-                className="admin-complaints-back-btn secondary-button"
-                onClick={() => setPage(user.role === 'admin' ? 'admin-dashboard' : 'kitchen-dashboard')}
-            >
-                <FaChevronLeft /> Back to Dashboard
-            </button>
-        </div>
+        </AdminLayout>
     );
 };
 

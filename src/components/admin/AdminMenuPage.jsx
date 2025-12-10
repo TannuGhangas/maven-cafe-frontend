@@ -5,8 +5,9 @@ import {
     TABLE_NUMBERS, ADD_ONS, SUGAR_LEVELS,
     getAllowedLocations, USER_LOCATIONS_DATA
 } from '../../config/constants';
+import AdminLayout from './AdminLayout';
 
-const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
+const AdminMenuPage = ({ user, callApi, setPage, styles, activeSection, setActiveSection }) => {
     const [loading, setLoading] = useState(false);
     const [menuCategories, setMenuCategories] = useState([]);
     const [addOns, setAddOns] = useState([]);
@@ -296,445 +297,454 @@ const AdminMenuPage = ({ user, callApi, setPage, styles }) => {
         await instantSave();
     };
 
-
     if (loading) return (
-        <div style={enhancedStyles.loadingContainer}>
-            <FaSpinner className="spinner" size={30} /> Loading Menu...
-        </div>
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div style={enhancedStyles.loadingContainer}>
+                <FaSpinner className="spinner" size={30} /> Loading Menu...
+            </div>
+        </AdminLayout>
     );
 
     return (
-        <div style={enhancedStyles.screenPadding}>
-            <h2 style={enhancedStyles.headerText}>
-                <FaUtensilSpoon style={{ marginRight: '10px' }} />
-                Menu Management
-            </h2>
+        <AdminLayout
+            user={user}
+            setPage={setPage}
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            callApi={callApi}
+        >
+            <div style={enhancedStyles.screenPadding}>
+                <h2 style={enhancedStyles.headerText}>
+                    <FaUtensilSpoon style={{ marginRight: '10px' }} />
+                    Menu Management
+                </h2>
 
-            <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                <button
-                    style={enhancedStyles.secondaryButton}
-                    onClick={() => setPage('admin-dashboard')}
-                >
-                    <FaChevronLeft /> Back to Admin Dashboard
-                </button>
-                <button
-                    style={enhancedStyles.primaryButton}
-                    onClick={addCategory}
-                >
-                    <FaPlus /> Add Category
-                </button>
-                <button
-                    style={enhancedStyles.primaryButton}
-                    onClick={saveMenu}
-                >
-                    Save Changes
-                </button>
-            </div>
+                <div style={{ marginBottom: '30px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                    <button
+                        style={enhancedStyles.primaryButton}
+                        onClick={addCategory}
+                    >
+                        <FaPlus /> Add Category
+                    </button>
+                    <button
+                        style={enhancedStyles.primaryButton}
+                        onClick={saveMenu}
+                    >
+                        Save Changes
+                    </button>
+                </div>
 
-            {/* Menu Categories */}
-            {menuCategories.map((category, catIndex) => (
-                <div key={category.name} style={enhancedStyles.menuCard}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        flexWrap: 'wrap',
-                        gap: '10px'
-                    }}>
-                        <h3 style={{
-                            ...enhancedStyles.categoryHeader,
-                            margin: 0,
-                            flex: '1 1 auto',
-                            minWidth: '200px'
-                        }}>
-                            {getIcon(category.icon)} {category.name}
-                        </h3>
+                {/* Menu Categories */}
+                {menuCategories.map((category, catIndex) => (
+                    <div key={category.name} style={enhancedStyles.menuCard}>
                         <div style={{
                             display: 'flex',
-                            gap: '8px',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
                             flexWrap: 'wrap',
-                            alignItems: 'center'
+                            gap: '10px'
                         }}>
-                            <button
-                                style={{
-                                    background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '10px',
-                                    padding: '8px 12px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.8rem',
-                                    fontWeight: '600',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    whiteSpace: 'nowrap',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 3px 8px rgba(0,122,255,0.3)',
-                                    transform: 'translateY(0)',
-                                    ':hover': {
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 5px 15px rgba(0,122,255,0.4)'
-                                    }
-                                }}
-                                onClick={() => openModal('editCategory', '', catIndex)}
-                                title="Edit Category"
-                            >
-                                <FaEdit />
-                                Edit
-                            </button>
-                            <button
-                                style={{
-                                    background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '10px',
-                                    padding: '8px 12px',
-                                    cursor: 'pointer',
-                                    fontSize: '0.8rem',
-                                    fontWeight: '600',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '5px',
-                                    whiteSpace: 'nowrap',
-                                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                    boxShadow: '0 3px 8px rgba(255,59,48,0.3)',
-                                    transform: 'translateY(0)',
-                                    ':hover': {
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 5px 15px rgba(255,59,48,0.4)'
-                                    }
-                                }}
-                                onClick={() => deleteCategory(catIndex)}
-                                title="Delete Category"
-                            >
-                                <FaTrash />
-                                Delete
-                            </button>
-                            <button
-                                style={{
-                                    ...enhancedStyles.primaryButton,
-                                    fontSize: '0.8rem',
-                                    padding: '8px 12px',
-                                    whiteSpace: 'nowrap',
-                                    background: 'linear-gradient(135deg, #a1db40 0%, #8bc34a 100%)',
-                                    boxShadow: '0 3px 8px rgba(161,219,64,0.3)',
-                                    transform: 'translateY(0)',
-                                    ':hover': {
-                                        transform: 'translateY(-1px)',
-                                        boxShadow: '0 5px 15px rgba(161,219,64,0.4)'
-                                    }
-                                }}
-                                onClick={() => openModal('addItem', category.name)}
-                            >
-                                <FaPlus /> Add Item
-                            </button>
+                            <h3 style={{
+                                ...enhancedStyles.categoryHeader,
+                                margin: 0,
+                                flex: '1 1 auto',
+                                minWidth: '200px'
+                            }}>
+                                {getIcon(category.icon)} {category.name}
+                            </h3>
+                            <div style={{
+                                display: 'flex',
+                                gap: '8px',
+                                flexWrap: 'wrap',
+                                alignItems: 'center'
+                            }}>
+                                <button
+                                    style={{
+                                        background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        padding: '8px 12px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 3px 8px rgba(0,122,255,0.3)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: '0 5px 15px rgba(0,122,255,0.4)'
+                                        }
+                                    }}
+                                    onClick={() => openModal('editCategory', '', catIndex)}
+                                    title="Edit Category"
+                                >
+                                    <FaEdit />
+                                    Edit
+                                </button>
+                                <button
+                                    style={{
+                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '10px',
+                                        padding: '8px 12px',
+                                        cursor: 'pointer',
+                                        fontSize: '0.8rem',
+                                        fontWeight: '600',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '5px',
+                                        whiteSpace: 'nowrap',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        boxShadow: '0 3px 8px rgba(255,59,48,0.3)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: '0 5px 15px rgba(255,59,48,0.4)'
+                                        }
+                                    }}
+                                    onClick={() => deleteCategory(catIndex)}
+                                    title="Delete Category"
+                                >
+                                    <FaTrash />
+                                    Delete
+                                </button>
+                                <button
+                                    style={{
+                                        ...enhancedStyles.primaryButton,
+                                        fontSize: '0.8rem',
+                                        padding: '8px 12px',
+                                        whiteSpace: 'nowrap',
+                                        background: 'linear-gradient(135deg, #a1db40 0%, #8bc34a 100%)',
+                                        boxShadow: '0 3px 8px rgba(161,219,64,0.3)',
+                                        transform: 'translateY(0)',
+                                        ':hover': {
+                                            transform: 'translateY(-1px)',
+                                            boxShadow: '0 5px 15px rgba(161,219,64,0.4)'
+                                        }
+                                    }}
+                                    onClick={() => openModal('addItem', category.name)}
+                                >
+                                    <FaPlus /> Add Item
+                                </button>
+                            </div>
                         </div>
-                    </div>
 
-                    {category.items && category.items.length > 0 ? (
-                        <div style={enhancedStyles.itemList}>
-                            {category.items.map((item, itemIndex) => (
-                                <div key={item.name} style={{
-                                    ...enhancedStyles.menuItem,
-                                    position: 'relative'
-                                }}>
-                                    {item.name}
-                                    <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
-                                        <button
-                                            style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
-                                            onClick={() => openModal('editItem', category.name, itemIndex, item.name)}
-                                            title="Edit Name"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
-                                            onClick={() => {
-                                                if (window.confirm(`Remove ${item.name}?`)) removeItem(catIndex, itemIndex);
-                                            }}
-                                            title="Remove"
-                                        >
-                                            <FaTrash />
-                                        </button>
+                        {category.items && category.items.length > 0 ? (
+                            <div style={enhancedStyles.itemList}>
+                                {category.items.map((item, itemIndex) => (
+                                    <div key={item.name} style={{
+                                        ...enhancedStyles.menuItem,
+                                        position: 'relative'
+                                    }}>
+                                        {item.name}
+                                        <div style={{ position: 'absolute', top: '5px', right: '5px', display: 'flex', gap: '2px', alignItems: 'center' }}>
+                                            <button
+                                                style={{ background: 'none', border: 'none', color: '#007aff', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                onClick={() => openModal('editItem', category.name, itemIndex, item.name)}
+                                                title="Edit Name"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                style={{ background: 'none', border: 'none', color: '#ff3b30', cursor: 'pointer', fontSize: '0.8rem' }}
+                                                onClick={() => {
+                                                    if (window.confirm(`Remove ${item.name}?`)) removeItem(catIndex, itemIndex);
+                                                }}
+                                                title="Remove"
+                                            >
+                                                <FaTrash />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <p style={{ color: '#666', fontStyle: 'italic', textAlign: 'center', margin: '20px 0' }}>
-                            No specific types - standard {category.name.toLowerCase()} available
-                        </p>
-                    )}
-                </div>
-            ))}
-
-            {/* Add-ons Section */}
-            <div style={enhancedStyles.menuCard}>
-                <h3 style={enhancedStyles.categoryHeader}>
-                    <FaUtensilSpoon style={{ marginRight: '8px' }} />
-                    Spice Add-Ons
-                    <button
-                        style={{ ...enhancedStyles.primaryButton, marginLeft: 'auto', fontSize: '0.8rem', padding: '5px 10px' }}
-                        onClick={() => openModal('addAddOn')}
-                    >
-                        <FaPlus /> Add
-                    </button>
-                </h3>
-                <div style={enhancedStyles.itemList}>
-                    {addOns.length > 0 ? addOns.map((addOn, index) => (
-                        <div key={addOn.name} style={{
-                            ...enhancedStyles.menuItem,
-                            minHeight: '80px' // Ensure minimum height for button space
-                        }}>
-                            <div style={{ marginBottom: '10px', fontSize: '1rem', fontWeight: '600' }}>
-                                {addOn.name}
-                            </div>
-                            <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
-                                <button
-                                    style={{ 
-                                        background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        borderRadius: '10px', 
-                                        padding: '8px 12px', 
-                                        cursor: 'pointer', 
-                                        fontSize: '0.8rem', 
-                                        fontWeight: '600',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        boxShadow: '0 3px 6px rgba(0,122,255,0.4)',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        ':hover': {
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: '0 6px 12px rgba(0,122,255,0.6)'
-                                        }
-                                    }}
-                                    onClick={() => openModal('editAddOn', '', index, addOn.name)}
-                                    title={`Edit add-on ${addOn.name}`}
-                                >
-                                    <FaEdit style={{ fontSize: '0.8rem' }} />
-                                    <span>Edit</span>
-                                </button>
-                                <button
-                                    style={{ 
-                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        borderRadius: '10px', 
-                                        padding: '8px 12px', 
-                                        cursor: 'pointer', 
-                                        fontSize: '0.8rem', 
-                                        fontWeight: '600',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        ':hover': {
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        if (window.confirm(`🗑️ Remove add-on "${addOn.name}"?`)) {
-                                            removeAddOn(index);
-                                            // Auto-save after removing add-on
-                                            setTimeout(() => saveMenu(false), 100);
-                                        }
-                                    }}
-                                    title={`Remove add-on ${addOn.name}`}
-                                >
-                                    <FaTrash style={{ fontSize: '0.8rem' }} />
-                                    <span>Remove</span>
-                                </button>
-                            </div>
-                        </div>
-                    )) : (
-                        <div style={{
-                            ...enhancedStyles.menuItem,
-                            backgroundColor: '#fff3cd',
-                            borderColor: '#ffeaa7',
-                            color: '#856404',
-                            textAlign: 'center',
-                            padding: '20px'
-                        }}>
-                            <p style={{ margin: 0, fontStyle: 'italic' }}>
-                                No add-ons configured. Click "Add" to create spice add-ons.
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Sugar Levels Section */}
-            <div style={enhancedStyles.menuCard}>
-                <h3 style={enhancedStyles.categoryHeader}>
-                    <FaUtensilSpoon style={{ marginRight: '8px' }} />
-                    Sugar Levels
-                    <button
-                        style={{ ...enhancedStyles.primaryButton, marginLeft: 'auto', fontSize: '0.8rem', padding: '5px 10px' }}
-                        onClick={() => openModal('addSugar')}
-                    >
-                        <FaPlus /> Add
-                    </button>
-                </h3>
-                <div style={enhancedStyles.itemList}>
-                    {sugarLevels.length > 0 ? sugarLevels.map((level, index) => (
-                        <div key={level.level} style={{
-                            ...enhancedStyles.menuItem,
-                            backgroundColor: level.level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
-                            color: level.level === 1 ? '#103c7f' : '#333',
-                            minHeight: '80px' // Ensure minimum height for button space
-                        }}>
-                            <div style={{ marginBottom: '10px' }}>
-                                {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
-                            </div>
-                            <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
-                                <button
-                                    style={{ 
-                                        background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
-                                        color: 'white', 
-                                        border: 'none', 
-                                        borderRadius: '10px', 
-                                        padding: '8px 12px', 
-                                        cursor: 'pointer', 
-                                        fontSize: '0.8rem', 
-                                        fontWeight: '600',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '6px',
-                                        boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
-                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                                        ':hover': {
-                                            transform: 'translateY(-2px)',
-                                            boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
-                                        }
-                                    }}
-                                    onClick={() => {
-                                        if (level.level === 1) {
-                                            if (window.confirm(`⚠️ WARNING: This is the default sugar level. Remove it anyway?`)) {
-                                                removeSugarLevel(level.level);
-                                                // Auto-save after removing default level
-                                                setTimeout(() => saveMenu(false), 100);
-                                            }
-                                        } else {
-                                            if (window.confirm(`🗑️ Remove sugar level ${level.level}?`)) {
-                                                removeSugarLevel(level.level);
-                                                // Auto-save after removing level
-                                                setTimeout(() => saveMenu(false), 100);
-                                            }
-                                        }
-                                    }}
-                                    title={`Remove sugar level ${level.level}`}
-                                >
-                                    <FaTrash style={{ fontSize: '0.8rem' }} />
-                                    <span>Remove</span>
-                                </button>
-                            </div>
-                        </div>
-                    )) : (
-                        <div style={{
-                            ...enhancedStyles.menuItem,
-                            backgroundColor: '#fff3cd',
-                            borderColor: '#ffeaa7',
-                            color: '#856404',
-                            textAlign: 'center',
-                            padding: '20px'
-                        }}>
-                            <p style={{ margin: 0, fontStyle: 'italic' }}>
-                                No sugar levels configured. Click "Add" to create sugar level options.
-                            </p>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* Note about persistence */}
-            <div style={{
-                ...enhancedStyles.menuCard,
-                backgroundColor: '#d4edda',
-                border: '1px solid #c3e6cb',
-                textAlign: 'center'
-            }}>
-                <p style={{
-                    color: '#155724',
-                    margin: 0,
-                    fontSize: '0.95rem',
-                    fontFamily: 'Calibri, Arial, sans-serif'
-                }}>
-                    <strong>Success:</strong> Menu items are now dynamically managed and saved to the database.
-                    Changes are instantly reflected across all users and kitchen staff.
-                </p>
-            </div>
-
-            {/* Modal for Add/Edit */}
-            {showModal && (
-                <div style={styles.modalOverlay}>
-                    <div style={styles.modalContent}>
-                        <h3 style={{ marginTop: 0, color: '#103c7f' }}>
-                            {modalData.type === 'editCategory' ? 'Edit Category' :
-                              modalData.type === 'addItem' ? `Add ${modalData.category} Item` :
-                              modalData.type === 'editItem' ? `Edit ${modalData.category} Item` :
-                              modalData.type === 'addAddOn' ? 'Add Spice Add-On' :
-                              modalData.type === 'editAddOn' ? 'Edit Spice Add-On' :
-                              'Add Sugar Level'}
-                        </h3>
-                        {modalData.type === 'editCategory' ? (
-                            <div>
-                                <label>Name:</label>
-                                <input
-                                    type="text"
-                                    value={modalData.name}
-                                    onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
-                                    style={styles.inputField}
-                                    placeholder="Category name"
-                                />
-                                <label>Icon:</label>
-                                <select
-                                    value={modalData.icon}
-                                    onChange={(e) => setModalData({ ...modalData, icon: e.target.value })}
-                                    style={styles.selectField}
-                                >
-                                    <option value="FaCoffee">Coffee</option>
-                                    <option value="FaMugHot">Tea</option>
-                                    <option value="FaGlassWhiskey">Milk</option>
-                                    <option value="FaTint">Water</option>
-                                    <option value="FaLemon">Lemon</option>
-                                    <option value="FaCube">Cube</option>
-                                    <option value="FaUtensilSpoon">Utensil</option>
-                                </select>
-                                <label>Color:</label>
-                                <input
-                                    type="color"
-                                    value={modalData.color}
-                                    onChange={(e) => setModalData({ ...modalData, color: e.target.value })}
-                                    style={styles.inputField}
-                                />
+                                ))}
                             </div>
                         ) : (
-                            <input
-                                type={modalData.type === 'addSugar' ? 'number' : 'text'}
-                                value={modalData.value}
-                                onChange={(e) => setModalData({ ...modalData, value: e.target.value })}
-                                placeholder={modalData.type === 'addSugar' ? 'Enter sugar level (number)' : 'Enter name'}
-                                style={styles.inputField}
-                                autoFocus
-                            />
+                            <p style={{ color: '#666', fontStyle: 'italic', textAlign: 'center', margin: '20px 0' }}>
+                                No specific types - standard {category.name.toLowerCase()} available
+                            </p>
                         )}
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
-                            <button style={styles.primaryButton} onClick={saveModal}>
-                                Save
-                            </button>
-                            <button style={styles.secondaryButton} onClick={closeModal}>
-                                Cancel
-                            </button>
-                        </div>
+                    </div>
+                ))}
+
+                {/* Add-ons Section */}
+                <div style={enhancedStyles.menuCard}>
+                    <h3 style={enhancedStyles.categoryHeader}>
+                        <FaUtensilSpoon style={{ marginRight: '8px' }} />
+                        Spice Add-Ons
+                        <button
+                            style={{ ...enhancedStyles.primaryButton, marginLeft: 'auto', fontSize: '0.8rem', padding: '5px 10px' }}
+                            onClick={() => openModal('addAddOn')}
+                        >
+                            <FaPlus /> Add
+                        </button>
+                    </h3>
+                    <div style={enhancedStyles.itemList}>
+                        {addOns.length > 0 ? addOns.map((addOn, index) => (
+                            <div key={addOn.name} style={{
+                                ...enhancedStyles.menuItem,
+                                minHeight: '80px' // Ensure minimum height for button space
+                            }}>
+                                <div style={{ marginBottom: '10px', fontSize: '1rem', fontWeight: '600' }}>
+                                    {addOn.name}
+                                </div>
+                                <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                    <button
+                                        style={{ 
+                                            background: 'linear-gradient(135deg, #007aff 0%, #0056cc 100%)', 
+                                            color: 'white', 
+                                            border: 'none', 
+                                            borderRadius: '10px', 
+                                            padding: '8px 12px', 
+                                            cursor: 'pointer', 
+                                            fontSize: '0.8rem', 
+                                            fontWeight: '600',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            boxShadow: '0 3px 6px rgba(0,122,255,0.4)',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            ':hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 6px 12px rgba(0,122,255,0.6)'
+                                            }
+                                        }}
+                                        onClick={() => openModal('editAddOn', '', index, addOn.name)}
+                                        title={`Edit add-on ${addOn.name}`}
+                                    >
+                                        <FaEdit style={{ fontSize: '0.8rem' }} />
+                                        <span>Edit</span>
+                                    </button>
+                                    <button
+                                        style={{ 
+                                            background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
+                                            color: 'white', 
+                                            border: 'none', 
+                                            borderRadius: '10px', 
+                                            padding: '8px 12px', 
+                                            cursor: 'pointer', 
+                                            fontSize: '0.8rem', 
+                                            fontWeight: '600',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            ':hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
+                                            }
+                                        }}
+                                        onClick={() => {
+                                            if (window.confirm(`🗑️ Remove add-on "${addOn.name}"?`)) {
+                                                removeAddOn(index);
+                                                // Auto-save after removing add-on
+                                                setTimeout(() => saveMenu(false), 100);
+                                            }
+                                        }}
+                                        title={`Remove add-on ${addOn.name}`}
+                                    >
+                                        <FaTrash style={{ fontSize: '0.8rem' }} />
+                                        <span>Remove</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <div style={{
+                                ...enhancedStyles.menuItem,
+                                backgroundColor: '#fff3cd',
+                                borderColor: '#ffeaa7',
+                                color: '#856404',
+                                textAlign: 'center',
+                                padding: '20px'
+                            }}>
+                                <p style={{ margin: 0, fontStyle: 'italic' }}>
+                                    No add-ons configured. Click "Add" to create spice add-ons.
+                                </p>
+                            </div>
+                        )}
                     </div>
                 </div>
-            )}
-        </div>
+
+                {/* Sugar Levels Section */}
+                <div style={enhancedStyles.menuCard}>
+                    <h3 style={enhancedStyles.categoryHeader}>
+                        <FaUtensilSpoon style={{ marginRight: '8px' }} />
+                        Sugar Levels
+                        <button
+                            style={{ ...enhancedStyles.primaryButton, marginLeft: 'auto', fontSize: '0.8rem', padding: '5px 10px' }}
+                            onClick={() => openModal('addSugar')}
+                        >
+                            <FaPlus /> Add
+                        </button>
+                    </h3>
+                    <div style={enhancedStyles.itemList}>
+                        {sugarLevels.length > 0 ? sugarLevels.map((level, index) => (
+                            <div key={level.level} style={{
+                                ...enhancedStyles.menuItem,
+                                backgroundColor: level.level === 1 ? '#a1db40' : '#f8f9fa', // Highlight default sugar level
+                                color: level.level === 1 ? '#103c7f' : '#333',
+                                minHeight: '80px' // Ensure minimum height for button space
+                            }}>
+                                <div style={{ marginBottom: '10px' }}>
+                                    {level.level} {level.level === 1 ? 'Spoon (Default)' : 'Spoons'}
+                                </div>
+                                <div style={{ position: 'absolute', bottom: '5px', right: '5px', display: 'flex', gap: '5px', alignItems: 'center' }}>
+                                    <button
+                                        style={{ 
+                                            background: 'linear-gradient(135deg, #ff3b30 0%, #d63027 100%)', 
+                                            color: 'white', 
+                                            border: 'none', 
+                                            borderRadius: '10px', 
+                                            padding: '8px 12px', 
+                                            cursor: 'pointer', 
+                                            fontSize: '0.8rem', 
+                                            fontWeight: '600',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '6px',
+                                            boxShadow: '0 3px 6px rgba(255,59,48,0.4)',
+                                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                            ':hover': {
+                                                transform: 'translateY(-2px)',
+                                                boxShadow: '0 6px 12px rgba(255,59,48,0.6)'
+                                            }
+                                        }}
+                                        onClick={() => {
+                                            if (level.level === 1) {
+                                                if (window.confirm(`⚠️ WARNING: This is the default sugar level. Remove it anyway?`)) {
+                                                    removeSugarLevel(level.level);
+                                                    // Auto-save after removing default level
+                                                    setTimeout(() => saveMenu(false), 100);
+                                                }
+                                            } else {
+                                                if (window.confirm(`🗑️ Remove sugar level ${level.level}?`)) {
+                                                    removeSugarLevel(level.level);
+                                                    // Auto-save after removing level
+                                                    setTimeout(() => saveMenu(false), 100);
+                                                }
+                                            }
+                                        }}
+                                        title={`Remove sugar level ${level.level}`}
+                                    >
+                                        <FaTrash style={{ fontSize: '0.8rem' }} />
+                                        <span>Remove</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )) : (
+                            <div style={{
+                                ...enhancedStyles.menuItem,
+                                backgroundColor: '#fff3cd',
+                                borderColor: '#ffeaa7',
+                                color: '#856404',
+                                textAlign: 'center',
+                                padding: '20px'
+                            }}>
+                                <p style={{ margin: 0, fontStyle: 'italic' }}>
+                                    No sugar levels configured. Click "Add" to create sugar level options.
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Note about persistence */}
+                <div style={{
+                    ...enhancedStyles.menuCard,
+                    backgroundColor: '#d4edda',
+                    border: '1px solid #c3e6cb',
+                    textAlign: 'center'
+                }}>
+                    <p style={{
+                        color: '#155724',
+                        margin: 0,
+                        fontSize: '0.95rem',
+                        fontFamily: 'Calibri, Arial, sans-serif'
+                    }}>
+                        <strong>Success:</strong> Menu items are now dynamically managed and saved to the database.
+                        Changes are instantly reflected across all users and kitchen staff.
+                    </p>
+                </div>
+
+                {/* Modal for Add/Edit */}
+                {showModal && (
+                    <div style={styles.modalOverlay}>
+                        <div style={styles.modalContent}>
+                            <h3 style={{ marginTop: 0, color: '#103c7f' }}>
+                                {modalData.type === 'editCategory' ? 'Edit Category' :
+                                  modalData.type === 'addItem' ? `Add ${modalData.category} Item` :
+                                  modalData.type === 'editItem' ? `Edit ${modalData.category} Item` :
+                                  modalData.type === 'addAddOn' ? 'Add Spice Add-On' :
+                                  modalData.type === 'editAddOn' ? 'Edit Spice Add-On' :
+                                  'Add Sugar Level'}
+                            </h3>
+                            {modalData.type === 'editCategory' ? (
+                                <div>
+                                    <label>Name:</label>
+                                    <input
+                                        type="text"
+                                        value={modalData.name}
+                                        onChange={(e) => setModalData({ ...modalData, name: e.target.value })}
+                                        style={styles.inputField}
+                                        placeholder="Category name"
+                                    />
+                                    <label>Icon:</label>
+                                    <select
+                                        value={modalData.icon}
+                                        onChange={(e) => setModalData({ ...modalData, icon: e.target.value })}
+                                        style={styles.selectField}
+                                    >
+                                        <option value="FaCoffee">Coffee</option>
+                                        <option value="FaMugHot">Tea</option>
+                                        <option value="FaGlassWhiskey">Milk</option>
+                                        <option value="FaTint">Water</option>
+                                        <option value="FaLemon">Lemon</option>
+                                        <option value="FaCube">Cube</option>
+                                        <option value="FaUtensilSpoon">Utensil</option>
+                                    </select>
+                                    <label>Color:</label>
+                                    <input
+                                        type="color"
+                                        value={modalData.color}
+                                        onChange={(e) => setModalData({ ...modalData, color: e.target.value })}
+                                        style={styles.inputField}
+                                    />
+                                </div>
+                            ) : (
+                                <input
+                                    type={modalData.type === 'addSugar' ? 'number' : 'text'}
+                                    value={modalData.value}
+                                    onChange={(e) => setModalData({ ...modalData, value: e.target.value })}
+                                    placeholder={modalData.type === 'addSugar' ? 'Enter sugar level (number)' : 'Enter name'}
+                                    style={styles.inputField}
+                                    autoFocus
+                                />
+                            )}
+                            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+                                <button style={styles.primaryButton} onClick={saveModal}>
+                                    Save
+                                </button>
+                                <button style={styles.secondaryButton} onClick={closeModal}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </AdminLayout>
     );
 };
 
