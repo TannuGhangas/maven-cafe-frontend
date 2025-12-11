@@ -1,77 +1,72 @@
+// main.jsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import { requestNotificationPermissionAndGetToken } from "./firebase";
 
-// Global styles
+// ------------------------------------------------------
+// 🟦 Global Styles
+// ------------------------------------------------------
 const globalStyles = `
-    body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #f7f7f7; }
-    h1, h2, h3 { color: #333; }
-    button { cursor: pointer; }
-    main { max-width: 600px; margin: 0 auto; min-height: calc(100vh - 60px); background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; background-color: #f7f7f7; }
+  h1, h2, h3 { color: #333; }
+  button { cursor: pointer; }
+  main { max-width: 600px; margin: 0 auto; min-height: calc(100vh - 60px); background-color: white; box-shadow: 0 0 10px rgba(0,0,0,0.05); }
 `;
 const styleSheet = document.createElement("style");
 styleSheet.innerText = globalStyles;
 document.head.appendChild(styleSheet);
 
-// Render App
+// ------------------------------------------------------
+// 🟦 Render App
+// ------------------------------------------------------
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 
-/* ======================================================================
-   🔥 FIXED: ONLY ONE SERVICE WORKER SHOULD EXIST
-   - Remove service-worker.js registration
-   - Do NOT register any default SW with Vite
-   - Only register firebase-messaging-sw.js
-====================================================================== */
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("/firebase-messaging-sw.js")
-      .then(() => console.log("✔ Firebase Messaging SW registered"))
-      .catch((err) =>
-        console.error("❌ Firebase Messaging SW registration failed:", err)
-      );
-  });
-}
-
-/* ======================================================================
-   🔥 Request FCM Token + Send Token To Backend
-====================================================================== */
+// ------------------------------------------------------
+// 🟦 Register Service Worker for Background Notifications
+// ------------------------------------------------------
 (async () => {
   try {
-    // Browser capability check
-    if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-      console.log("⚠️ Push notifications not supported on this device");
+    if ('serviceWorker' in navigator) {
+      console.log('📱 Registering service worker for background notifications...');
+      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('✅ Service worker registered:', registration.scope);
+    } else {
+      console.log('❌ Service workers not supported in this browser');
+    }
+  } catch (err) {
+    console.warn('⚠️ Service worker registration failed:', err.message);
+  }
+})();
+
+// ------------------------------------------------------
+// 🟦 Request Notification Permission (ONLY after login)
+// ------------------------------------------------------
+(async () => {
+  try {
+    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+    const { id: userId, role: userRole } = currentUser;
+
+    if (!userId || !userRole) {
+      console.log("⚠️ User not logged in → Not requesting FCM token yet");
       return;
     }
 
     // Ask permission + get token
     const token = await requestNotificationPermissionAndGetToken();
-    if (!token) {
-      console.log("⚠️ No FCM token received");
-      return;
-    }
+    if (!token) return;
 
     console.log("🔑 FCM Token:", token);
 
-    // Get user from localStorage
-    const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
-    const { id: userId, role: userRole } = currentUser;
-
-    if (!userId || !userRole) {
-      console.log("⚠️ No logged-in user → Skipping FCM token send");
-      return;
-    }
-
-    // Build clean backend URL
-    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
+    // Clean backend URL
+    const apiUrl = import.meta.env.VITE_API_URL || "http://10.119.41.34:3001";
     const cleanApiUrl = apiUrl.replace(/\/api\/?$/, "");
 
-    // Send token → backend
+    // Send token to backend
     const response = await fetch(`${cleanApiUrl}/api/save-fcm-token`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, userId, userRole }),
+      body: JSON.stringify({ token, userId, userRole })
     });
 
     if (response.ok) {

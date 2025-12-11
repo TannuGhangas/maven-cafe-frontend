@@ -2,25 +2,27 @@
 // Firebase Messaging Service Worker
 // -----------------------------------------------------------
 
-// Load Firebase scripts (compat needed for SW)
+// Load Firebase scripts for service worker
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js");
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
+// -----------------------------------------------------------
 // Initialize Firebase
+// -----------------------------------------------------------
 firebase.initializeApp({
   apiKey: "AIzaSyBpYWI6mQQzNBMT4rjvZXAhh-RXuiD1Uyo",
   authDomain: "cafeapp-11a07.firebaseapp.com",
   projectId: "cafeapp-11a07",
-  storageBucket: "cafeapp-11a07.appspot.com",
+  storageBucket: "cafeapp-11a07.firebasestorage.app",
   messagingSenderId: "726921778154",
   appId: "1:726921778154:web:baad8d1094ffa594e91893",
-  measurementId: "G-8Y583Y9CQ0",
+  measurementId: "G-8Y583Y9CQ0"
 });
 
 const messaging = firebase.messaging();
 
 // -----------------------------------------------------------
-// BACKGROUND MESSAGE HANDLER (App CLOSED / minimized)
+// BACKGROUND MESSAGE HANDLER (App CLOSED / Minimized)
 // -----------------------------------------------------------
 messaging.onBackgroundMessage((payload) => {
   console.log("[SW] Background message:", payload);
@@ -45,12 +47,12 @@ messaging.onBackgroundMessage((payload) => {
     requireInteraction: true,
     data: {
       ...payload.data,
-      timestamp: Date.now(),
+      timestamp: Date.now()
     },
     actions: [
       { action: "open_app", title: "📱 Open App" },
-      { action: "dismiss", title: "❌ Dismiss" },
-    ],
+      { action: "dismiss", title: "❌ Dismiss" }
+    ]
   };
 
   return self.registration.showNotification(title, options);
@@ -65,29 +67,30 @@ self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   if (event.action === "dismiss") return;
 
-  const notificationData = event.notification.data;
+  const data = event.notification.data;
 
   event.waitUntil(
     clients.matchAll({ type: "window", includeUncontrolled: true }).then((clientList) => {
+      // If app already open → focus + send message
       for (const client of clientList) {
         if (client.url.includes(self.location.origin)) {
           client.postMessage({
             type: "notification_click",
-            data: notificationData,
+            data
           });
           return client.focus();
         }
       }
 
-      // No window open → open new
+      // If app closed → open new window
       return clients.openWindow("/").then((newClient) => {
         if (newClient) {
           setTimeout(() => {
             newClient.postMessage({
               type: "notification_click",
-              data: notificationData,
+              data
             });
-          }, 800);
+          }, 700);
         }
       });
     })
@@ -95,10 +98,10 @@ self.addEventListener("notificationclick", (event) => {
 });
 
 // -----------------------------------------------------------
-// FALLBACK RAW PUSH HANDLER (useful for custom payloads)
+// FALLBACK RAW PUSH (non-FCM / custom payloads)
 // -----------------------------------------------------------
 self.addEventListener("push", (event) => {
-  console.log("[SW] Push event received");
+  console.log("[SW] Raw push received");
 
   if (!event.data) return;
 
@@ -123,26 +126,27 @@ self.addEventListener("push", (event) => {
       tag: data.tag || Date.now().toString(),
       renotify: true,
       requireInteraction: true,
-      data,
+      data
     };
 
     event.waitUntil(self.registration.showNotification(title, options));
   } catch (err) {
-    console.warn("[SW] Push not JSON:", event.data.text());
+    console.warn("[SW] Could not parse push JSON:", err);
+
     event.waitUntil(
       self.registration.showNotification("🍽️ Maven Cafe", {
         body: event.data.text(),
         icon: "/icons/icon-192-v2.png",
         badge: "/icons/icon-192-v2.png",
-        tag: Date.now().toString(),
         requireInteraction: true,
+        tag: Date.now().toString()
       })
     );
   }
 });
 
 // -----------------------------------------------------------
-// SW LIFECYCLE
+// SERVICE WORKER LIFECYCLE
 // -----------------------------------------------------------
 self.addEventListener("install", () => {
   console.log("[SW] Installed");

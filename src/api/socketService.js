@@ -19,7 +19,7 @@ const loadSocketIO = async () => {
 
 // Get the base URL from environment variable
 const getSocketUrl = () => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://10.119.41.34:3001';
   // Remove /api suffix and trailing slash if present to avoid double /api/api/ issues
   return apiUrl.replace(/\/api\/?$/, '').replace(/\/$/, '');
 };

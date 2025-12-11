@@ -38,6 +38,36 @@ function App() {
 
   const isLoggedIn = !!user;
 
+  // --- SERVICE WORKER MESSAGE LISTENER ---
+  useEffect(() => {
+    // Listen for messages from service worker (for notification clicks)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        console.log('📱 Received message from service worker:', event.data);
+        
+        if (event.data?.type === 'notification_click') {
+          const { data } = event.data;
+          console.log('🔔 Notification clicked with data:', data);
+          
+          // Handle different notification types
+          if (data?.type === 'new-order') {
+            // If kitchen user, navigate to kitchen dashboard
+            if (user?.role === 'kitchen') {
+              setPage('kitchen-dashboard');
+            }
+          } else if (data?.type === 'chef-call') {
+            // If kitchen user, navigate to kitchen dashboard to see the call
+            if (user?.role === 'kitchen') {
+              setPage('kitchen-dashboard');
+            }
+          }
+          
+          // You can add more notification type handlers here
+        }
+      });
+    }
+  }, [user]);
+
   // --- ROLE-BASED LOGIN REDIRECTION ---
   useEffect(() => {
     if (!user) return setPage('login');

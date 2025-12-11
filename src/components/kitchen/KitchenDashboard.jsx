@@ -148,7 +148,7 @@ const KitchenDashboard = ({ user, callApi, setPage, styles, kitchenView, setKitc
                     const token = await requestNotificationPermissionAndGetToken();
                     
                     if (token) {
-                        const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+                        const apiUrl = import.meta.env.VITE_API_URL || 'http://10.119.41.34:3001';
                         // Remove trailing /api if present to avoid double /api/api/ issue
                         const cleanApiUrl = apiUrl.replace(/\/api\/?$/, '');
                         const response = await fetch(`${cleanApiUrl}/api/save-fcm-token`, {

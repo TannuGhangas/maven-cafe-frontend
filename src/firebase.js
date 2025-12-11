@@ -17,12 +17,15 @@ const firebaseConfig = {
   measurementId: "G-8Y583Y9CQ0"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
 let messaging = null;
 let messagingInitialized = false;
 
-// Initialize messaging safely
+// ------------------------------------------------------------
+// INITIALIZE MESSAGING SAFELY
+// ------------------------------------------------------------
 const initializeMessaging = async () => {
   try {
     const supported = await isSupported();
@@ -43,22 +46,22 @@ initializeMessaging();
 export { messaging };
 
 // ------------------------------------------------------------
-// REQUEST TOKEN
+// REQUEST NOTIFICATION PERMISSION + GET TOKEN
 // ------------------------------------------------------------
 export async function requestNotificationPermissionAndGetToken() {
   try {
     if (!messagingInitialized) await initializeMessaging();
     if (!messaging) return null;
 
+    // Register the service worker ONCE
     const registration = await navigator.serviceWorker.register(
       "/firebase-messaging-sw.js"
     );
 
-    console.log("✅ SW registered for FCM:", registration);
+    console.log("🔥 SW registered for FCM:", registration);
 
     const permission = await Notification.requestPermission();
-    console.log("Permission:", permission);
-
+    console.log("Permission result:", permission);
     if (permission !== "granted") return null;
 
     const token = await getToken(messaging, {
@@ -76,7 +79,7 @@ export async function requestNotificationPermissionAndGetToken() {
 
     return token;
   } catch (err) {
-    console.error("❌ Token error:", err);
+    console.error("❌ Token generation error:", err);
     return null;
   }
 }
@@ -87,7 +90,7 @@ export async function requestNotificationPermissionAndGetToken() {
 export function onForegroundMessage(callback) {
   if (messaging && messagingInitialized) {
     onMessage(messaging, (payload) => {
-      console.log("📱 Foreground message:", payload);
+      console.log("📱 Foreground message received:", payload);
       callback(payload);
     });
   }
@@ -100,7 +103,7 @@ export async function checkNotificationSetup() {
   const result = {
     https:
       window.location.protocol === "https:" ||
-      window.location.hostname === "localhost",
+      window.location.hostname === "10.119.41.34",
     serviceWorker: "serviceWorker" in navigator,
     notification: "Notification" in window,
     messaging: false
@@ -110,6 +113,6 @@ export async function checkNotificationSetup() {
     result.messaging = await isSupported();
   } catch (err) {}
 
-  console.log("🔍 Notification checks:", result);
+  console.log("🔍 Notification diagnostics:", result);
   return result;
 }

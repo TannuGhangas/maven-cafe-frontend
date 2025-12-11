@@ -10,7 +10,7 @@ export default defineConfig({
   includeAssets: ["favicon.svg", "robots.txt"],
 
   devOptions: {
-    enabled: false   // disable PWA during localhost
+    enabled: false   // disable PWA during development
   },
 
   manifest: {

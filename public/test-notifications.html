@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maven Cafe - Notification Test Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        button {
+            background: #ff7f41;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #e66a2f;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .logs {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔔 Maven Cafe - Notification Test Tool</h1>
+        <p>Use this tool to test FCM notifications when the app is closed/minimized.</p>
+
+        <div class="test-section">
+            <h2>📱 Service Worker Status</h2>
+            <div id="sw-status" class="status info">Checking...</div>
+            <button onclick="checkServiceWorker()">Check Service Worker</button>
+        </div>
+
+        <div class="test-section">
+            <h2>🔑 FCM Token Management</h2>
+            <div id="token-status" class="status info">Not requested</div>
+            <button onclick="requestFCMToken()">Request FCM Token</button>
+            <button onclick="showToken()" id="show-token-btn" disabled>Show Token</button>
+            <button onclick="testNotification()" id="test-notification-btn" disabled>Test Notification</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📊 Environment Checks</h2>
+            <div id="env-checks" class="status info">Checking environment...</div>
+            <button onclick="runEnvironmentChecks()">Run All Checks</button>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Test Logs</h2>
+            <div id="logs" class="logs"></div>
+            <button onclick="clearLogs()">Clear Logs</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBpYWI6mQQzNBMT4rjvZXAhh-RXuiD1Uyo",
+            authDomain: "cafeapp-11a07.firebaseapp.com",
+            projectId: "cafeapp-11a07",
+            storageBucket: "cafeapp-11a07.firebasestorage.app",
+            messagingSenderId: "726921778154",
+            appId: "1:726921778154:web:baad8d1094ffa594e91893",
+            measurementId: "G-8Y583Y9CQ0"
+        };
+
+        let fcmToken = null;
+        let messaging = null;
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Initialize Firebase Messaging
+        messaging = firebase.messaging();
+
+        // Logging function
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            logEntry.className = type;
+            logs.appendChild(logEntry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        // Check service worker registration
+        async function checkServiceWorker() {
+            const status = document.getElementById('sw-status');
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+                    status.className = 'status success';
+                    status.textContent = `✅ Service Worker Registered: ${registration.scope}`;
+                    log('Service Worker registered successfully', 'success');
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '❌ Service Workers not supported';
+                    log('Service Workers not supported', 'error');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Registration failed: ${error.message}`;
+                log(`Service Worker registration failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Request FCM token
+        async function requestFCMToken() {
+            const status = document.getElementById('token-status');
+            try {
+                // Request permission
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    status.className = 'status error';
+                    status.textContent = '❌ Notification permission denied';
+                    log('Notification permission denied', 'error');
+                    return;
+                }
+
+                // Get token
+                fcmToken = await messaging.getToken({
+                    vapidKey: "BLPpu8OZN-PgmVq4-D1SjVHBI5fa0T-VPAsLMD-p-WKB35YGWSkr1QYXoYFt-cX8KUasd1isRG4UnZRHWOSFmdU",
+                    serviceWorkerRegistration: await navigator.serviceWorker.ready
+                });
+
+                if (fcmToken) {
+                    status.className = 'status success';
+                    status.textContent = '✅ FCM Token obtained';
+                    log(`FCM Token: ${fcmToken.substring(0, 20)}...`, 'success');
+                    
+                    // Enable test buttons
+                    document.getElementById('show-token-btn').disabled = false;
+                    document.getElementById('test-notification-btn').disabled = false;
+                } else {
+                    status.className = 'status error';
+                    status.textContent = '❌ No token obtained';
+                    log('No FCM token obtained', 'error');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}`;
+                log(`FCM token request failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Show token
+        function showToken() {
+            if (fcmToken) {
+                alert(`FCM Token:\n\n${fcmToken}\n\nYou can copy this token and use it to test notifications from the backend.`);
+                log('Token displayed to user', 'info');
+            }
+        }
+
+        // Test notification
+        async function testNotification() {
+            const status = document.getElementById('token-status');
+            if (!fcmToken) {
+                status.className = 'status error';
+                status.textContent = '❌ No token available';
+                return;
+            }
+
+            try {
+                // Send test notification via backend API
+                const apiUrl = 'http://10.119.41.34:3001';
+                const response = await fetch(`${apiUrl}/api/test-notification`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: 'test-user', userRole: 'kitchen' })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    status.className = 'status success';
+                    status.textContent = '✅ Test notification sent!';
+                    log('Test notification sent successfully', 'success');
+                } else {
+                    status.className = 'status error';
+                    status.textContent = `❌ Failed: ${result.message}`;
+                    log(`Test notification failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = `❌ Error: ${error.message}`;
+                log(`Test notification error: ${error.message}`, 'error');
+            }
+        }
+
+        // Environment checks
+        async function runEnvironmentChecks() {
+            const checks = document.getElementById('env-checks');
+            const results = [];
+
+            // Check HTTPS
+            if (window.location.protocol === 'https:' || window.location.hostname === 'localhost') {
+                results.push('✅ HTTPS/Localhost - OK');
+            } else {
+                results.push('❌ HTTPS required - FCM needs HTTPS in production');
+            }
+
+            // Check service worker support
+            if ('serviceWorker' in navigator) {
+                results.push('✅ Service Worker - Supported');
+            } else {
+                results.push('❌ Service Worker - Not supported');
+            }
+
+            // Check notification support
+            if ('Notification' in window) {
+                results.push('✅ Notifications - Supported');
+            } else {
+                results.push('❌ Notifications - Not supported');
+            }
+
+            // Check messaging support
+            try {
+                const supported = await firebase.messaging().isSupported();
+                if (supported) {
+                    results.push('✅ Firebase Messaging - Supported');
+                } else {
+                    results.push('❌ Firebase Messaging - Not supported');
+                }
+            } catch (error) {
+                results.push('❌ Firebase Messaging - Error checking support');
+            }
+
+            checks.className = 'status info';
+            checks.innerHTML = results.join('<br>');
+            log('Environment checks completed', 'info');
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            log('Notification test tool loaded', 'info');
+            runEnvironmentChecks();
+            checkServiceWorker();
+        });
+
+        // Handle background messages
+        messaging.onBackgroundMessage((payload) => {
+            log(`📱 Background message: ${payload.notification?.title}`, 'info');
+        });
+    </script>
+</body>
+</html>
