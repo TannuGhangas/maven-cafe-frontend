@@ -7,9 +7,8 @@ import NotificationModal from '../common/NotificationModal';
 import speechManager from '../../utils/speechSynthesis';
 
 const Notification = ({ showNotification, handleNotificationOk, orderData }) => {
-    // Early return check
+    // Early return check - notification is hidden
     if (!showNotification) {
-        console.log('Notification not showing (showNotification is false)');
         return null;
     }
     
