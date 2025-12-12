@@ -59,7 +59,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(<App />);
     console.log("🔑 FCM Token:", token);
 
     // Clean backend URL
-    const apiUrl = import.meta.env.VITE_API_URL || "http://10.119.41.34:3001";
+    const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:3001";
     const cleanApiUrl = apiUrl.replace(/\/api\/?$/, "");
 
     // Send token to backend
